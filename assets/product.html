@@ -5,19 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Transcript.Tax Monitor Pro - IRS Transcript Automation</title>
-  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['DM Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial']
-          }
-        }
-      }
-    };
-  </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js"></script>
+  
+  
   <script src="/_sdk/element_sdk.js"></script>
   <script src="/_sdk/data_sdk.js"></script>
 
@@ -26,11 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles/site.css?v=1" />
 
-  <script>
-    if (typeof pdfjsLib !== 'undefined') {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.js";
-    }
-  </script>
+  
  </head>
 
  <body class="h-full noise font-sans">
@@ -38,14 +23,16 @@
 
    <section id="sales-page" class="page-section">
 
+    <!-- PARTIAL:header -->
+
     <nav class="bg-midnight sticky top-0 z-50">
      <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <button data-action="navigate" data-target="landing-page" class="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+      <a href="/index.html" class="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
        </svg>
        Back
-      </button>
+      </a>
       <span id="sales-product-name" class="text-white font-bold">Transcript.Tax Monitor Pro</span>
       <span id="sales-price" class="sr-only">$497</span>
       <button data-action="navigate" data-target="checkout" class="btn-primary text-sm py-2 px-4">Buy Now</button>
@@ -68,6 +55,8 @@
       <button data-action="navigate" data-target="checkout" class="btn-primary text-xl px-12 py-4">Get TranscriptPro Now →</button>
      </div>
     </section>
+
+    <!-- PARTIAL:footer -->
 
    </section>
 
