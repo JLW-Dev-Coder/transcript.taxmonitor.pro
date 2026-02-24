@@ -6,6 +6,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
    
   <title>Transcript.Tax Monitor Pro - IRS Transcript Automation</title>
+
+  <!-- Tailwind (CDN). Yes, we are keeping it. -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['DM Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial']
+          }
+        }
+      }
+    };
+  </script>
    
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
@@ -13,8 +27,9 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles/site.css?v=1" />
-  <link rel="icon" type="image/svg+xml" href="/assets/logo.svg" />
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
   <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
 
   <script>
