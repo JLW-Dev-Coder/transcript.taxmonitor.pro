@@ -1,0 +1,247 @@
+<!-- assets\confirmation.html-->
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transcript.Tax Monitor Pro — Payment Confirmed</title>
+
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="/styles/site.css?v=1" />
+
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+  <link rel="icon" type="image/svg+xml" href="/assets/logo.svg" />
+
+  <script>
+    // Keep Tailwind config lightweight and consistent.
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["DM Sans", "ui-sans-serif", "system-ui"] },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="h-full noise font-sans text-white">
+  <div id="app-container" class="min-h-full">
+
+    <!-- Header -->
+    <header class="site-header sticky top-0 z-50">
+      <div class="mx-auto max-w-7xl px-6 py-4">
+        <div class="flex items-center justify-between gap-4 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 backdrop-blur">
+          <a href="/index.html" class="flex items-center gap-3 text-white no-underline">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/10">
+              <img src="/assets/logo.svg" alt="Tax Monitor Pro Logo" class="h-5 w-5" />
+            </span>
+            <div class="leading-tight">
+              <div class="text-sm font-semibold">Transcript.Tax Monitor Pro</div>
+              <div class="text-xs text-white/60">IRS transcript automation</div>
+            </div>
+          </a>
+
+          <nav class="hidden items-center gap-6 text-sm text-white/70 md:flex">
+            <a class="hover:text-white" href="/index.html#features">Features</a>
+            <a class="hover:text-white" href="/index.html#testimonials">Case Studies</a>
+            <a class="hover:text-white" href="/index.html#pricing">Pricing</a>
+          </nav>
+
+          <div class="flex items-center gap-3">
+            <a href="/assets/product.html" class="hidden rounded-xl border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10 md:inline-block">
+              Back to Product
+            </a>
+
+            <button
+              type="button"
+              class="inline-flex items-center justify-center rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-white hover:bg-white/10 md:hidden"
+              aria-label="Open menu"
+              onclick="document.getElementById('mobile-nav').classList.toggle('hidden')"
+            >
+              <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="mobile-nav" class="hidden">
+          <div class="mt-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-white/70 backdrop-blur">
+            <div class="flex flex-col gap-3">
+              <a class="hover:text-white" href="/index.html#features" onclick="document.getElementById('mobile-nav').classList.add('hidden')">Features</a>
+              <a class="hover:text-white" href="/index.html#testimonials" onclick="document.getElementById('mobile-nav').classList.add('hidden')">Case Studies</a>
+              <a class="hover:text-white" href="/index.html#pricing" onclick="document.getElementById('mobile-nav').classList.add('hidden')">Pricing</a>
+              <a class="mt-2 inline-flex w-full items-center justify-center rounded-xl bg-purple-600 px-4 py-2 font-semibold text-white hover:bg-purple-700" href="/assets/product.html">
+                Back to Product
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main -->
+    <main class="mx-auto max-w-7xl px-6 pb-20 pt-10">
+      <div class="mx-auto max-w-3xl">
+        <div class="mb-6">
+          <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
+            <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+            Payment confirmed
+          </div>
+          <h1 class="mt-3 text-3xl font-semibold tracking-tight">Thanks for your payment</h1>
+          <p class="mt-2 text-white/70">
+            You’re all set. A receipt will appear on your statement, and we’ll route your access from here.
+          </p>
+        </div>
+
+        <!-- Stripe-like confirmation card -->
+        <section class="overflow-hidden rounded-3xl border border-white/10 bg-white/5 backdrop-blur">
+          <div class="grid grid-cols-1 md:grid-cols-2">
+
+            <!-- Left: Summary -->
+            <div class="border-white/10 p-7 md:border-r">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <div class="text-xs text-white/60">Pay</div>
+                  <div class="mt-1 text-3xl font-semibold" id="amount">$19.00</div>
+                </div>
+                <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/10">
+                  <img src="/assets/logo.svg" alt="" class="h-5 w-5" aria-hidden="true" />
+                </span>
+              </div>
+
+              <div class="mt-5 space-y-3">
+                <div>
+                  <div class="text-sm font-semibold" id="productName">Transcript Tax Monitor Pro</div>
+                  <div class="mt-1 text-sm text-white/65" id="productDescription">
+                    Transcript monitoring credits.
+                  </div>
+                </div>
+
+                <div class="rounded-2xl border border-white/10 bg-black/20 p-4">
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-white/70">Total paid</span>
+                    <span class="font-semibold" id="totalPaid">$19.00</span>
+                  </div>
+                  <div class="mt-2 text-xs text-white/50" id="sessionLine" style="display:none;"></div>
+                </div>
+              </div>
+
+              <div class="mt-6 flex flex-col gap-3">
+                <a
+                  href="/assets/product.html"
+                  class="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
+                >
+                  Back to Product
+                </a>
+                <a
+                  href="/index.html#pricing"
+                  class="inline-flex items-center justify-center rounded-2xl bg-purple-600 px-4 py-3 text-sm font-semibold text-white hover:bg-purple-700"
+                >
+                  View Plans
+                </a>
+              </div>
+            </div>
+
+            <!-- Right: Confirmation -->
+            <div class="p-7">
+              <div class="flex items-start justify-between gap-4">
+                <div class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 ring-1 ring-emerald-500/30">
+                  <svg viewBox="0 0 24 24" class="h-5 w-5 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 6L9 17l-5-5" />
+                  </svg>
+                </div>
+                <div class="text-right">
+                  <div class="text-xs text-white/60">Status</div>
+                  <div class="text-sm font-semibold text-emerald-200">Paid</div>
+                </div>
+              </div>
+
+              <div class="mt-5">
+                <div class="text-lg font-semibold">Payment received</div>
+                <p class="mt-2 text-sm text-white/70">
+                  A payment to <span class="font-semibold">LENORE, INC</span> will appear on your statement.
+                </p>
+              </div>
+
+              <div class="mt-6 rounded-2xl border border-white/10 bg-black/20 p-5">
+                <div class="text-xs text-white/60">Next steps</div>
+                <ul class="mt-3 space-y-3 text-sm text-white/75">
+                  <li class="flex gap-3">
+                    <span class="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-xs">1</span>
+                    <span>Keep this tab handy in case you need your receipt.</span>
+                  </li>
+                  <li class="flex gap-3">
+                    <span class="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-xs">2</span>
+                    <span>Head back to the product page to continue setup.</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="mt-6 flex items-center justify-between text-xs text-white/50">
+                <span>Powered by Stripe</span>
+                <span class="hidden sm:inline">Terms · Privacy</span>
+              </div>
+            </div>
+
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        // Read common Stripe redirect params (payment links vary). We display what we can without breaking.
+        var params = new URLSearchParams(window.location.search);
+        var amount = params.get("amount") || params.get("amount_total") || params.get("total") || "";
+        var currency = (params.get("currency") || "usd").toUpperCase();
+        var sessionId = params.get("session_id") || params.get("checkout_session") || "";
+        var paymentIntent = params.get("payment_intent") || "";
+
+        function formatMoney(raw) {
+          // Accept cents or dollars. If raw is an integer >= 100 and no decimal, assume cents.
+          var s = String(raw || "").trim();
+          if (!s) return null;
+          var n = Number(s);
+          if (!Number.isFinite(n)) return null;
+          var isCents = Number.isInteger(n) && n >= 100;
+          var dollars = isCents ? n / 100 : n;
+          try {
+            return new Intl.NumberFormat(undefined, {
+              style: "currency",
+              currency: currency,
+              maximumFractionDigits: 2,
+            }).format(dollars);
+          } catch (e) {
+            return "$" + dollars.toFixed(2);
+          }
+        }
+
+        var formatted = formatMoney(amount);
+        if (formatted) {
+          document.getElementById("amount").textContent = formatted;
+          document.getElementById("totalPaid").textContent = formatted;
+        }
+
+        if (sessionId || paymentIntent) {
+          var line = "";
+          if (sessionId) line += "Session: " + sessionId;
+          if (sessionId && paymentIntent) line += " · ";
+          if (paymentIntent) line += "Payment: " + paymentIntent;
+          var el = document.getElementById("sessionLine");
+          el.textContent = line;
+          el.style.display = "block";
+        }
+      })();
+    </script>
+
+  </div>
+</body>
+</html>
