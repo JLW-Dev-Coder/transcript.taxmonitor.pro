@@ -1,0 +1,39 @@
+<nav class="gradient-hero">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2" onclick="event.preventDefault(); showPage('landing-page');">
+      <div class="w-10 h-10 gradient-gold rounded-lg flex items-center justify-center" aria-hidden="true">
+        <svg class="w-6 h-6 text-midnight" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+      <span id="nav-product-name" class="text-white font-bold text-xl">Transcript.Tax Monitor Pro</span>
+    </a>
+
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#features" class="text-white/80 hover:text-gold transition-colors">Features</a>
+      <a href="#testimonials" class="text-white/80 hover:text-gold transition-colors">Case Studies</a>
+      <a href="#pricing" class="text-white/80 hover:text-gold transition-colors">Pricing</a>
+      <button type="button" class="btn-secondary text-sm" onclick="showPage('sales-page')">View Product</button>
+    </div>
+
+    <button
+      type="button"
+      class="md:hidden btn-secondary text-sm"
+      aria-controls="mobile-nav"
+      aria-expanded="false"
+      onclick="toggleMobileNav(this)"
+    >
+      Menu
+    </button>
+  </div>
+
+  <div id="mobile-nav" class="hidden md:hidden border-t border-white/10">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3">
+      <a href="#features" class="text-white/80 hover:text-gold transition-colors" onclick="closeMobileNav()">Features</a>
+      <a href="#testimonials" class="text-white/80 hover:text-gold transition-colors" onclick="closeMobileNav()">Case Studies</a>
+      <a href="#pricing" class="text-white/80 hover:text-gold transition-colors" onclick="closeMobileNav()">Pricing</a>
+      <button type="button" class="btn-primary text-sm w-full" onclick="closeMobileNav(); showPage('sales-page')">View Product</button>
+    </div>
+  </div>
+</nav>

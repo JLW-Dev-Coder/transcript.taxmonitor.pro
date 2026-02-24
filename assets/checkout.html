@@ -1,0 +1,139 @@
+<!-- assets\checkout.html -->
+   <section id="checkout" class="page-section">
+    <div class="min-h-full py-12">
+     <div class="max-w-6xl mx-auto px-6"><button onclick="showPage('sales-page')" class="flex items-center gap-2 text-gray-500 hover:text-midnight mb-8 transition-colors">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+       </svg> Back to Product </button>
+      <div class="grid lg:grid-cols-2 gap-12">
+        
+        <!-- Order Summary -->
+       <div class="order-last lg:order-first">
+        <div class="card-elevated p-8">
+         <h2 class="font-display text-2xl font-bold text-midnight mb-6">Order Summary</h2>
+         <div class="border-b border-gray-200 pb-6 mb-6">
+          <div class="flex items-start gap-4">
+           <div class="w-16 h-16 gradient-gold rounded-xl flex items-center justify-center flex-shrink-0">
+            <svg class="w-8 h-8 text-midnight" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+           </div>
+           <div class="flex-1">
+            <h3 class="font-bold text-midnight">TranscriptPro Complete</h3>
+            <p class="text-sm text-gray-500">Lifetime access • Unlimited use</p>
+           </div><span id="checkout-price" class="font-bold text-midnight">$497</span>
+          </div>
+         </div>
+         <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span class="text-gray-600">Subtotal</span> <span class="text-midnight">$497</span>
+          </div>
+          <div class="flex justify-between"><span class="text-gray-600">Tax</span> <span class="text-midnight">$0</span>
+          </div>
+          <div class="flex justify-between text-lg font-bold pt-3 border-t border-gray-200"><span class="text-midnight">Total</span> <span class="text-gold">$497</span>
+          </div>
+         </div>
+         <div class="mt-8 p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
+          <div class="flex items-center gap-3 mb-2">
+           <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+           </svg><span class="font-bold text-midnight">30-Day Guarantee</span>
+          </div>
+          <p class="text-sm text-gray-600">Not satisfied? Get a full refund within 30 days. No questions asked.</p>
+         </div>
+        </div>
+       </div>
+       
+       <!-- Checkout Form -->
+       <div>
+        <div class="card-elevated p-8">
+         <h2 class="font-display text-2xl font-bold text-midnight mb-6">Complete Your Order</h2>
+         <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+          <div class="flex items-center gap-2 text-purple-800">
+           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+           </svg><span class="font-semibold text-sm">Demo Mode</span>
+          </div>
+          <p class="text-purple-700 text-sm mt-1">This is a sample checkout page for demonstration purposes. No actual payment will be processed.</p>
+         </div>
+         <form id="checkout-form" class="space-y-6">
+          <div>
+           <h3 class="font-semibold text-midnight mb-4">Contact Information</h3>
+           <div class="space-y-4">
+            <div><label for="checkout-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label> <input type="text" id="checkout-name" placeholder="John Smith" class="input-field input-field-light" required>
+            </div>
+            <div><label for="checkout-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label> <input type="email" id="checkout-email" placeholder="john@taxfirm.com" class="input-field input-field-light" required>
+            </div>
+           </div>
+          </div>
+          <div class="pt-6 border-t border-gray-200">
+           <h3 class="font-semibold text-midnight mb-4">Firm Details (for receipt)</h3>
+           <div><label for="checkout-firm" class="block text-sm font-medium text-gray-700 mb-1">Firm Name</label> <input type="text" id="checkout-firm" placeholder="Smith Tax Services" class="input-field input-field-light">
+           </div>
+          </div><button type="submit" id="checkout-submit-btn" class="btn-primary w-full text-lg py-4"> Complete Purchase — $497 </button>
+          <div class="flex items-center justify-center gap-4 text-gray-400 text-sm">
+           <div class="flex items-center gap-1">
+            <svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
+            </svg> Secure Checkout
+           </div><span>•</span> <span>Instant Download</span>
+          </div>
+         </form>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section>
+   
+   <!-- Order Confirmation -->
+   <section id="confirmation" class="page-section">
+    <div class="min-h-full flex items-center py-12">
+     <div class="max-w-3xl mx-auto px-6 text-center">
+      <div class="w-24 h-24 gradient-gold rounded-full flex items-center justify-center mx-auto mb-8">
+       <svg class="w-12 h-12 text-midnight" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+       </svg>
+      </div>
+      <h1 class="font-display text-4xl md:text-5xl font-bold text-midnight mb-6">Welcome to TranscriptPro! 🎉</h1>
+      <p class="text-xl text-gray-600 mb-8">Your purchase is complete. Check your email for download instructions and your license key.</p>
+      <div class="card-elevated p-8 text-left mb-8">
+       <h3 class="font-bold text-midnight mb-4">Next Steps:</h3>
+       <div class="space-y-4">
+        <div class="check-item">
+         <div class="check-icon">
+          1
+         </div>
+         <div>
+          <p class="font-semibold text-midnight">Check Your Email</p>
+          <p class="text-gray-600 text-sm">Your download link and license key have been sent</p>
+         </div>
+        </div>
+        <div class="check-item">
+         <div class="check-icon">
+          2
+         </div>
+         <div>
+          <p class="font-semibold text-midnight">Download &amp; Install</p>
+          <p class="text-gray-600 text-sm">Follow the quick setup guide (takes less than 5 minutes)</p>
+         </div>
+        </div>
+        <div class="check-item">
+         <div class="check-icon">
+          3
+         </div>
+         <div>
+          <p class="font-semibold text-midnight">Add Your Branding</p>
+          <p class="text-gray-600 text-sm">Upload your logo and set your firm colors</p>
+         </div>
+        </div>
+        <div class="check-item">
+         <div class="check-icon">
+          4
+         </div>
+         <div>
+          <p class="font-semibold text-midnight">Process Your First Transcript</p>
+          <p class="text-gray-600 text-sm">You'll have a professional report in under 30 seconds</p>
+         </div>
+        </div>
+       </div>
+      </div>
+      <p class="text-gray-500">Questions? Email us at <span class="text-purple-700 font-semibold">support@transcriptpro.com</span></p><button onclick="showPage('landing-page')" class="mt-8 text-gray-500 hover:text-midnight transition-colors"> ← Return to Homepage </button>
+     </div>
+    </div>
+   </section>
+  </div>
+  

@@ -1,0 +1,89 @@
+<!-- assets\product.html -->
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transcript.Tax Monitor Pro - IRS Transcript Automation</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['DM Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial']
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles/site.css?v=1" />
+
+  <script>
+    if (typeof pdfjsLib !== 'undefined') {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.js";
+    }
+  </script>
+ </head>
+
+ <body class="h-full noise font-sans">
+  <div id="app-container" class="h-full overflow-auto">
+
+   <section id="sales-page" class="page-section">
+
+    <nav class="bg-midnight sticky top-0 z-50">
+     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <button data-action="navigate" data-target="landing-page" class="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+       </svg>
+       Back
+      </button>
+      <span id="sales-product-name" class="text-white font-bold">Transcript.Tax Monitor Pro</span>
+      <span id="sales-price" class="sr-only">$497</span>
+      <button data-action="navigate" data-target="checkout" class="btn-primary text-sm py-2 px-4">Buy Now</button>
+     </div>
+    </nav>
+
+    <header class="gradient-hero py-20">
+     <div class="max-w-4xl mx-auto px-6 text-center text-white">
+      <div class="counter inline-block mb-6">🏆 #1 Transcript Tool for Tax Pros</div>
+      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">Turn IRS Transcripts Into Client-Ready Reports</h1>
+      <p class="text-xl text-white/80 mb-8 max-w-2xl mx-auto">The complete automation solution that parses, interprets, and presents transcript data beautifully—with your branding.</p>
+      <button data-action="navigate" data-target="checkout" class="btn-primary text-xl px-12 py-4">Get TranscriptPro Now</button>
+     </div>
+    </header>
+
+    <section class="py-20 gradient-hero">
+     <div class="max-w-4xl mx-auto px-6 text-center">
+      <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-6">Ready to Reclaim Your Time?</h2>
+      <p class="text-xl text-white/80 mb-8">Join 2,000+ tax professionals who've transformed their transcript workflow.</p>
+      <button data-action="navigate" data-target="checkout" class="btn-primary text-xl px-12 py-4">Get TranscriptPro Now →</button>
+     </div>
+    </section>
+
+   </section>
+
+  </div>
+
+  <script>
+   document.addEventListener('click', function (event) {
+     const trigger = event.target.closest('[data-action="navigate"]');
+     if (!trigger) return;
+
+     const target = trigger.getAttribute('data-target');
+     if (typeof showPage === 'function' && target) {
+       showPage(target);
+     }
+   });
+  </script>
+
+ </body>
+</html>

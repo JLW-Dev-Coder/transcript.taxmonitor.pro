@@ -1,9 +1,12 @@
+<!--index.html-->>
 <!doctype html>
 <html lang="en" class="h-full">
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
   <title>Transcript.Tax Monitor Pro - IRS Transcript Automation</title>
+   
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script>
     // Lock DM Sans as the global Tailwind sans font.
@@ -20,31 +23,27 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <script src="/_sdk/data_sdk.js"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>$1  <link rel="stylesheet" href="/styles/site.css?v=1" />
-<script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="/styles/site.css?v=1" />
+
+  <script>
     if (typeof pdfjsLib !== 'undefined') {
       pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.js";
     }
-  </script>
-  
-  
+  </script>  
  </head>
+
  <body class="h-full noise font-sans">
-  <div id="app-container" class="h-full overflow-auto"><!-- Landing Page -->
-   <section id="landing-page" class="page-section active"><!-- Navigation -->
-    <nav class="gradient-hero">
-     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-       <div class="w-10 h-10 gradient-gold rounded-lg flex items-center justify-center">
-        <svg class="w-6 h-6 text-midnight" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-       </div><span id="nav-product-name" class="text-white font-bold text-xl">TranscriptPro</span>
-      </div>
-      <div class="hidden md:flex items-center gap-8"><a href="#features" class="text-white/80 hover:text-gold transition-colors">Features</a> <a href="#testimonials" class="text-white/80 hover:text-gold transition-colors">Case Studies</a> <a href="#pricing" class="text-white/80 hover:text-gold transition-colors">Pricing</a> <button onclick="showPage('sales-page')" class="btn-secondary text-sm">View Product</button>
-      </div>
-     </div>
-    </nav><!-- Hero Section -->
+  <div id="app-container" class="h-full overflow-auto">
+
+    <!-- Landing Page -->
+   <section id="landing-page" class="page-section active">
+
+    <!-- PARTIAL:header -->
+
+    <!-- Hero Section -->
     <header class="gradient-hero relative min-h-[90%] flex items-center">
      <div class="max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-12 items-center">
       <div class="text-white">
@@ -102,7 +101,9 @@
        </div>
       </div>
      </div>
-    </header><!-- Pain Points Section -->
+    </header>
+    
+    <!-- Pain Points Section -->
     <section class="py-20 bg-white">
      <div class="max-w-7xl mx-auto px-6">
       <div class="text-center max-w-3xl mx-auto mb-16">
@@ -152,7 +153,9 @@
           </div>
         </div>
       </div>
-    </section><!-- Parser Section -->
+    </section>
+    
+    <!-- Parser Section -->
     <section class="py-20 bg-gradient-to-b from-slate-900 to-slate-800">
      <style>
       /* Client report (shareable) */
@@ -194,7 +197,9 @@
        <p class="text-xl text-white/80">Upload a transcript PDF. It parses in your browser. No uploads. No risk.</p>
        <p class="text-sm text-white/60 mt-3">Optional: add your firm logo so the preview report looks like <em>your</em> deliverable.</p>
       </div>
-      <div class="grid lg:grid-cols-2 gap-12 items-stretch"><!-- Left: Upload Interface -->
+      <div class="grid lg:grid-cols-2 gap-12 items-stretch">
+        
+       <!-- Left: Upload Interface -->
        <div class="bg-slate-800/50 backdrop-blur border border-purple-500/30 rounded-2xl p-8 h-full flex flex-col">
         <div class="space-y-6 flex-1 flex flex-col">
          <div><label class="block text-white/80 text-sm font-medium mb-3">Upload Transcript PDF</label>
@@ -216,7 +221,9 @@
            </svg> Runs locally • No PDF uploads</p>
          </div>
         </div>
-       </div><!-- Right: Preview & Benefits -->
+       </div>
+       
+       <!-- Right: Preview & Benefits -->
        <div class="space-y-6 h-full flex flex-col">
         <div class="bg-slate-800/50 backdrop-blur border border-purple-500/20 rounded-2xl p-8 flex-1 flex flex-col">
          <div class="flex items-center justify-between mb-4">
@@ -259,7 +266,9 @@
        </div>
       </div>
      </div>
-    </section><!-- Features Section -->
+    </section>
+    
+    <!-- Features Section -->
     <section id="features" class="py-20 bg-cream">
      <div class="max-w-7xl mx-auto px-6">
       <div class="text-center max-w-3xl mx-auto mb-16">
@@ -319,7 +328,9 @@
        </div>
       </div>
      </div>
-    </section><!-- What This Solves Section -->
+    </section>
+    
+    <!-- What This Solves Section -->
     <section id="testimonials" class="py-20">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center max-w-3xl mx-auto mb-16">
@@ -464,21 +475,13 @@
       <div class="flex flex-col sm:flex-row gap-4 justify-center"><button onclick="showPage('lead-magnet')" class="btn-primary text-lg"> Get Your Free Guide First → </button> <button onclick="showPage('sales-page')" class="btn-secondary"> Skip to Purchase </button>
       </div>
      </div>
-    </section><!-- Footer -->
-    <footer class="bg-midnight py-12">
-     <div class="max-w-7xl mx-auto px-6">
-      <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 gradient-gold rounded-lg flex items-center justify-center">
-         <svg class="w-5 h-5 text-midnight" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-         </svg>
-        </div><span class="text-white font-bold">TranscriptPro</span>
-       </div>
-       <p class="text-white/50 text-sm">© 2024 TranscriptPro. All rights reserved.</p>
-      </div>
-     </div>
-    </footer>
-   </section><!-- Lead Magnet Page -->
+    </section>
+
+    <!-- PARTIAL:footer -->
+
+</section>
+   
+   <!-- Lead Magnet Page -->
    <section id="lead-magnet" class="page-section">
     <div class="min-h-full gradient-hero flex items-center py-12">
      <div class="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
@@ -544,7 +547,9 @@
       </div>
      </div>
     </div>
-   </section><!-- Thank You Page -->
+   </section>
+
+   <!-- Thank You Page -->
    <section id="thank-you" class="page-section">
     <div class="min-h-full flex items-center py-12">
      <div class="max-w-4xl mx-auto px-6 text-center">
@@ -589,1247 +594,10 @@
       </div><button onclick="showPage('landing-page')" class="text-gray-500 hover:text-midnight transition-colors"> ← Return to Homepage </button>
      </div>
     </div>
-<<<<<<< HEAD
-   </section><!-- Sales Page -->
-   <section id="sales-page" class="page-section"><!-- Sales Nav -->
-    <nav class="bg-midnight sticky top-0 z-50">
-     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between"><button onclick="showPage('landing-page')" class="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-       </svg> Back </button> <span id="sales-product-name" class="text-white font-bold">TranscriptPro</span>
-      <span id="sales-price" class="sr-only">$497</span>
-      <button onclick="showPage('checkout')" class="btn-primary text-sm py-2 px-4">Buy Now</button>
-     </div>
-    </nav><!-- Sales Hero -->
-    <header class="gradient-hero py-20">
-     <div class="max-w-4xl mx-auto px-6 text-center text-white">
-      <div class="counter inline-block mb-6">
-       🏆 #1 Transcript Tool for Tax Pros
-      </div>
-      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">Turn IRS Transcripts Into Client-Ready Reports</h1>
-      <p class="text-xl text-white/80 mb-8 max-w-2xl mx-auto">The complete automation solution that parses, interprets, and presents transcript data beautifully—with your branding.</p><button onclick="showPage('checkout')" class="btn-primary text-xl px-12 py-4"> Get TranscriptPro Now </button>
-     </div>
-    </header><!-- How It Works -->
-    <section class="py-20 bg-white">
-     <div class="max-w-7xl mx-auto px-6">
-      <h2 class="font-display text-3xl md:text-4xl font-bold text-midnight text-center mb-16">How It Works</h2>
-      <div class="grid md:grid-cols-3 gap-8">
-       <div class="text-center">
-        <div class="w-20 h-20 gradient-gold rounded-2xl flex items-center justify-center mx-auto mb-6"><span class="text-3xl font-bold text-midnight">1</span>
-        </div>
-        <h3 class="font-bold text-xl text-midnight mb-3">Upload PDF</h3>
-        <p class="text-gray-600">Drop in any IRS transcript PDF directly from SOAR or your IRS account. Our parser handles the rest.</p>
-       </div>
-       <div class="text-center">
-        <div class="w-20 h-20 gradient-gold rounded-2xl flex items-center justify-center mx-auto mb-6"><span class="text-3xl font-bold text-midnight">2</span>
-        </div>
-        <h3 class="font-bold text-xl text-midnight mb-3">Auto-Interpret</h3>
-        <p class="text-gray-600">Every code is automatically matched against IRS publications and translated into plain language.</p>
-       </div>
-       <div class="text-center">
-        <div class="w-20 h-20 gradient-gold rounded-2xl flex items-center justify-center mx-auto mb-6"><span class="text-3xl font-bold text-midnight">3</span>
-        </div>
-        <h3 class="font-bold text-xl text-midnight mb-3">Download Report</h3>
-        <p class="text-gray-600">Get a beautiful, branded PDF report ready to send to your client—with your logo and colors.</p>
-       </div>
-      </div>
-     </div>
-    </section><!-- What You Get -->
-    <section class="py-20 bg-cream">
-     <div class="max-w-7xl mx-auto px-6">
-      <h2 class="font-display text-3xl md:text-4xl font-bold text-midnight text-center mb-16">Everything Included</h2>
-      <div class="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-       <div class="card-elevated p-6 flex items-start gap-4">
-        <div class="check-icon flex-shrink-0">
-         ✓
-        </div>
-        <div>
-         <h4 class="font-bold text-midnight mb-1">Full Transcript Parser</h4>
-         <p class="text-gray-600 text-sm">Handles Account, Return, Wage &amp; Income, and all other transcript types</p>
-        </div>
-       </div>
-       <div class="card-elevated p-6 flex items-start gap-4">
-        <div class="check-icon flex-shrink-0">
-         ✓
-        </div>
-        <div>
-         <h4 class="font-bold text-midnight mb-1">IRS Code Database</h4>
-         <p class="text-gray-600 text-sm">Complete reference of 150+ codes from official IRS publications</p>
-        </div>
-       </div>
-       <div class="card-elevated p-6 flex items-start gap-4">
-        <div class="check-icon flex-shrink-0">
-         ✓
-        </div>
-        <div>
-         <h4 class="font-bold text-midnight mb-1">Custom Branding</h4>
-         <p class="text-gray-600 text-sm">Add your logo, firm name, contact info, and brand colors</p>
-=======
    </section>
-  
-   <!-- PARTIAL:pages/sales-page -->
-
-   <!-- PARTIAL:pages/checkout-page -->
    
-  </div>
-
-       <div class="glass rounded-2xl p-7 border border-slate-700/30">
-        <div class="flex items-start gap-3">
-         <div class="mt-0.5 w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/20 flex items-center justify-center text-purple-200 text-sm font-bold">✓</div>
-         <div>
-          <h3 class="text-white font-semibold mb-2">ClickUp Integration</h3>
-          <p class="text-white/70 text-sm leading-relaxed">All workflow activity projected as templated tasks. R2 is the source of truth, ClickUp is a projection.</p>
-         </div>
->>>>>>> 446642dacd186bab98f4a6cace16449b6dcbac46
-        </div>
-       </div>
-       <div class="card-elevated p-6 flex items-start gap-4">
-        <div class="check-icon flex-shrink-0">
-         ✓
-        </div>
-        <div>
-         <h4 class="font-bold text-midnight mb-1">Unlimited Usage</h4>
-         <p class="text-gray-600 text-sm">No per-report fees. Process as many transcripts as you need</p>
-        </div>
-       </div>
-       <div class="card-elevated p-6 flex items-start gap-4">
-        <div class="check-icon flex-shrink-0">
-         ✓
-        </div>
-        <div>
-         <h4 class="font-bold text-midnight mb-1">Priority Support</h4>
-         <p class="text-gray-600 text-sm">Email support with 24-hour response time</p>
-        </div>
-       </div>
-       <div class="card-elevated p-6 flex items-start gap-4">
-        <div class="check-icon flex-shrink-0">
-         ✓
-        </div>
-        <div>
-         <h4 class="font-bold text-midnight mb-1">Lifetime Updates</h4>
-         <p class="text-gray-600 text-sm">Free updates as IRS codes and forms change</p>
-        </div>
-       </div>
-      </div>
-     </div>
-    </section><!-- Pricing Section -->
-    <section id="pricing" class="py-20 bg-midnight">
-     <div class="max-w-4xl mx-auto px-6">
-      <div class="grid lg:grid-cols-2 gap-8 max-w-5xl mx-auto"><!-- Single-Use Card (Featured) -->
-       <div class="lg:col-span-1 relative">
-        <div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-purple-500 rounded-2xl blur opacity-75"></div>
-        <div class="relative bg-slate-900 border-2 border-purple-500 rounded-2xl p-8 md:p-10">
-         <div class="inline-block mb-6 px-4 py-1 rounded-full text-sm font-semibold text-purple-300 bg-purple-500/20 border border-purple-500/40">
-          MOST POPULAR
-         </div>
-         <h3 class="text-2xl md:text-3xl font-bold text-white mb-2">Single-Use Unlock</h3>
-         <p class="text-white/60 mb-6">Perfect for tax professionals who need it now.</p>
-         <div class="mb-8"><span class="text-5xl md:text-6xl font-bold text-white">$19</span>
-          <p class="text-white/50 text-sm mt-2">One transcript. One export. No subscription.</p>
-         </div><button onclick="showPage('checkout')" class="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white font-bold py-4 rounded-lg transition-all transform hover:scale-105 mb-6"> Unlock Now </button>
-         <div class="space-y-4 text-sm">
-          <div class="flex items-start gap-3">
-           <svg class="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-           </svg><span class="text-white/80">Parse locally with pdf.js</span>
-          </div>
-          <div class="flex items-start gap-3">
-           <svg class="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-           </svg><span class="text-white/80">Client-ready export</span>
-          </div>
-          <div class="flex items-start gap-3">
-           <svg class="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-           </svg><span class="text-white/80">Transaction code decoding</span>
-          </div>
-          <div class="flex items-start gap-3">
-           <svg class="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-           </svg><span class="text-white/80">Copy + Print + PDF output</span>
-          </div>
-         </div>
-        </div>
-       </div><!-- Pro Card (Coming Soon) -->
-       <div class="lg:col-span-1">
-        <div class="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8 md:p-10 opacity-60">
-         <div class="inline-block mb-6 px-4 py-1 rounded-full text-sm font-semibold text-slate-400 bg-slate-700/30 border border-slate-600/50">
-          COMING SOON
-         </div>
-         <h3 class="text-2xl md:text-3xl font-bold text-slate-300 mb-2">Pro (Team Edition)</h3>
-         <p class="text-slate-400 mb-6">Built for firms and teams who scale.</p>
-         <div class="mb-8"><span class="text-5xl md:text-6xl font-bold text-slate-400">∞</span>
-          <p class="text-slate-400 text-sm mt-2">Available Q1 2025</p>
-         </div><button disabled class="w-full bg-slate-700 text-slate-400 font-bold py-4 rounded-lg cursor-not-allowed opacity-50 mb-6"> Notify Me </button>
-         <div class="space-y-4 text-sm">
-          <div class="flex items-start gap-3">
-           <svg class="w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-           </svg><span class="text-slate-400">Batch parsing</span>
-          </div>
-          <div class="flex items-start gap-3">
-           <svg class="w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-           </svg><span class="text-slate-400">Saved templates</span>
-          </div>
-          <div class="flex items-start gap-3">
-           <svg class="w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-           </svg><span class="text-slate-400">Firm branding</span>
-          </div>
-          <div class="flex items-start gap-3">
-           <svg class="w-5 h-5 text-slate-500 flex-shrink-0 mt-0.5" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-           </svg><span class="text-slate-400">Team seats</span>
-          </div>
-         </div>
-         <p class="text-slate-400 text-xs mt-6 pt-6 border-t border-slate-700">Built for firms.</p>
-        </div>
-       </div>
-      </div>
-     </div>
-    </section><!-- FAQ Section -->
-    <section class="py-20 bg-white">
-     <div class="max-w-3xl mx-auto px-6">
-      <h2 class="font-display text-3xl md:text-4xl font-bold text-midnight text-center mb-12">Frequently Asked Questions</h2>
-      <div class="space-y-4">
-       <div class="card-elevated p-6">
-        <h4 class="font-bold text-midnight mb-2">What transcript formats are supported?</h4>
-        <p class="text-gray-600">TranscriptPro works with PDF transcripts downloaded directly from SOAR or IRS online accounts. Faxed or re-printed scans are not supported due to quality limitations.</p>
-       </div>
-       <div class="card-elevated p-6">
-        <h4 class="font-bold text-midnight mb-2">Is my client data secure?</h4>
-        <p class="text-gray-600">Absolutely. TranscriptPro runs entirely on your local computer. Client data is never uploaded to any server or cloud service.</p>
-       </div>
-       <div class="card-elevated p-6">
-        <h4 class="font-bold text-midnight mb-2">Do I need technical skills?</h4>
-        <p class="text-gray-600">Not at all. If you can drag and drop a file, you can use TranscriptPro. The interface is designed for busy tax professionals, not tech experts.</p>
-       </div>
-       <div class="card-elevated p-6">
-        <h4 class="font-bold text-midnight mb-2">What if I'm not satisfied?</h4>
-        <p class="text-gray-600">We offer a 30-day money-back guarantee. If TranscriptPro doesn't save you time and impress your clients, we'll refund your purchase—no questions asked.</p>
-       </div>
-      </div>
-     </div>
-    </section><!-- Final CTA -->
-    <section class="py-20 gradient-hero">
-     <div class="max-w-4xl mx-auto px-6 text-center">
-      <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-6">Ready to Reclaim Your Time?</h2>
-      <p class="text-xl text-white/80 mb-8">Join 2,000+ tax professionals who've transformed their transcript workflow.</p><button onclick="showPage('checkout')" class="btn-primary text-xl px-12 py-4"> Get TranscriptPro Now → </button>
-     </div>
-    </section>
-   </section><!-- Checkout Page -->
-   <section id="checkout" class="page-section">
-    <div class="min-h-full py-12">
-     <div class="max-w-6xl mx-auto px-6"><button onclick="showPage('sales-page')" class="flex items-center gap-2 text-gray-500 hover:text-midnight mb-8 transition-colors">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-       </svg> Back to Product </button>
-      <div class="grid lg:grid-cols-2 gap-12"><!-- Order Summary -->
-       <div class="order-last lg:order-first">
-        <div class="card-elevated p-8">
-         <h2 class="font-display text-2xl font-bold text-midnight mb-6">Order Summary</h2>
-         <div class="border-b border-gray-200 pb-6 mb-6">
-          <div class="flex items-start gap-4">
-           <div class="w-16 h-16 gradient-gold rounded-xl flex items-center justify-center flex-shrink-0">
-            <svg class="w-8 h-8 text-midnight" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-           </div>
-           <div class="flex-1">
-            <h3 class="font-bold text-midnight">TranscriptPro Complete</h3>
-            <p class="text-sm text-gray-500">Lifetime access • Unlimited use</p>
-           </div><span id="checkout-price" class="font-bold text-midnight">$497</span>
-          </div>
-         </div>
-         <div class="space-y-3 text-sm">
-          <div class="flex justify-between"><span class="text-gray-600">Subtotal</span> <span class="text-midnight">$497</span>
-          </div>
-          <div class="flex justify-between"><span class="text-gray-600">Tax</span> <span class="text-midnight">$0</span>
-          </div>
-          <div class="flex justify-between text-lg font-bold pt-3 border-t border-gray-200"><span class="text-midnight">Total</span> <span class="text-gold">$497</span>
-          </div>
-         </div>
-         <div class="mt-8 p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
-          <div class="flex items-center gap-3 mb-2">
-           <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-           </svg><span class="font-bold text-midnight">30-Day Guarantee</span>
-          </div>
-          <p class="text-sm text-gray-600">Not satisfied? Get a full refund within 30 days. No questions asked.</p>
-         </div>
-        </div>
-       </div><!-- Checkout Form -->
-       <div>
-        <div class="card-elevated p-8">
-         <h2 class="font-display text-2xl font-bold text-midnight mb-6">Complete Your Order</h2>
-         <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
-          <div class="flex items-center gap-2 text-purple-800">
-           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-           </svg><span class="font-semibold text-sm">Demo Mode</span>
-          </div>
-          <p class="text-purple-700 text-sm mt-1">This is a sample checkout page for demonstration purposes. No actual payment will be processed.</p>
-         </div>
-         <form id="checkout-form" class="space-y-6">
-          <div>
-           <h3 class="font-semibold text-midnight mb-4">Contact Information</h3>
-           <div class="space-y-4">
-            <div><label for="checkout-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label> <input type="text" id="checkout-name" placeholder="John Smith" class="input-field input-field-light" required>
-            </div>
-            <div><label for="checkout-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label> <input type="email" id="checkout-email" placeholder="john@taxfirm.com" class="input-field input-field-light" required>
-            </div>
-           </div>
-          </div>
-          <div class="pt-6 border-t border-gray-200">
-           <h3 class="font-semibold text-midnight mb-4">Firm Details (for receipt)</h3>
-           <div><label for="checkout-firm" class="block text-sm font-medium text-gray-700 mb-1">Firm Name</label> <input type="text" id="checkout-firm" placeholder="Smith Tax Services" class="input-field input-field-light">
-           </div>
-          </div><button type="submit" id="checkout-submit-btn" class="btn-primary w-full text-lg py-4"> Complete Purchase — $497 </button>
-          <div class="flex items-center justify-center gap-4 text-gray-400 text-sm">
-           <div class="flex items-center gap-1">
-            <svg class="w-4 h-4" fill="currentColor" viewbox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-            </svg> Secure Checkout
-           </div><span>•</span> <span>Instant Download</span>
-          </div>
-         </form>
-        </div>
-       </div>
-      </div>
-     </div>
-    </div>
-   </section><!-- Order Confirmation -->
-   <section id="confirmation" class="page-section">
-    <div class="min-h-full flex items-center py-12">
-     <div class="max-w-3xl mx-auto px-6 text-center">
-      <div class="w-24 h-24 gradient-gold rounded-full flex items-center justify-center mx-auto mb-8">
-       <svg class="w-12 h-12 text-midnight" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-       </svg>
-      </div>
-      <h1 class="font-display text-4xl md:text-5xl font-bold text-midnight mb-6">Welcome to TranscriptPro! 🎉</h1>
-      <p class="text-xl text-gray-600 mb-8">Your purchase is complete. Check your email for download instructions and your license key.</p>
-      <div class="card-elevated p-8 text-left mb-8">
-       <h3 class="font-bold text-midnight mb-4">Next Steps:</h3>
-       <div class="space-y-4">
-        <div class="check-item">
-         <div class="check-icon">
-          1
-         </div>
-         <div>
-          <p class="font-semibold text-midnight">Check Your Email</p>
-          <p class="text-gray-600 text-sm">Your download link and license key have been sent</p>
-         </div>
-        </div>
-        <div class="check-item">
-         <div class="check-icon">
-          2
-         </div>
-         <div>
-          <p class="font-semibold text-midnight">Download &amp; Install</p>
-          <p class="text-gray-600 text-sm">Follow the quick setup guide (takes less than 5 minutes)</p>
-         </div>
-        </div>
-        <div class="check-item">
-         <div class="check-icon">
-          3
-         </div>
-         <div>
-          <p class="font-semibold text-midnight">Add Your Branding</p>
-          <p class="text-gray-600 text-sm">Upload your logo and set your firm colors</p>
-         </div>
-        </div>
-        <div class="check-item">
-         <div class="check-icon">
-          4
-         </div>
-         <div>
-          <p class="font-semibold text-midnight">Process Your First Transcript</p>
-          <p class="text-gray-600 text-sm">You'll have a professional report in under 30 seconds</p>
-         </div>
-        </div>
-       </div>
-      </div>
-      <p class="text-gray-500">Questions? Email us at <span class="text-purple-700 font-semibold">support@transcriptpro.com</span></p><button onclick="showPage('landing-page')" class="mt-8 text-gray-500 hover:text-midnight transition-colors"> ← Return to Homepage </button>
-     </div>
-    </div>
-   </section>
-  </div><!-- Toast Container -->
+  <!-- Toast Container -->
   <div id="toast-container"></div>
-
-  <!-- Contact Us (site-wide) -->
-  <div id="chat-root" class="fixed bottom-6 left-6 z-[9999]">
-    <button id="chat-launch" type="button" class="group hidden flex items-center gap-3 rounded-2xl px-4 py-3 border border-purple-500/30 bg-slate-950/60 backdrop-blur shadow-lg shadow-black/30 hover:border-purple-400/50 transition">
-      <span class="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-500/15 border border-purple-500/25">
-        <svg class="w-5 h-5 text-purple-200" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet">
-          <path d="M21 12a8.5 8.5 0 0 1-8.5 8.5c-1.7 0-3.3-.5-4.7-1.3L3 21l1.8-4.8A8.5 8.5 0 1 1 21 12Z" />
-          <path d="M8 10h8" />
-          <path d="M8 14h5" />
-        </svg>
-      </span>
-      <span class="text-left">
-        <span class="block text-sm font-semibold text-white">ScriptBot</span>
-        <span class="block text-xs text-slate-300">Reply within 24 hours</span>
-      </span>
-      <span class="ml-2 hidden sm:inline-flex text-[11px] px-2.5 py-1 rounded-full border border-purple-500/25 bg-purple-500/10 text-purple-200">Chat</span>
-    </button>
-
-    <div id="chat-panel" class="mt-3 w-[min(420px,calc(100vw-3rem))] rounded-3xl border border-slate-700/40 bg-slate-950/70 backdrop-blur shadow-2xl shadow-black/40 overflow-hidden flex flex-col">
-      <!-- Single-surface panel: header + thread + composer (no nested frames) -->
-      <div class="px-5 py-4 border-b border-slate-800/60 flex items-start justify-between gap-3 shrink-0">
-        <div class="flex items-center gap-3">
-          <span class="w-10 h-10 rounded-xl flex items-center justify-center bg-purple-500/15 border border-purple-500/25">
-            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.77 9.77 0 01-4-.8L3 20l1.1-3.3A7.7 7.7 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-            </svg>
-          </span>
-          <div>
-            <div class="text-white font-semibold leading-tight">ScriptBot</div>
-            <div class="text-xs text-slate-400 mt-0.5">Ask a quick question or send a message.</div>
-          </div>
-        </div>
-        <button id="chat-close" type="button" class="p-2 rounded-xl border border-slate-700/40 bg-slate-900/40 text-slate-200 hover:text-white hover:border-slate-500/50 transition" aria-label="Close chat">
-          <svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 6 6 18" />
-            <path d="M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <div class="flex-1 min-h-0 flex flex-col">
-        <!-- Thread (no inner bordered box) -->
-        <div id="chat-log" class="flex-1 min-h-0 overflow-auto px-5 py-4 space-y-3"></div>
-
-        <!-- Composer -->
-        <div class="border-t border-slate-800/60 p-5">
-          <form id="chat-form" class="space-y-3">
-            <div id="chat-email-wrap" class="hidden">
-              <label for="chat-email" class="block text-xs text-slate-300 mb-1.5">Email</label>
-              <input id="chat-email" type="email" autocomplete="email" placeholder="you@firm.com" class="input-field input-field-light rounded-xl" />
-            </div>
-
-            <div>
-              <label for="chat-message" class="block text-xs text-slate-300 mb-1.5">Request</label>
-              <textarea id="chat-message" rows="4" placeholder="Ask ScriptBot a question…" class="input-field input-field-light rounded-xl resize-none" required></textarea>
-            </div>
-
-            <div class="flex flex-col sm:flex-row gap-3">
-              <button id="chat-send" type="submit" class="btn-primary w-full sm:w-auto text-sm py-3 px-5">Send message</button>
-              <button id="chat-book" type="button" data-cal-link="tax-monitor-pro/tax-monitor-transcript-support" data-cal-namespace="tax-monitor-transcript-support" data-cal-config='{"layout":"month_view","useSlotsViewOnSmallScreen":"true"}' class="btn-secondary w-full sm:w-auto text-sm py-3 px-5">Book support call</button>
-            </div>
-
-            <div class="text-[11px] text-slate-400">By sending, you agree we can contact you about this request.</div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // Default configuration
-    const defaultConfig = {
-      hero_headline: 'Transform IRS Transcripts Into Professional Reports in Minutes',
-      hero_subheadline: 'The only automation tool tax professionals need to parse, interpret, and present IRS transcript data with beautiful, branded reports your clients will love.',
-      cta_button_text: 'Get Your Free Guide →',
-      product_name: 'TranscriptPro',
-      price_amount: '$497'
-    };
-
-    let config = { ...defaultConfig };
-    let currentData = [];
-    let currentRecordCount = 0;
-
-    // Minimal, boring helpers to keep the DOM from throwing tantrums.
-    function getEl(id) {
-      return document.getElementById(id);
-    }
-
-    function safeSetText(id, value) {
-      const el = getEl(id);
-      if (!el) return false;
-      el.textContent = value;
-      return true;
-    }
-
-    // Page navigation
-    function showPage(pageId) {
-      const target = getEl(pageId);
-      if (!target) {
-        console.error(`showPage: Missing page section #${pageId}`);
-        showToast('Navigation error: page not found.', 'error');
-        return;
-      }
-
-      document.querySelectorAll('.page-section').forEach(page => {
-        page.classList.remove('active');
-      });
-
-      target.classList.add('active');
-
-      const container = getEl('app-container');
-      if (container) container.scrollTop = 0;
-    }
-
-    // Toast notifications
-    function showToast(message, type = 'success') {
-      const container = getEl('toast-container');
-      if (!container) {
-        console[type === 'error' ? 'error' : 'log']('Toast:', message);
-        return;
-      }
-
-      const toast = document.createElement('div');
-      toast.className = `toast toast-${type}`;
-      toast.textContent = message;
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 4000);
-    }
-
-    // --- Client Report (shareable deliverable) ---
-
-    const sampleReportData = {
-      logo: null,
-      taxpayerName: "John Q. Public",
-      taxPeriodEnding: "12/31/2023",
-      reportDate: "01/20/2024",
-      preparedBy: "Tax Professional",
-      currentBalance: "$0.00",
-      refundStatus: "Issued",
-      noticesIssued: "No",
-      actionRequired: "No",
-      riskLevel: "Low",
-      summary: "The account shows a clean refund status with no outstanding balance or pending notices. All tax obligations for the 2023 tax year have been satisfied. No further action is required at this time."
-    };
-
-    let brandLogoDataUrl = null;
-
-    function getRiskClass(level) {
-      if (level === "Low") return "low";
-      if (level === "Moderate") return "moderate";
-      return "attention";
-    }
-
-    function renderClientReport(data) {
-      const out = getEl('free-report-output');
-      if (!out) return;
-
-      const stamp = new Date().toLocaleDateString();
-      const logoHtml = data.logo ? `<img class="report-logo" src="${data.logo}" alt="Firm logo" />` : '';
-
-      out.innerHTML = `
-        <div class="report-page">
-          <div class="report-content">
-            <div class="report-header">
-              <div>
-                <div class="report-h1">IRS Transcript Summary</div>
-                <div class="report-kicker">Client-ready account analysis</div>
-              </div>
-              ${logoHtml}
-            </div>
-
-            <div class="report-section">
-              <div class="report-title">Client Information</div>
-              <div class="report-grid">
-                <div class="report-block"><div class="report-label">Taxpayer Name</div><div class="report-value">${data.taxpayerName}</div></div>
-                <div class="report-block"><div class="report-label">Tax Period Ending</div><div class="report-value">${data.taxPeriodEnding}</div></div>
-                <div class="report-block"><div class="report-label">Report Date</div><div class="report-value">${data.reportDate}</div></div>
-                <div class="report-block"><div class="report-label">Prepared By</div><div class="report-value">${data.preparedBy}</div></div>
-              </div>
-            </div>
-
-            <div class="report-section">
-              <div class="report-title">Account Status</div>
-              <div class="report-status">
-                <div class="report-card"><div class="report-stat">${data.currentBalance}</div><div class="report-stat-label">Current Balance</div></div>
-                <div class="report-card"><div class="report-stat">${data.refundStatus}</div><div class="report-stat-label">Refund Status</div></div>
-                <div class="report-card"><div class="report-stat">${data.noticesIssued}</div><div class="report-stat-label">Notices Issued</div></div>
-              </div>
-              <div class="report-status" style="margin-top:12px; grid-template-columns: repeat(2, 1fr);">
-                <div class="report-card"><div class="report-stat">${data.actionRequired}</div><div class="report-stat-label">Action Required</div></div>
-                <div class="report-card"><div class="report-stat ${getRiskClass(data.riskLevel)}">${data.riskLevel}</div><div class="report-stat-label">Risk Assessment</div></div>
-              </div>
-            </div>
-
-            <div class="report-section">
-              <div class="report-title">What This Means</div>
-              <div class="report-summary">${data.summary}</div>
-            </div>
-
-            <div class="report-footer">
-              <span>This report is confidential and for the named taxpayer and their representative only.</span>
-              <span>Generated ${stamp}</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    function initClientReportUi() {
-      const logoInput = getEl('brand-logo');
-      if (logoInput) {
-        logoInput.addEventListener('change', () => {
-          const file = logoInput.files && logoInput.files[0];
-          if (!file) { brandLogoDataUrl = null; return; }
-          if (!String(file.type || '').startsWith('image/')) {
-            brandLogoDataUrl = null;
-            showToast('Logo must be an image file.', 'error');
-            logoInput.value = '';
-            return;
-          }
-          const reader = new FileReader();
-          reader.onload = () => {
-            brandLogoDataUrl = String(reader.result || '');
-            showToast('Logo loaded for preview.');
-          };
-          reader.onerror = () => {
-            brandLogoDataUrl = null;
-            showToast('Could not read that logo file.', 'error');
-          };
-          reader.readAsDataURL(file);
-        });
-      }
-
-      const previewBtn = getEl('preview-report-btn');
-  if (previewBtn) {
-    previewBtn.addEventListener('click', () => {
-      const data = { ...sampleReportData, logo: brandLogoDataUrl };
-
-      const reportSection = getEl('free-report');
-      const output = getEl('free-report-output');
-
-      if (!reportSection || !output) {
-        console.error('Preview failed: missing free-report section or output container');
-        return;
-      }
-
-      // Ensure section is visible
-      document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
-      reportSection.classList.remove('hidden');
-
-      // Render
-      renderClientReport(data);
-
-      // Scroll into view to guarantee visibility
-      reportSection.scrollIntoView({ behavior: 'instant' });
-    });
-  }
-      }
-
-      const printBtn = getEl('report-print');
-      if (printBtn) {
-        printBtn.addEventListener('click', () => window.print());
-      }
-    }
-
-    // "Tests" (aka: sanity checks) so you don't have to hunt null refs at runtime.
-    function runSanityChecks() {
-      const requiredIds = [
-        'app-container',
-        'checkout-form',
-        'checkout-name',
-        'checkout-email',
-        'checkout-firm',
-        'checkout-price',
-        'checkout-submit-btn',
-        'hero-cta',
-        'hero-headline',
-        'hero-subheadline',
-        'lead-email',
-        'lead-firm',
-        'lead-form',
-        'lead-name',
-        'lead-submit-btn',
-        'nav-product-name',
-        'sales-price',
-        'sales-product-name',
-        'toast-container'
-      ].sort();
-
-      const missing = requiredIds.filter(id => !getEl(id));
-      if (missing.length) {
-        console.warn('Sanity check: missing element ids:', missing);
-      }
-
-      // Extra: chat widget IDs
-      const chatIds = [
-        'chat-book',
-        'chat-close',
-        'chat-email',
-        'chat-form',
-        'chat-launch',
-        'chat-log',
-        'chat-message',
-        'chat-panel',
-        'chat-root',
-        'chat-send'
-      ].sort();
-      const missingChat = chatIds.filter(id => !getEl(id));
-      if (missingChat.length) {
-        console.warn('Sanity check: missing chat element ids:', missingChat);
-      }
-
-      // Extra: endpoints present
-      if (typeof CHAT_ENDPOINT === 'undefined' || typeof CHAT_LOG_ENDPOINT === 'undefined') {
-        console.warn('Sanity check: chat endpoints not defined (this should never happen).');
-      }
-    }
-
-    // Update UI based on config
-    function updateUI() {
-      safeSetText('hero-headline', config.hero_headline || defaultConfig.hero_headline);
-      safeSetText('hero-subheadline', config.hero_subheadline || defaultConfig.hero_subheadline);
-      safeSetText('hero-cta', config.cta_button_text || defaultConfig.cta_button_text);
-
-      const productName = config.product_name || defaultConfig.product_name;
-      safeSetText('nav-product-name', productName);
-      safeSetText('sales-product-name', productName);
-
-      const price = config.price_amount || defaultConfig.price_amount;
-      safeSetText('checkout-price', price);
-      safeSetText('sales-price', price);
-    }
-
-    // Data SDK handler
-    const dataHandler = {
-      onDataChanged(data) {
-        currentData = data;
-        currentRecordCount = data.length;
-      }
-    };
-
-    // Initialize Element SDK
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange: async (newConfig) => {
-          config = { ...config, ...newConfig };
-          updateUI();
-        },
-        mapToCapabilities: (cfg) => ({
-          borderables: [],
-          fontEditable: undefined,
-          fontSizeable: undefined,
-          recolorables: []
-        }),
-        mapToEditPanelValues: (cfg) => new Map([
-          ['cta_button_text', cfg.cta_button_text || defaultConfig.cta_button_text],
-          ['hero_headline', cfg.hero_headline || defaultConfig.hero_headline],
-          ['hero_subheadline', cfg.hero_subheadline || defaultConfig.hero_subheadline],
-          ['price_amount', cfg.price_amount || defaultConfig.price_amount],
-          ['product_name', cfg.product_name || defaultConfig.product_name]
-        ])
-      });
-
-      if (window.elementSdk.config) {
-        config = { ...config, ...window.elementSdk.config };
-      }
-    }
-
-    // Initialize Data SDK
-    async function initDataSdk() {
-      if (window.dataSdk) {
-        const result = await window.dataSdk.init(dataHandler);
-        if (!result.isOk) {
-          console.error('Failed to initialize Data SDK');
-        }
-      }
-    }
-
-    initDataSdk();
-
-    // Lead form submission
-    const leadForm = getEl('lead-form');
-    if (leadForm) {
-      leadForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const submitBtn = getEl('lead-submit-btn');
-        if (!submitBtn) return;
-
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Sending...';
-        submitBtn.disabled = true;
-
-        const name = getEl('lead-name')?.value || '';
-        const email = getEl('lead-email')?.value || '';
-        const firm = getEl('lead-firm')?.value || '';
-
-        if (currentRecordCount >= 999) {
-          showToast('Maximum leads reached. Please contact support.', 'error');
-          submitBtn.textContent = originalText;
-          submitBtn.disabled = false;
-          return;
-        }
-
-        if (window.dataSdk) {
-          const result = await window.dataSdk.create({
-            created_at: new Date().toISOString(),
-            email,
-            firm_name: firm,
-            id: `lead_${Date.now()}`,
-            lead_type: 'free_guide',
-            name
-          });
-
-          if (result.isOk) {
-            showToast('Success! Check your email for the guide.');
-            showPage('thank-you');
-          } else {
-            showToast('Something went wrong. Please try again.', 'error');
-          }
-        } else {
-          showToast('Success! Check your email for the guide.');
-          showPage('thank-you');
-        }
-
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-        e.target.reset();
-      });
-    }
-
-    // Checkout form submission
-    const checkoutForm = getEl('checkout-form');
-    if (checkoutForm) {
-      checkoutForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const submitBtn = getEl('checkout-submit-btn');
-        if (!submitBtn) return;
-
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Processing...';
-        submitBtn.disabled = true;
-
-        const name = getEl('checkout-name')?.value || '';
-        const email = getEl('checkout-email')?.value || '';
-        const firm = getEl('checkout-firm')?.value || '';
-
-        if (currentRecordCount >= 999) {
-          showToast('Maximum orders reached. Please contact support.', 'error');
-          submitBtn.textContent = originalText;
-          submitBtn.disabled = false;
-          return;
-        }
-
-        if (window.dataSdk) {
-          const result = await window.dataSdk.create({
-            created_at: new Date().toISOString(),
-            email,
-            firm_name: firm,
-            id: `order_${Date.now()}`,
-            lead_type: 'purchase',
-            name
-          });
-
-          if (result.isOk) {
-            showToast('Order complete! Welcome to TranscriptPro!');
-            showPage('confirmation');
-          } else {
-            showToast('Payment processing failed. Please try again.', 'error');
-          }
-        } else {
-          showToast('Order complete! Welcome to TranscriptPro!');
-          showPage('confirmation');
-        }
-
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-        e.target.reset();
-      });
-    }
-
-    // --- Contact Us widget wiring ---
-
-    // Worker endpoints (front-end only; Worker must implement these routes).
-    // Message intake (explicit click: submit form)
-    const CHAT_ENDPOINT = 'https://api.taxmonitor.pro/forms/support/chat-intake';
-
-    // Session logging (automatic): logs a session open/close + basic metadata.
-    // If the Worker route isn't live yet, this will fail silently.
-    const CHAT_LOG_ENDPOINT = 'https://api.taxmonitor.pro/forms/support/chat-log';
-
-    // Boot
-    runSanityChecks();
-    updateUI();
-    document.addEventListener('DOMContentLoaded', () => {
-  initClientReportUi();
-});
-
-    function newEventId() {
-      try {
-        return (crypto && crypto.randomUUID) ? crypto.randomUUID() : `evt_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-      } catch {
-        return `evt_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-      }
-    }
-
-    function ensureSessionToken() {
-      try {
-        const key = 'tmp_session_token';
-        const existing = localStorage.getItem(key);
-        if (existing) return existing;
-        const token = `st_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-        localStorage.setItem(key, token);
-        return token;
-      } catch {
-        return `st_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-      }
-    }
-
-    function openSupportCall() {
-      // Element-click embed: clicking the booking button will open Cal.
-      const btn = getEl('chat-book');
-      if (btn) {
-        btn.click();
-        return;
-      }
-      window.open('https://cal.com/tax-monitor-pro/tax-monitor-transcript-support', '_blank', 'noopener');
-    }
-
-    (function initChatWidget() {
-      const launch = getEl('chat-launch');
-      const panel = getEl('chat-panel');
-      const close = getEl('chat-close');
-      const form = getEl('chat-form');
-      const emailWrap = getEl('chat-email-wrap');
-      const email = getEl('chat-email');
-      const message = getEl('chat-message');
-      const send = getEl('chat-send');
-      const book = getEl('chat-book');
-      const log = getEl('chat-log');
-
-      if (!launch || !panel || !close || !form || !emailWrap || !email || !message || !send || !book || !log) {
-        console.warn('Contact Us widget: missing required elements');
-        return;
-      }
-
-      const transcript = [];
-      const index = buildPageIndex();
-
-      const session = {
-        sessionToken: ensureSessionToken(),
-        startedAt: new Date().toISOString(),
-        pageUrl: String(location.href || ''),
-        referrer: String(document.referrer || ''),
-        userAgent: String(navigator.userAgent || '')
-      };
-
-      async function postJson(url, payload) {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        if (!res.ok) {
-          const txt = await res.text().catch(() => '');
-          throw new Error(`HTTP ${res.status}${txt ? `: ${txt.slice(0, 200)}` : ''}`);
-        }
-        return true;
-      }
-
-      async function logSession(kind, extra) {
-        try {
-          await postJson(CHAT_LOG_ENDPOINT, {
-            ...session,
-            eventId: newEventId(),
-            kind,
-            transcriptCount: transcript.length,
-            ...extra
-          });
-        } catch (err) {
-          // Logging is best-effort; do not break the widget.
-          console.warn('Chat log failed:', err);
-        }
-      }
-
-      function open() {
-        panel.classList.remove('hidden');
-        launch.classList.add('hidden');
-        logSession('open', { openedAt: new Date().toISOString() });
-        try { message.focus(); } catch {}
-      }
-
-      function hide() {
-        panel.classList.add('hidden');
-        launch.classList.remove('hidden');
-        logSession('close', { closedAt: new Date().toISOString() });
-      }
-
-      function esc(s) {
-        return String(s || '')
-          .replaceAll('&', '&amp;')
-          .replaceAll('<', '&lt;')
-          .replaceAll('>', '&gt;')
-          .replaceAll('"', '&quot;')
-          .replaceAll("'", '&#39;');
-      }
-
-      function push(role, text) {
-        transcript.push({ role, text });
-
-        const row = document.createElement('div');
-        row.className = role === 'user' ? 'flex justify-end' : 'flex justify-start';
-
-        const bubble = document.createElement('div');
-        bubble.className = role === 'user'
-          ? 'max-w-[85%] rounded-2xl px-4 py-3 border border-purple-500/25 bg-purple-500/10 text-slate-100'
-          : 'max-w-[85%] rounded-2xl px-4 py-3 border border-slate-800/70 bg-slate-950/40 text-slate-200';
-
-        bubble.innerHTML = `<div class="text-sm">${esc(text)}</div>`;
-        row.appendChild(bubble);
-        log.appendChild(row);
-        log.scrollTop = log.scrollHeight;
-      }
-
-      function pushBotHtml(html, transcriptText) {
-        transcript.push({ role: 'bot', text: transcriptText || '' });
-
-        const row = document.createElement('div');
-        row.className = 'flex justify-start';
-
-        const bubble = document.createElement('div');
-        bubble.className = 'max-w-[85%] rounded-2xl px-4 py-3 border border-slate-800/70 bg-slate-950/40 text-slate-200';
-        bubble.innerHTML = html;
-
-        row.appendChild(bubble);
-        log.appendChild(row);
-        log.scrollTop = log.scrollHeight;
-      }
-
-      function tokenize(str) {
-        const s = String(str || '').toLowerCase();
-        const out = [];
-        let cur = '';
-        for (let i = 0; i < s.length; i++) {
-          const ch = s[i];
-          const code = ch.charCodeAt(0);
-          const isAZ = code >= 97 && code <= 122;
-          const is09 = code >= 48 && code <= 57;
-          if (isAZ || is09) cur += ch;
-          else {
-            if (cur) out.push(cur);
-            cur = '';
-          }
-        }
-        if (cur) out.push(cur);
-        return out;
-      }
-
-      function scoreMatch(qTokens, docTokens) {
-        if (!qTokens.length || !docTokens.length) return 0;
-        const set = new Set(docTokens);
-        let hits = 0;
-        for (const t of qTokens) if (set.has(t)) hits++;
-        return hits / Math.sqrt(docTokens.length);
-      }
-
-      function buildPageIndex() {
-        const nodes = Array.from(document.querySelectorAll('main, section, header, footer')).filter(Boolean);
-        const items = [];
-        const seen = new Set();
-
-        for (const node of nodes) {
-          if (node.id === 'chat-root') continue;
-          const id = node.id ? String(node.id) : '';
-          const titleEl = node.querySelector('h1, h2, h3');
-          const title = titleEl ? titleEl.textContent.trim() : '';
-          const text = String(node.innerText || '')
-            .replaceAll('\n', ' ')
-            .replaceAll('\t', ' ')
-            .split(' ')
-            .filter(Boolean)
-            .join(' ')
-            .trim();
-          if (!text || text.length < 80) continue;
-
-          const key = `${id}::${title}::${text.slice(0, 200)}`;
-          if (seen.has(key)) continue;
-          seen.add(key);
-
-          items.push({
-            anchor: id ? `#${id}` : '',
-            text,
-            title,
-            tokens: tokenize(text)
-          });
-        }
-
-        return items;
-      }
-
-      function searchBestAnswer(question) {
-        const qTokens = tokenize(question);
-        if (!qTokens.length) return null;
-
-        let best = null;
-        for (const item of index) {
-          const score = scoreMatch(qTokens, item.tokens);
-          if (!best || score > best.score) best = { item, score };
-        }
-
-        if (!best || best.score < 0.35) return null;
-
-        const raw = best.item.text;
-        const first = qTokens.find(t => t.length >= 3) || qTokens[0];
-        const pos = raw.toLowerCase().indexOf(first);
-        const start = Math.max(0, (pos === -1 ? 0 : pos - 90));
-        const end = Math.min(raw.length, start + 320);
-        const snippet = raw.slice(start, end).trim();
-
-        return {
-          anchor: best.item.anchor,
-          snippet,
-          title: best.item.title
-        };
-      }
-
-      function serializeTranscript() {
-        return transcript
-          .map(m => `${m.role === 'user' ? 'User' : 'Widget'}: ${m.text}`)
-          .join('\n');
-      }
-
-      function hasSensitiveContent(str) {
-        const s = String(str || '');
-        if (s.toLowerCase().includes('ssn')) return true;
-
-        // crude SSN-ish detector (###-##-####)
-        const digits = s.split('').filter(ch => ch >= '0' && ch <= '9').length;
-        const hyphens = s.split('').filter(ch => ch === '-').length;
-        if (digits === 9 && hyphens >= 2) return true;
-
-        return false;
-      }
-
-      // UI wiring
-      launch.addEventListener('click', () => {
-        // Launcher should only appear when the panel is closed.
-        open();
-      });
-
-      close.addEventListener('click', () => {
-        hide();
-      });
-
-      book.addEventListener('click', () => {
-        openSupportCall();
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') hide();
-      });
-
-      // Initial state: show panel, hide launcher.
-      // User should only see the launcher after closing the panel.
-      try {
-        panel.classList.remove('hidden');
-        launch.classList.add('hidden');
-      } catch {}
-
-      // Log the initial open once on load.
-      logSession('open', { openedAt: new Date().toISOString(), initial: true });
-
-      // Seed
-      pushBotHtml(
-        '<div class="text-sm"><span class="text-purple-200 font-semibold">ScriptBot</span>: I can answer simple questions from the site content. Enter your request below.</div>' +
-        '<div class="text-sm mt-2">If you want to message support, enter your email and we’ll reply within 24 hours.</div>',
-        'ScriptBot: I can answer simple questions from the site content. Enter your request below. If you want to message support, enter your email and we’ll reply within 24 hours.'
-      );
-
-      // Submit = explicit user action => send to Worker + try to answer from page content.
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const q = String(message.value || '').trim();
-        const em = String(email.value || '').trim();
-
-        // Email is only collected when the user explicitly sends a message.
-        // First submit reveals the email field if it's not present.
-        if (!em) {
-          emailWrap.classList.remove('hidden');
-          showToast('Add your email to send your message.', 'error');
-          try { email.focus(); } catch {}
-          return;
-        }
-
-        if (!q) {
-          showToast('Write a message first.', 'error');
-          return;
-        }
-
-        // No sensitive stuff.
-        if (hasSensitiveContent(q)) {
-          push('user', q);
-          logSession('blocked', { at: new Date().toISOString(), chars: q.length });
-          pushBotHtml('<div class="text-sm">No sensitive data here (SSNs, transcripts, etc.). Keep it general or book a support call.</div>', 'Sensitive content blocked.');
-          message.value = '';
-          return;
-        }
-
-        push('user', q);
-        logSession('message', { at: new Date().toISOString(), chars: q.length });
-
-        // Attempt local answer.
-        const qLower = q.toLowerCase();
-        const bookingWords = ['appointment', 'book', 'booking', 'call', 'calendar', 'schedule', 'scheduling'];
-        const isBooking = bookingWords.some(w => qLower.includes(w));
-
-        if (isBooking) {
-          pushBotHtml(
-            '<div class="text-sm">You can book a support call here:</div>' +
-            '<div class="mt-3">' +
-              '<button type="button" data-cal-link="tax-monitor-pro/tax-monitor-transcript-support" data-cal-namespace="tax-monitor-transcript-support" data-cal-config=\'{' +
-                '"layout":"month_view","useSlotsViewOnSmallScreen":"true"' +
-              '}\' class="inline-flex items-center gap-2 rounded-2xl px-4 py-3 border border-purple-500/30 bg-purple-500/10 text-purple-200 hover:text-white hover:border-purple-400/50 transition">' +
-                '<span class="w-8 h-8 rounded-xl flex items-center justify-center bg-purple-500/15 border border-purple-500/25">' +
-                  '<svg class="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                    '<path d="M8 7V3m8 4V3" />' +
-                    '<path d="M3 11h18" />' +
-                    '<path d="M5 5h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />' +
-                    '<path d="M7 15h4" />' +
-                    '<path d="M7 19h2" />' +
-                  '</svg>' +
-                '</span>' +
-                '<span class="text-sm font-semibold">Open calendar</span>' +
-              '</button>' +
-            '</div>',
-            'Booking request: provided calendar link.'
-          );
-        } else {
-          const ans = searchBestAnswer(q);
-          if (ans) {
-            const title = ans.title ? `<div class="text-xs text-white/60 mb-1">From: ${esc(ans.title)}</div>` : '';
-            const link = ans.anchor ? `<a class="text-purple-300 text-xs mt-2 inline-block hover:text-purple-200" href="${esc(ans.anchor)}">Jump to section →</a>` : '';
-            pushBotHtml(`${title}<div class="text-sm">${esc(ans.snippet)}</div>${link}`, ans.snippet);
-          } else {
-            pushBotHtml(
-              '<div class="text-sm">I can’t answer that confidently from this page content.</div>' +
-              '<div class="text-sm mt-2">I still sent your message to our team. If it’s urgent, book a support call.</div>',
-              'No match found. Sent message to team.'
-            );
-          }
-        }
-
-        // Always submit to backend (explicit user action).
-        const original = send.textContent;
-        send.textContent = 'Sending…';
-        send.disabled = true;
-        try {
-          await postJson(CHAT_ENDPOINT, {
-            ...session,
-            createdAt: new Date().toISOString(),
-            email: em,
-            eventId: newEventId(),
-            message: q,
-            transcript: serializeTranscript()
-          });
-          showToast('Message sent. We’ll reply within 24 hours.');
-        } catch (err) {
-          console.error('Contact intake failed:', err);
-          showToast('Could not send message. Please book a support call.', 'error');
-        } finally {
-          send.textContent = original;
-          send.disabled = false;
-        }
-
-        message.value = '';
-      });
-
-      // Additional "test": ensure we can safely open/close without exceptions.
-      try {
-        if (typeof open !== 'function' || typeof hide !== 'function') {
-          console.warn('Contact Us widget: open/hide functions not available');
-        }
-      } catch {}
-    })();
-  </script>
 
   <!-- Cal element-click embed code begins -->
   <script type="text/javascript">
@@ -1873,5 +641,33 @@
   </script>
   <!-- Cal element-click embed code ends -->
 
+  <!-- CAL.COM FLOATING SUPPORT -->
+  <script type="text/javascript" id="cal-embed-loader">
+    (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
+  </script>
+
+  <script type="text/javascript" id="cal-embed-config">
+    Cal("init", "tax-monitor-transcript-support", {origin:"https://app.cal.com"});
+
+    Cal.ns["tax-monitor-transcript-support"]("floatingButton", {
+      "calLink":"tax-monitor-pro/tax-monitor-transcript-support",
+      "config":{
+        "layout":"month_view",
+        "useSlotsViewOnSmallScreen":"true"
+      },
+      "buttonText":"Book Transcript Support"
+    });
+
+    Cal.ns["tax-monitor-transcript-support"]("ui", {
+      "cssVarsPerTheme":{
+        "light":{"cal-brand":"#292929"},
+        "dark":{"cal-brand":"#f97316"}
+      },
+      "hideEventTypeDetails":false,
+      "layout":"month_view"
+    });
+  </script>
+  <!-- END CAL.COM FLOATING SUPPORT -->
+   
 </body>
 </html>

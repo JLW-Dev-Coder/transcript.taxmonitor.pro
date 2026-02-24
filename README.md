@@ -18,8 +18,8 @@ It does NOT contain:
 
 Remain in:
 
-C:\Users\britn\OneDrive\taxmonitor.pro-site\workers\api\src\index.js
-C:\Users\britn\OneDrive\taxmonitor.pro-site\app\contracts\
+\OneDrive\taxmonitor.pro-site\workers\api\src\index.js
+\OneDrive\taxmonitor.pro-site\app\contracts\
 
 Worker runs on:
 https://api.taxmonitor.pro
