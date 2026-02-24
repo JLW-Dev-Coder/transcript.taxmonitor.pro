@@ -1,68 +1,173 @@
-/* /_sdk/data_sdk.js
-   Tiny data helpers: eventId/sessionToken + basic POST helper.
-*/
-
+/* _sdk/element_sdk.js */
 (function () {
-  function randomId(prefix) {
-    var buf = new Uint8Array(16);
-    crypto.getRandomValues(buf);
-    var hex = Array.prototype.map.call(buf, function (b) {
-      return b.toString(16).padStart(2, "0");
-    }).join("");
-    return prefix + "_" + hex;
+  "use strict";
+
+  function $(id) {
+    return document.getElementById(id);
   }
 
-  function getParam(name) {
-    try {
-      return new URL(location.href).searchParams.get(name);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  function getOrCreate(key, prefix) {
-    var v = localStorage.getItem(key);
-    if (v) return v;
-    v = randomId(prefix);
-    localStorage.setItem(key, v);
-    return v;
-  }
-
-  function getSessionToken() {
-    var qp = getParam("sessionToken");
-    if (qp) {
-      localStorage.setItem("tm_sessionToken", qp);
-      return qp;
-    }
-    return getOrCreate("tm_sessionToken", "sess");
-  }
-
-  function getEventId() {
-    return randomId("evt");
-  }
-
-  async function postJson(url, payload) {
-    var res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload || {})
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => {
+      const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+      return map[c] || c;
     });
-
-    var text = await res.text();
-    var data;
-    try { data = text ? JSON.parse(text) : null; } catch (_) { data = text; }
-
-    if (!res.ok) {
-      var msg = (data && data.error) ? data.error : ("Request failed: " + res.status);
-      throw new Error(msg);
-    }
-
-    return data;
   }
 
-  window.tmData = Object.freeze({
-    getEventId: getEventId,
-    getSessionToken: getSessionToken,
-    postJson: postJson
-  });
+  function toast(message, tone) {
+    const container = $("toast-container");
+    if (!container) return;
+
+    const el = document.createElement("div");
+    el.className =
+      "fixed bottom-6 left-1/2 z-[9999] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 rounded-2xl border px-4 py-3 text-sm shadow-lg backdrop-blur " +
+      (tone === "error"
+        ? "border-red-500/30 bg-red-500/10 text-red-100"
+        : "border-white/10 bg-slate-950/40 text-white/90");
+
+    el.textContent = message;
+    container.appendChild(el);
+
+    setTimeout(() => el.classList.add("opacity-0"), 2600);
+    setTimeout(() => el.remove(), 3100);
+  }
+
+  function setActiveSection(sectionId) {
+    const sections = document.querySelectorAll(".page-section");
+    sections.forEach((s) => s.classList.remove("active"));
+    const target = document.getElementById(sectionId);
+    if (target) target.classList.add("active");
+  }
+
+  function showPage(sectionId) {
+    setActiveSection(sectionId);
+    const el = document.getElementById(sectionId);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  window.showPage = showPage;
+
+  function initHashRouting() {
+    const hash = (location.hash || "").replace("#", "");
+    if (!hash) return;
+
+    // If it matches a section on the landing page, keep landing-page active and scroll.
+    const target = document.getElementById(hash);
+    if (target) {
+      setActiveSection("landing-page");
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    // Otherwise, if hash is a page-section, activate it.
+    const section = document.getElementById(hash);
+    if (section && section.classList.contains("page-section")) {
+      showPage(hash);
+    }
+  }
+
+  async function handleLeadForm() {
+    const form = $("lead-form");
+    if (!form) return;
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = $("lead-name")?.value?.trim() || "";
+      const email = $("lead-email")?.value?.trim() || "";
+      const firm = $("lead-firm")?.value?.trim() || "";
+
+      if (!email) {
+        toast("Email is required.", "error");
+        return;
+      }
+
+      // This is intentionally “no assumptions”: you can wire the backend later.
+      // For now, just confirm capture.
+      toast("Saved. Check your email for the guide link.", "ok");
+
+      // Optional: if you later add a Worker endpoint, this is where it goes.
+      // window.tmData?.post?.("https://api.taxmonitor.pro/forms/lead-magnet/transcript-ebook", { email, firm, name });
+
+      form.reset();
+      showPage("landing-page");
+    });
+  }
+
+  function buildFreeReportShell() {
+    return `
+      <div class="report-page">
+        <div class="report-content">
+          <div class="report-header">
+            <div>
+              <div class="report-h1">IRS Transcript Report</div>
+              <div class="report-kicker">Transcript.Tax Monitor Pro</div>
+            </div>
+            <div style="text-align:right">
+              <div class="report-kicker">Generated</div>
+              <div style="font-weight:800">${escapeHtml(new Date().toLocaleDateString())}</div>
+            </div>
+          </div>
+
+          <div class="report-section">
+            <div class="report-title">Summary</div>
+            <div class="report-summary">
+              This is a preview report format. Your real report would list transcript type, extracted transaction codes, and plain-English interpretations.
+            </div>
+          </div>
+
+          <div class="report-section">
+            <div class="report-title">Key Metrics</div>
+            <div class="report-status">
+              <div class="report-card">
+                <div class="report-stat low">24</div>
+                <div class="report-stat-label">Codes Found</div>
+              </div>
+              <div class="report-card">
+                <div class="report-stat low">100%</div>
+                <div class="report-stat-label">Interpretation</div>
+              </div>
+              <div class="report-card">
+                <div class="report-stat moderate">8.3s</div>
+                <div class="report-stat-label">Processing</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="report-footer">
+            <div>${escapeHtml(location.host)}</div>
+            <div>Client-ready format • Print-friendly</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function initReportPreview() {
+    const btn = $("preview-report-btn");
+    const out = $("free-report-output");
+    const printBtn = $("report-print");
+
+    if (btn) {
+      btn.addEventListener("click", () => {
+        if (out) out.innerHTML = buildFreeReportShell();
+        showPage("free-report");
+      });
+    }
+
+    if (printBtn) {
+      printBtn.addEventListener("click", () => window.print());
+    }
+  }
+
+  function init() {
+    initHashRouting();
+    handleLeadForm();
+    initReportPreview();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
 })();
