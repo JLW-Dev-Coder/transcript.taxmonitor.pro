@@ -1,4 +1,4 @@
-<!--index.html-->
+<!-- index.html -->
 <!doctype html>
 <html lang="en" class="h-full">
  <head>
@@ -467,7 +467,25 @@
     </div>
    </section>
 
-   <!-- CTA Section -->
+   <!-- Pricing Section -->
+    <section id="pricing" class="py-20 bg-cream">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center max-w-3xl mx-auto mb-12">
+          <div class="counter inline-block mb-4">💳 Pricing</div>
+          <h2 class="font-display text-3xl md:text-4xl font-bold text-midnight mb-4">Simple pricing. Unlimited transcripts.</h2>
+          <p class="text-gray-600">Choose the plan that fits your workflow and get instant access.</p>
+        </div>
+
+        <div class="card-elevated p-6 md:p-8">
+          <script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+          <stripe-pricing-table
+            pricing-table-id="prctbl_1T4PS0CMpIgwe61Z8kbUr8Gm"
+            publishable-key="pk_live_51RNgmXCMpIgwe61ZCHYicktcQO8DFhsYuLqHjeQ8BvEI7E5acLO8tfX3oUgu44qrZRVq8qM86DLTADI7erArJAIm00LH2K4GuC"
+          ></stripe-pricing-table>
+        </div>
+      </div>
+    </section>
+
     <section class="py-20 gradient-hero">
      <div class="max-w-4xl mx-auto px-6 text-center">
       <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-6">Ready to Transform Your Transcript Workflow?</h2>
@@ -479,7 +497,7 @@
 
     <!-- PARTIAL:footer -->
 
-</section>
+   </section>
    
    <!-- Lead Magnet Page -->
    <section id="lead-magnet" class="page-section">
@@ -545,53 +563,6 @@
         <p class="text-xs text-gray-400 text-center">We respect your privacy. Unsubscribe anytime.</p>
        </form>
       </div>
-     </div>
-    </div>
-   </section>
-
-   <!-- Thank You Page -->
-   <section id="thank-you" class="page-section">
-    <div class="min-h-full flex items-center py-12">
-     <div class="max-w-4xl mx-auto px-6 text-center">
-      <div class="w-24 h-24 bg-sage rounded-full flex items-center justify-center mx-auto mb-8">
-       <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-       </svg>
-      </div>
-      <h1 class="font-display text-4xl md:text-5xl font-bold text-midnight mb-6">You're In! Check Your Email 📧</h1>
-      <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">Your free IRS Transcript Code Guide is on its way to your inbox. While you wait, here's something even more powerful...</p>
-      <div class="card-elevated p-8 md:p-12 max-w-3xl mx-auto mb-8">
-       <div class="counter inline-block mb-4">
-        ⚡ EXCLUSIVE OFFER
-       </div>
-       <h2 class="font-display text-2xl md:text-3xl font-bold text-midnight mb-4">What If You Never Had to Look Up Codes Again?</h2>
-       <p class="text-gray-600 mb-6">The guide is great for learning, but <strong>TranscriptPro</strong> automates the entire process. Upload a transcript → Get a beautiful, branded report in seconds.</p>
-       <div class="grid md:grid-cols-3 gap-6 mb-8">
-        <div class="text-center">
-         <div class="text-3xl font-bold text-gold mb-2">
-          8 sec
-         </div>
-         <div class="text-sm text-gray-500">
-          Average Processing Time
-         </div>
-        </div>
-        <div class="text-center">
-         <div class="text-3xl font-bold text-gold mb-2">
-          100%
-         </div>
-         <div class="text-sm text-gray-500">
-          Code Accuracy
-         </div>
-        </div>
-        <div class="text-center">
-         <div class="text-3xl font-bold text-gold mb-2">
-          ∞
-         </div>
-         <div class="text-sm text-gray-500">
-          Unlimited Reports
-         </div>
-        </div>
-       </div><button onclick="showPage('sales-page')" class="btn-primary text-lg"> See TranscriptPro in Action → </button>
-      </div><button onclick="showPage('landing-page')" class="text-gray-500 hover:text-midnight transition-colors"> ← Return to Homepage </button>
      </div>
     </div>
    </section>
