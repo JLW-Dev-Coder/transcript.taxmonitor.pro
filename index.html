@@ -459,18 +459,7 @@ html, body, button, input, textarea, select {
  <body class="h-full noise font-sans">
   <div id="app-container" class="h-full overflow-auto"><!-- Landing Page -->
    <section id="landing-page" class="page-section active"><!-- Navigation -->
-    <nav class="gradient-hero">
-     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-       <div class="w-10 h-10 scale-[1.15] gradient-gold rounded-lg flex items-center justify-center">
-        <svg class="w-5 h-5 text-purple-300" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-       </div><span id="nav-product-name" class="text-white font-bold text-xl">TranscriptPro</span>
-      </div>
-      <div class="hidden md:flex items-center gap-8"><a href="#features" class="text-white/80 hover:text-gold transition-colors">Features</a> <a href="#testimonials" class="text-white/80 hover:text-gold transition-colors">Case Studies</a> <a href="#pricing" class="text-white/80 hover:text-gold transition-colors">Pricing</a> <button onclick="showPage('sales-page')" class="btn-secondary text-sm">View Product</button>
-      </div>
-     </div>
-    </nav><!-- Hero Section -->
+    <div data-partial="partials/nav.html"></div><!-- Hero Section -->
     <header class="gradient-hero relative min-h-screen flex items-center">
      <div class="max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-12 items-center w-full">
       <div class="text-white">
@@ -937,32 +926,7 @@ html, body, button, input, textarea, select {
       </div>
      </div>
     </section><!-- Footer -->
-    <footer class="bg-midnight py-12">
-     <div class="max-w-7xl mx-auto px-6">
-      <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 gradient-gold rounded-lg flex items-center justify-center">
-         <svg class="w-5 h-5 text-purple-300" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-         </svg>
-        </div><span class="text-white font-bold">TranscriptPro</span>
-       </div>
-
-       <div class="flex flex-col items-center md:items-end gap-2">
-        <div class="flex items-center gap-4 text-sm">
-         <button type="button" class="text-white/70 hover:text-white transition" onclick="openLegalOverlay('privacy')">Privacy Policy</button>
-         <button type="button" class="text-white/70 hover:text-white transition" onclick="openLegalOverlay('terms')">Terms</button>
-        </div>
-        <div class="text-white/50 text-sm text-center md:text-right">
-         © <span id="footer-year">2026</span> Lenore, Inc. All rights reserved.
-        </div>
-        <div class="text-white/40 text-xs text-center md:text-right">
-         Official sites: <a class="underline hover:text-white" href="https://taxmonitor.pro" target="_blank" rel="noopener">taxmonitor.pro</a>, <a class="underline hover:text-white" href="https://virtuallaunch.pro" target="_blank" rel="noopener">virtuallaunch.pro</a>
-        </div>
-       </div>
-      </div>
-     </div>
-    </footer>
-   </section><!-- Lead Magnet Page -->
+    <div data-partial="partials/footer.html"></div></section><!-- Lead Magnet Page -->
    <section id="lead-magnet" class="page-section">
     <div class="min-h-full gradient-hero flex items-center py-12">
      <div class="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
@@ -1036,7 +1000,7 @@ html, body, button, input, textarea, select {
        <svg class="w-5 h-5 text-purple-300" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
        </svg>
       </div>
-      <h1 class="font-display text-4xl md:text-5xl font-bold text-midnight mb-6">You're In! Check Your Email <span class="inline-flex align-middle" aria-hidden="true"><svg class="w-7 h-7 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16v12H4V6Z"/><path d="m4 7 8 6 8-6"/></svg></span></h1>
+      <h1 class="font-display text-4xl md:text-5xl font-bold text-midnight mb-6">You're In! Check Your Email 📧</h1>
       <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">Your free IRS Transcript Code Guide is on its way to your inbox. While you wait, here's something even more powerful...</p>
       <div class="card-elevated p-8 md:p-12 max-w-3xl mx-auto mb-8">
        <div class="counter inline-block mb-4">
@@ -1073,117 +1037,393 @@ html, body, button, input, textarea, select {
       </div><button onclick="showPage('landing-page')" class="text-gray-500 hover:text-midnight transition-colors"> ← Return to Homepage </button>
      </div>
     </div>
+   </section><!-- Sales Page -->
+   <section id="sales-page" class="page-section">
+    <!-- Sales Nav -->
+    <nav class="bg-midnight sticky top-0 z-50">
+     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <button onclick="showPage('landing-page')" class="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+       </svg>
+       Back
+      </button>
+
+      <span id="sales-product-name" class="text-white font-bold">TranscriptPro<\/span>
+      <span id="sales-price" class="sr-only">$797/mo</span>
+
+      <button onclick="showCheckout('credits_25')" class="btn-primary text-sm py-2 px-4">Buy Credits<\/button>
+     </div>
+    </nav>
+
+    <!-- Sales Hero -->
+    <header class="gradient-hero py-20">
+     <div class="max-w-5xl mx-auto px-6 text-center text-white">
+      <div class="counter inline-block mb-6">⚙️ Enterprise CRM for Tax Professionals</div>
+      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">Serverless Tax Practice Automation</h1>
+      <p class="text-xl text-white/80 mb-10 max-w-3xl mx-auto">Contract-driven workflows. Immutable audit trails. ClickUp integration. Built on Cloudflare for 99.99% uptime, zero ops overhead.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+       <button onclick="showCheckout('credits_25')" class="btn-primary text-lg">Buy Credits<\/button>
+       <button onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})" class="btn-secondary">Transparent Pricing</button>
+      </div>
+     </div>
+    </header>
+
+    <!-- Stack -->
+    <section class="py-20 bg-slate-800/40">
+     <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-14">
+       <div class="counter inline-block mb-4">The Tax Monitor Pro Stack</div>
+       <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-3">Designed like enterprise software. Operated like a landing page.</h2>
+       <p class="text-white/70">Four layers. One purpose: reliable automation with receipts you can actually defend.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 bg-white/5 border border-white/10">
+         <span class="text-xl">☁️</span>
+        </div>
+        <h3 class="text-white font-semibold text-lg mb-2">Presentation Layer</h3>
+        <p class="text-white/70 text-sm leading-relaxed">Fast, secure UI served from Cloudflare Pages. Always online.</p>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 bg-white/5 border border-white/10">
+         <span class="text-xl">⚡</span>
+        </div>
+        <h3 class="text-white font-semibold text-lg mb-2">Logic Layer</h3>
+        <p class="text-white/70 text-sm leading-relaxed">Cloudflare Workers validate, process, and orchestrate all events.</p>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 bg-white/5 border border-white/10">
+         <span class="text-xl">💾</span>
+        </div>
+        <h3 class="text-white font-semibold text-lg mb-2">Storage Layer</h3>
+        <p class="text-white/70 text-sm leading-relaxed">Cloudflare R2 stores all canonical data and immutable receipts.</p>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 bg-white/5 border border-white/10">
+         <span class="text-xl">✅</span>
+        </div>
+        <h3 class="text-white font-semibold text-lg mb-2">Execution Layer</h3>
+        <p class="text-white/70 text-sm leading-relaxed">ClickUp tasks for accounts, orders, and support workflows.</p>
+       </div>
+      </div>
+     </div>
+    </section>
+
+    <!-- Capabilities -->
+    <section class="py-20 bg-midnight">
+     <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-14">
+       <div class="counter inline-block mb-4">Enterprise Capabilities Built In</div>
+       <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-3">The stuff you wish your current stack did by default</h2>
+       <p class="text-white/70">Clear contracts. No mystery state. No duplicated work. No "who changed this" nightmares.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="flex items-start gap-3">
+         <div class="mt-0.5 w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/20 flex items-center justify-center text-purple-200 text-sm font-bold">✓</div>
+         <div>
+          <h3 class="text-white font-semibold mb-2">Contract-Driven Validation</h3>
+          <p class="text-white/70 text-sm leading-relaxed">JSON contracts define all business logic. No ambiguity. Complete audit trails on every event.</p>
+         </div>
+        </div>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="flex items-start gap-3">
+         <div class="mt-0.5 w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/20 flex items-center justify-center text-purple-200 text-sm font-bold">✓</div>
+         <div>
+          <h3 class="text-white font-semibold mb-2">Idempotent &amp; Retry-Safe</h3>
+          <p class="text-white/70 text-sm leading-relaxed">Every event is append-only and idempotent. No duplicate tasks, emails, or records.</p>
+         </div>
+        </div>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="flex items-start gap-3">
+         <div class="mt-0.5 w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/20 flex items-center justify-center text-purple-200 text-sm font-bold">✓</div>
+         <div>
+          <h3 class="text-white font-semibold mb-2">ClickUp Integration</h3>
+          <p class="text-white/70 text-sm leading-relaxed">All workflow activity projected as templated tasks. R2 is the source of truth, ClickUp is a projection.</p>
+         </div>
+        </div>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="flex items-start gap-3">
+         <div class="mt-0.5 w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/20 flex items-center justify-center text-purple-200 text-sm font-bold">✓</div>
+         <div>
+          <h3 class="text-white font-semibold mb-2">Multi-Auth Security</h3>
+          <p class="text-white/70 text-sm leading-relaxed">Google OAuth, Magic Link, SAML/OIDC. Built-in 2848 two-signature flows.</p>
+         </div>
+        </div>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="flex items-start gap-3">
+         <div class="mt-0.5 w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/20 flex items-center justify-center text-purple-200 text-sm font-bold">✓</div>
+         <div>
+          <h3 class="text-white font-semibold mb-2">Event-Driven Automation</h3>
+          <p class="text-white/70 text-sm leading-relaxed">Triggers from logins, uploads, payments, appointments, forms, and tasks. Fully automated.</p>
+         </div>
+        </div>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="flex items-start gap-3">
+         <div class="mt-0.5 w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/20 flex items-center justify-center text-purple-200 text-sm font-bold">✓</div>
+         <div>
+          <h3 class="text-white font-semibold mb-2">Immutable Receipt System</h3>
+          <p class="text-white/70 text-sm leading-relaxed">Every event logged, validated, and cryptographically secured. Complete compliance history.</p>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section class="py-20 bg-slate-800/40">
+     <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-14">
+       <div class="counter inline-block mb-4">Fully Integrated Tech Stack</div>
+       <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-3">Best-of-breed tools, glued together correctly</h2>
+       <p class="text-white/70">No duct tape. No surprise state. No "it works on Tuesdays" integrations.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="text-2xl mb-4">🔌</div>
+        <h3 class="text-white font-semibold mb-2">Cloudflare</h3>
+        <p class="text-white/70 text-sm leading-relaxed">Pages, Workers, and R2 for global edge computing and immutable storage.</p>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="text-2xl mb-4">✔️</div>
+        <h3 class="text-white font-semibold mb-2">ClickUp</h3>
+        <p class="text-white/70 text-sm leading-relaxed">Native task management projection. All workflow activity visible in real-time.</p>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="text-2xl mb-4">💳</div>
+        <h3 class="text-white font-semibold mb-2">Stripe</h3>
+        <p class="text-white/70 text-sm leading-relaxed">PCI-compliant payments with webhook signature validation and idempotent receipts.</p>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="text-2xl mb-4">📧</div>
+        <h3 class="text-white font-semibold mb-2">Google Workspace</h3>
+        <p class="text-white/70 text-sm leading-relaxed">Secure email, calendar, and document management for your team.</p>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="text-2xl mb-4">📅</div>
+        <h3 class="text-white font-semibold mb-2">Cal.com</h3>
+        <p class="text-white/70 text-sm leading-relaxed">Appointment scheduling with webhook integration and event-driven workflows.</p>
+       </div>
+
+       <div class="glass rounded-2xl p-7 border border-slate-700/30">
+        <div class="text-2xl mb-4">🔐</div>
+        <h3 class="text-white font-semibold mb-2">OAuth &amp; SAML</h3>
+        <p class="text-white/70 text-sm leading-relaxed">Enterprise SSO support with strict validation and compliance logging.</p>
+       </div>
+      </div>
+     </div>
+    </section>
+
+    <!-- Pricing -->
+    <section id="pricing" class="py-20 bg-midnight">
+     <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-14">
+       <div class="counter inline-block mb-4">Transparent, Scalable Pricing</div>
+       <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-3">Pick the plan that matches your practice</h2>
+       <p class="text-white/70">All plans include 30-day free trial. No credit card required. Cancel anytime.</p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 items-stretch">
+       <div class="glass rounded-2xl p-8 border border-slate-700/30 flex flex-col">
+        <div class="text-white font-semibold text-lg">Starter</div>
+        <div class="text-white/60 text-sm mt-1">Perfect for smaller practices</div>
+        <div class="mt-6 flex items-end gap-2">
+         <div class="text-4xl font-extrabold text-white">$297</div>
+         <div class="text-white/60">/mo</div>
+        </div>
+        <ul class="mt-6 space-y-3 text-sm text-white/75">
+         <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>99.99% uptime SLA</span></li>
+         <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>ClickUp integration</span></li>
+         <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Email support</span></li>
+         <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Up to 500 accounts</span></li>
+        </ul>
+        <div class="mt-8">
+         <button onclick="showCheckout('credits_10')" class="btn-secondary w-full">Buy Credits<\/button>
+        </div>
+       </div>
+
+       <div class="gradient-border">
+        <div class="glass rounded-[20px] p-8 border border-purple-500/30 flex flex-col h-full">
+         <div class="flex items-center justify-between gap-3">
+          <div>
+           <div class="text-white font-semibold text-lg">Professional</div>
+           <div class="text-white/60 text-sm mt-1">For growing tax practices</div>
+          </div>
+          <div class="counter">MOST POPULAR</div>
+         </div>
+
+         <div class="mt-6 flex items-end gap-2">
+          <div class="text-4xl font-extrabold text-white">$797</div>
+          <div class="text-white/60">/mo</div>
+         </div>
+
+         <ul class="mt-6 space-y-3 text-sm text-white/75">
+          <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Advanced compliance logging</span></li>
+          <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>All Starter features</span></li>
+          <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Priority support</span></li>
+          <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Up to 2,500 accounts</span></li>
+         </ul>
+
+         <div class="mt-8">
+          <button onclick="showCheckout('credits_25')" class="btn-primary w-full">Buy Credits<\/button>
+         </div>
+        </div>
+       </div>
+
+       <div class="glass rounded-2xl p-8 border border-slate-700/30 flex flex-col">
+        <div class="text-white font-semibold text-lg">Enterprise</div>
+        <div class="text-white/60 text-sm mt-1">For large-scale operations</div>
+        <div class="mt-6 flex items-end gap-2">
+         <div class="text-4xl font-extrabold text-white">Custom</div>
+         <div class="text-white/60">/mo</div>
+        </div>
+        <ul class="mt-6 space-y-3 text-sm text-white/75">
+         <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>All Professional features</span></li>
+         <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Custom integrations</span></li>
+         <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Dedicated support</span></li>
+         <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Unlimited accounts</span></li>
+        </ul>
+        <div class="mt-8">
+         <button type="button" class="btn-secondary w-full" onclick="showToast('Sales will contact you shortly (or at least pretend to).', 'success')">Contact Sales</button>
+        </div>
+       </div>
+      </div>
+
+      <div class="mt-10 text-center text-white/60 text-sm">Credits never expire. No refunds.</div>
+     </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-20 gradient-hero">
+     <div class="max-w-5xl mx-auto px-6 text-center">
+      <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-6">Want a system that can explain itself?</h2>
+      <p class="text-xl text-white/80 mb-8 max-w-3xl mx-auto">Most CRMs are just fancy forms. This one keeps receipts and enforces contracts so your operations stop drifting into chaos.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+       <button onclick="showCheckout('credits_25')" class="btn-primary text-lg">Buy Credits<\/button>
+       <button onclick="showPage('landing-page')" class="btn-secondary">Back to Home</button>
+      </div>
+     </div>
+    </section>
    </section>
-  
-   <!-- PARTIAL:pages/sales-page -->
 
-   <!-- PARTIAL:pages/checkout-page -->
-   
+   <!-- Checkout Page -->
+   <section id="checkout" class="page-section">
+    <div class="min-h-full gradient-hero flex items-center py-12">
+     <div class="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center w-full">
+      <!-- Left: Order Summary -->
+      <div class="card-elevated p-8">
+       <h2 class="text-2xl font-bold text-white mb-6">Order Summary</h2>
+
+       <div class="border-b border-white/10 pb-6 mb-6">
+        <div class="flex items-center gap-4 mb-4">
+         <div class="w-16 h-16 gradient-gold rounded-lg flex items-center justify-center text-2xl">🪙</div>
+         <div class="flex-1">
+          <h3 id="checkout-product" class="font-bold text-white">TranscriptPro Credits</h3>
+          <p class="text-white/70 text-sm">Digital good • Credits never expire • Token shareable</p>
+         </div>
+        </div>
+
+        <div class="grid sm:grid-cols-3 gap-3 mt-4" role="radiogroup" aria-label="Choose credit bundle">
+         <button type="button" class="bundle-option glass rounded-xl p-4 border border-white/10 text-left hover:border-purple-400/40 transition" data-bundle="credits_10">
+          <div class="text-white font-extrabold">10 Credits</div>
+          <div class="text-white/60 text-xs mt-1">$19 • $1.90 per parse</div>
+         </button>
+         <button type="button" class="bundle-option glass rounded-xl p-4 border border-purple-500/30 text-left hover:border-purple-400/50 transition" data-bundle="credits_25" aria-pressed="true">
+          <div class="flex items-center justify-between gap-2">
+           <div class="text-white font-extrabold">25 Credits</div>
+           <span class="tm-pill">Best value</span>
+          </div>
+          <div class="text-white/60 text-xs mt-1">$39 • $1.56 per parse</div>
+         </button>
+         <button type="button" class="bundle-option glass rounded-xl p-4 border border-white/10 text-left hover:border-purple-400/40 transition" data-bundle="credits_100">
+          <div class="text-white font-extrabold">100 Credits</div>
+          <div class="text-white/60 text-xs mt-1">$129 • $1.29 per parse</div>
+         </button>
+        </div>
+       </div>
+
+       <div class="space-y-3 mb-6">
+        <div class="flex justify-between text-white/70"><span>Subtotal</span> <span id="checkout-subtotal">$39</span></div>
+        <div class="flex justify-between text-white/70 pb-3 border-b border-white/10"><span>Tax</span> <span id="checkout-tax">$0</span></div>
+        <div class="flex justify-between text-lg font-bold text-white"><span>Total</span> <span class="text-gold" id="checkout-total">$39</span></div>
+       </div>
+
+       <div class="bg-purple-600/10 border border-purple-500/30 rounded-lg p-4 mb-6">
+        <p class="text-purple-200 font-bold text-sm mb-1">Digital good</p>
+        <p class="text-white/70 text-xs">Credits never expire. No refunds. Purchases create a token that can be shared.</p>
+       </div>
+
+       <div class="text-white/50 text-xs">Powered by Stripe Checkout.</div>
+      </div>
+
+      <!-- Right: Buyer Info -->
+      <div class="card-elevated p-8 max-w-md mx-auto w-full">
+       <h3 class="font-display text-2xl font-bold text-midnight text-center mb-2">Checkout</h3>
+       <p class="text-gray-500 text-center mb-6">Secure payment. Instant delivery.</p>
+
+       <form id="checkout-form" class="space-y-4" onsubmit="handleCheckout(event)">
+        <input type="hidden" id="checkout-bundle" value="credits_25" />
+
+        <div>
+         <label for="checkout-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+         <input type="text" id="checkout-name" placeholder="John Smith" class="input-field input-field-light" required />
+        </div>
+
+        <div>
+         <label for="checkout-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+         <input type="email" id="checkout-email" placeholder="john@taxfirm.com" class="input-field input-field-light" required />
+        </div>
+
+        <div>
+         <label for="checkout-firm" class="block text-sm font-medium text-gray-700 mb-1">Firm Name</label>
+         <input type="text" id="checkout-firm" placeholder="Smith Tax Services" class="input-field input-field-light" required />
+        </div>
+
+        <div class="bg-white/5 border border-white/10 rounded-lg p-3">
+         <p class="text-white/70 text-xs"><strong>Note:</strong> You’ll complete payment on Stripe Checkout, then return here.</p>
+        </div>
+
+        <button type="submit" id="checkout-submit-btn" class="btn-primary w-full text-center py-3 font-semibold">Continue to Secure Checkout →</button>
+        <p class="text-xs text-gray-400 text-center">Credits never expire. No refunds.</p>
+       </form>
+      </div>
+     </div>
+    </div>
+   </section>
   </div>
-
   <script>
-    function showPage(pageId, opts) {
-      const options = opts || {};
-      const silent = !!options.silent;
-
+    function showPage(pageId) {
       // Hide all pages
       const pages = document.querySelectorAll('.page-section');
       pages.forEach(page => page.classList.remove('active'));
-
       // Show target page
       const targetPage = document.getElementById(pageId);
       if (targetPage) {
         targetPage.classList.add('active');
         window.scrollTo(0, 0);
       }
-
-      // Keep URL in sync so Stripe cancel can just return here.
-      if (!silent) {
-        try {
-          const url = new URL(window.location.href);
-          url.searchParams.set('view', pageId);
-          history.pushState({ view: pageId }, '', url.toString());
-        } catch {}
-      }
     }
-
-    function showCheckout(bundle, opts) {
-      const options = opts || {};
-      const silent = !!options.silent;
-
-      const b = String(bundle || 'credits_25');
-      const input = document.getElementById('checkout-bundle');
-      if (input) input.value = b;
-
-      // Update UI
-      const subtotalEl = document.getElementById('checkout-subtotal');
-      const totalEl = document.getElementById('checkout-total');
-      const productEl = document.getElementById('checkout-product');
-
-      const map = {
-        credits_10: { credits: 10, price: 19, per: '1.90', label: '10 Credits' },
-        credits_100: { credits: 100, price: 129, per: '1.29', label: '100 Credits' },
-        credits_25: { credits: 25, price: 39, per: '1.56', label: '25 Credits' }
-      };
-
-      const chosen = map[b] || map.credits_25;
-      if (subtotalEl) subtotalEl.textContent = `$${chosen.price}`;
-      if (totalEl) totalEl.textContent = `$${chosen.price}`;
-      if (productEl) productEl.textContent = `TranscriptPro Credits — ${chosen.label}`;
-
-      // Highlight selected bundle button
-      document.querySelectorAll('.bundle-option').forEach((btn) => {
-        const isOn = btn.getAttribute('data-bundle') === b;
-        btn.setAttribute('aria-pressed', isOn ? 'true' : 'false');
-        btn.classList.toggle('border-purple-500/30', isOn);
-        btn.classList.toggle('border-white/10', !isOn);
-      });
-
-      // Show checkout (silent avoids URL churn when we're restoring from URL)
-      showPage('checkout', { silent: true });
-
-      if (!silent) {
-        try {
-          const url = new URL(window.location.href);
-          url.searchParams.set('view', 'checkout');
-          url.searchParams.set('bundle', b);
-          history.pushState({ view: 'checkout', bundle: b }, '', url.toString());
-        } catch {}
-      }
-    }
-
-    // Restore correct view on page load (including Stripe cancel returning here)
-    (function initViewFromUrl(){
-      try {
-        const url = new URL(window.location.href);
-        const view = (url.searchParams.get('view') || 'landing-page').trim();
-        const bundle = (url.searchParams.get('bundle') || '').trim();
-
-        if (view === 'checkout') {
-          showCheckout(bundle || 'credits_25', { silent: true });
-          return;
-        }
-
-        // allow known pages only
-        const allowed = new Set(['checkout','landing-page','lead-magnet','sales-page','thank-you']);
-        showPage(allowed.has(view) ? view : 'landing-page', { silent: true });
-      } catch {
-        showPage('landing-page', { silent: true });
-      }
-    })();
-
-    // Back/forward buttons
-    window.addEventListener('popstate', () => {
-      try {
-        const url = new URL(window.location.href);
-        const view = (url.searchParams.get('view') || 'landing-page').trim();
-        const bundle = (url.searchParams.get('bundle') || '').trim();
-        if (view === 'checkout') return showCheckout(bundle || 'credits_25', { silent: true });
-        showPage(view || 'landing-page', { silent: true });
-      } catch {
-        showPage('landing-page', { silent: true });
-      }
-    });
 
     function showCheckout(bundle) {
       const b = String(bundle || 'credits_25');
@@ -1772,680 +2012,18 @@ html, body { height: 100%; background: #f8f9fa; font-family: 'DM Sans', -apple-s
 </div>
 
 <button class="print-button" onclick="window.print()">🖨️ Print / Save as PDF</button>
+<script data-partial-loader>
+(async function(){
+  async function inject(el){
+    const path = el.getAttribute("data-partial");
+    if(!path) return;
+    const res = await fetch("/" + path.replace(/^\//,""), { cache: "no-store" });
+    if(!res.ok) throw new Error("Failed to load partial: " + path);
+    el.outerHTML = await res.text();
+  }
+  const nodes = Array.from(document.querySelectorAll("[data-partial]"));
+  for (const n of nodes) { await inject(n); }
+})();
+</script>
 </body>
-</html>`;
-      return reportContent;
-    }
-
-    function openBestFormatOverlay() {
-      openReportModalFromUrl('/sample-transcript-format.html', 'Best Transcript Format');
-    }
-  </script>
-
-  <!-- Report Preview Modal (click backdrop or ESC to close) -->
-  <div id="report-preview-overlay" class="fixed inset-0 z-[9998] hidden" role="dialog" aria-modal="true" aria-label="Report preview">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-
-    <div class="relative h-full w-full flex items-center justify-center p-4 sm:p-8">
-      <div class="w-full max-w-6xl rounded-2xl border border-white/10 bg-slate-950/40 shadow-2xl backdrop-blur overflow-hidden">
-        <div class="flex items-center justify-between gap-4 px-4 sm:px-6 py-3 border-b border-white/10">
-          <div id="report-preview-title" class="text-sm font-semibold text-white">Sample Report Preview</div>
-          <button id="report-preview-close" type="button" class="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition" onclick="closeReportModal()" aria-label="Close preview">
-            <svg class="h-5 w-5" viewbox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
-          </button>
-        </div>
-
-        <div class="bg-white">
-          <iframe id="report-preview-frame" title="Sample report" class="w-full" style="height: 82vh; border: 0;" loading="lazy"></iframe>
-        </div>
-      </div>
-    </div>
-  </div>
-
-<!-- Legal overlays (site-wide) -->
-  <div id="legal-overlay" class="fixed inset-0 z-[10000] hidden" role="dialog" aria-modal="true" aria-label="Legal">
-    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
-
-    <div class="relative h-full w-full overflow-auto">
-      <div class="max-w-[980px] mx-auto px-6 py-10">
-        <div class="gradient-border">
-          <div class="glass rounded-[20px] p-6 sm:p-8">
-            <div class="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
-<button
-  type="button"
-  onclick="showPage('sales-page')"
-  class="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors"
->
-  <svg
-    class="w-5 h-5"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    stroke-width="2"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  >
-    <path d="M15 18l-6-6 6-6" />
-  </svg>
-  <span>Back</span>
-</button>
-
-              <div class="text-right">
-                <div class="text-white font-semibold leading-none">Lenore, Inc.</div>
-                <div class="text-white/50 text-xs">Official sites: taxmonitor.pro, virtuallaunch.pro</div>
-              </div>
-            </div>
-
-            <!-- Privacy -->
-            <div id="legal-privacy" class="hidden pt-6">
-              <div class="text-center mb-10">
-                <div class="flex items-center justify-center gap-3 mb-2">
-                  <div class="w-10 h-10 scale-[1.15] rounded-lg flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);">
-                    <span class="text-slate-950 font-bold text-sm tracking-tight">TM</span>
-                  </div>
-                  <div class="text-left">
-                    <h1 class="text-white font-semibold text-lg leading-tight">Tax Monitor Pro</h1>
-                    <p class="text-white/50 text-xs">Owned by Lenore, Inc.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-white mb-2">Privacy Policy</h2>
-                <p class="text-white/70 text-base mb-3">Install Data Handling</p>
-                <p class="text-white/50 text-sm">Last updated: February 10, 2026</p>
-              </div>
-
-              <div class="glass rounded-2xl p-6 sm:p-8 border border-purple-500/25">
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <p class="text-white/70 leading-relaxed">
-                    This Privacy Policy explains how Lenore, Inc. (“Provider”) may access and handle Client information during platform installs.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Install Data Handling</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Provider may access Client information only as reasonably necessary to complete installation, configuration, troubleshooting, verification of deliverables, and administrative transfer.
-                    Provider does not sell Client data.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">A. Information Provider May Receive</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Provider may receive or have access to Client-provided information such as administrative credentials, user lists, business contact information, workflows, templates, messages, portal content, files, and configuration data. Depending on Client’s use of the platform, Provider may also incidentally view information uploaded by Client or Client’s end users.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">B. Purpose of Access</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Provider will access and use information only as reasonably necessary to complete the Install, perform troubleshooting, verify deliverables, and transfer administrative control back to Client.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">C. Data Minimization</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Provider will make reasonable efforts to minimize access to content not required for installation. Client is encouraged to avoid uploading sensitive information into the platform during the Install unless it is necessary for testing or configuration.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">D. Confidentiality &amp; Security</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Provider will maintain commercially reasonable administrative, technical, and organizational safeguards to protect information accessed during the Install. Client remains responsible for selecting secure credentials, enabling platform security settings, and managing user permissions after transfer.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">E. Credential Handling</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Client may provide credentials or temporary access links to enable installation. Client may revoke Provider access at any time; however, doing so may pause or prevent completion. After completion, Client should rotate any temporary passwords, revoke temporary invites, and confirm Super Admin ownership.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">F. Third-Party Platforms</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    The platform is a third-party service. Provider does not control and is not responsible for the platform provider’s privacy practices, security controls, data processing, retention, or hosting. Client is responsible for reviewing and accepting the third-party platform’s privacy policy and terms.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">G. Data Retention</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Provider does not intend to store Client data outside the platform except as necessary for installation documentation, support records, invoicing, or proof of delivery. Any retained information will be limited and kept only for as long as reasonably necessary for business and legal purposes.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">H. Client Requests</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Client may request deletion of Provider-held installation artifacts or documentation that contain Client information, to the extent Provider is not required to retain the information for legal, tax, accounting, dispute, or recordkeeping obligations.
-                  </p>
-                </section>
-
-                <section>
-                  <h3 class="text-white font-semibold text-lg mb-3">Contact</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    For questions regarding this Privacy Policy or Provider’s data handling practices, contact Lenore, Inc. through official business channels.
-                  </p>
-                </section>
-              </div>
-            </div>
-
-            <!-- Terms -->
-            <div id="legal-terms" class="hidden pt-6">
-              <div class="text-center mb-10">
-                <div class="flex items-center justify-center gap-3 mb-2">
-                  <div class="w-10 h-10 scale-[1.15] rounded-lg flex items-center justify-center shadow-lg" style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);">
-                    <span class="text-slate-950 font-bold text-sm tracking-tight">TM</span>
-                  </div>
-                  <div class="text-left">
-                    <h1 class="text-white font-semibold text-lg leading-tight">Tax Monitor Pro</h1>
-                    <p class="text-white/50 text-xs">Owned by Lenore, Inc.</p>
-                  </div>
-                </div>
-              </div>
-
-              <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-white mb-2">Terms</h2>
-                <p class="text-white/70 text-base mb-3">Platform Install &amp; Admin Transfer Agreement</p>
-                <p class="text-white/50 text-sm">Last updated: February 10, 2026</p>
-              </div>
-
-              <div class="glass rounded-2xl p-6 sm:p-8 border border-purple-500/25">
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Service Agreement</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Platform Install &amp; Admin Transfer Agreement
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <p class="text-white/70 leading-relaxed">
-                    This Platform Install &amp; Admin Transfer Agreement (“Agreement”) is entered into by and between
-                    Lenore, Inc. (“Provider”) and the individual or entity purchasing installation services (“Client”).
-                    Provider and Client may be referred to individually as a “Party” and collectively as the “Parties.”
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 1. Covered Installs &amp; Scope of Work (Platform Setup Only)</h3>
-                  <p class="text-white/70 leading-relaxed mb-4">
-                    This Agreement applies to all Provider installation offerings purchased by Client, including:
-                  </p>
-                  <ul class="list-disc list-inside text-white/70 leading-relaxed space-y-1">
-                    <li>Tax Monitor Setup</li>
-                    <li>VA Agency Setup</li>
-                    <li>VA Starter Track Setup</li>
-                  </ul>
-                  <p class="text-white/70 leading-relaxed mt-4">
-                    Provider will perform a fixed-scope installation and configuration of a third-party software platform selected by Client (the “Install”).
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    The Install may include platform configuration, portal or workspace setup, workflows, projects, permissions, templates, and related technical enablement.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    Provider’s services are limited strictly to system setup. No ongoing operations, management, monitoring, staffing, or advisory services are included unless expressly agreed to in writing.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 2. No Professional or Regulated Services</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Client acknowledges that Provider does not provide tax, legal, accounting, financial, compliance, employment, or regulated professional services under this Agreement.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    Any industry-specific wording (including tax, virtual assistant, agency, operations, or compliance language) appearing in templates, examples, or workflows is structural or illustrative only and does not constitute advice, representation, or a professional engagement.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    Client remains solely responsible for all services offered to third parties using the installed system.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 3. Client Responsibilities</h3>
-                  <ul class="list-disc list-inside text-white/70 leading-relaxed space-y-2">
-                    <li>Provide timely access, credentials, approvals, and information required to complete the Install.</li>
-                    <li>Review and approve all configurations prior to use.</li>
-                    <li>Ensure that all workflows, messaging, permissions, and use of the platform comply with Client’s internal policies, contracts, and applicable laws.</li>
-                    <li>Maintain and pay for all third-party software, subscriptions, licenses, and integrations required for continued platform use.</li>
-                  </ul>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 4. Super Admin Access &amp; Transfer</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    To perform the Install, Provider may require temporary elevated access, including Super Admin or equivalent permissions.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    Client authorizes Provider to access the platform solely for purposes of completing the Install. Upon completion:
-                  </p>
-                  <ul class="list-disc list-inside text-white/70 leading-relaxed space-y-2 mt-4">
-                    <li>Client will be designated as the primary Super Admin and system owner.</li>
-                    <li>Client assumes full responsibility for credential security, user access, and permission management.</li>
-                    <li>Provider has no control over and no responsibility for actions taken after Super Admin control is transferred or returned.</li>
-                  </ul>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 5. Third-Party Platform Billing &amp; Ownership</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Client understands that the installed platform is operated by a third-party provider independent of Provider.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    If Provider initially provisions the platform during installation, third-party billing may begin after the Install is completed, including charges that may appear approximately thirty (30) days later depending on the platform’s billing cycle.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    Once Client is the Super Admin or billing party on file, Client is solely responsible for all platform fees, renewals, add-ons, overages, subscriptions, and related charges.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    Provider is not responsible for pricing changes, billing disputes, service interruptions, account suspensions, feature changes, or any actions taken by the third-party platform provider.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 6. Acceptance of Deliverables</h3>
-                  <p class="text-white/70 leading-relaxed mb-4">
-                    The Install is deemed accepted upon the earlier of:
-                  </p>
-                  <ul class="list-disc list-inside text-white/70 leading-relaxed space-y-2">
-                    <li>Provider marking the Install complete in writing (including via task or portal completion), or</li>
-                    <li>Client using the installed system in production.</li>
-                  </ul>
-                  <p class="text-white/70 leading-relaxed mt-4">
-                    Any changes, enhancements, or rework requested after acceptance are outside scope and require a separate written agreement.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 7. Fees, Payment, and Refunds</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Client agrees to pay the one-time installation fee presented at checkout.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    Unless otherwise stated in writing, fees are non-refundable once work has commenced due to the nature of digital configuration, provisioning, and access enablement.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 8. Privacy Policy (Data Handling)</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    This section describes how Provider may access and handle Client information during the Install.
-                  </p>
-
-                  <div class="mt-6 space-y-6">
-                    <div>
-                      <h4 class="text-white font-semibold mb-2">A. Information Provider May Receive</h4>
-                      <p class="text-white/70 leading-relaxed">
-                        Provider may receive or have access to Client-provided information such as administrative credentials, user lists, business contact information, workflows, templates, messages, portal content, files, and configuration data. Depending on Client’s use of the platform, Provider may also incidentally view information uploaded by Client or Client’s end users.
-                      </p>
-                    </div>
-
-                    <div>
-                      <h4 class="text-white font-semibold mb-2">B. Purpose of Access</h4>
-                      <p class="text-white/70 leading-relaxed">
-                        Provider will access and use information only as reasonably necessary to complete the Install, perform troubleshooting, verify deliverables, and transfer administrative control back to Client.
-                      </p>
-                    </div>
-
-                    <div>
-                      <h4 class="text-white font-semibold mb-2">C. Data Minimization</h4>
-                      <p class="text-white/70 leading-relaxed">
-                        Provider will make reasonable efforts to minimize access to content not required for installation. Client is encouraged to avoid uploading sensitive information into the platform during the Install unless it is necessary for testing or configuration.
-                      </p>
-                    </div>
-
-                    <div>
-                      <h4 class="text-white font-semibold mb-2">D. Confidentiality &amp; Security</h4>
-                      <p class="text-white/70 leading-relaxed">
-                        Provider will maintain commercially reasonable administrative, technical, and organizational safeguards to protect information accessed during the Install. Client remains responsible for selecting secure credentials, enabling platform security settings, and managing user permissions after transfer.
-                      </p>
-                    </div>
-
-                    <div>
-                      <h4 class="text-white font-semibold mb-2">E. Credential Handling</h4>
-                      <p class="text-white/70 leading-relaxed">
-                        Client may provide credentials or temporary access links to enable installation. Client may revoke Provider access at any time; however, doing so may pause or prevent completion. After completion, Client should rotate any temporary passwords, revoke temporary invites, and confirm Super Admin ownership.
-                      </p>
-                    </div>
-
-                    <div>
-                      <h4 class="text-white font-semibold mb-2">F. Third-Party Platforms</h4>
-                      <p class="text-white/70 leading-relaxed">
-                        The platform is a third-party service. Provider does not control and is not responsible for the platform provider’s privacy practices, security controls, data processing, retention, or hosting. Client is responsible for reviewing and accepting the third-party platform’s privacy policy and terms.
-                      </p>
-                    </div>
-
-                    <div>
-                      <h4 class="text-white font-semibold mb-2">G. Data Retention</h4>
-                      <p class="text-white/70 leading-relaxed">
-                        Provider does not intend to store Client data outside the platform except as necessary for installation documentation, support records, invoicing, or proof of delivery. Any retained information will be limited and kept only for as long as reasonably necessary for business and legal purposes.
-                      </p>
-                    </div>
-
-                    <div>
-                      <h4 class="text-white font-semibold mb-2">H. Client Requests</h4>
-                      <p class="text-white/70 leading-relaxed">
-                        Client may request deletion of Provider-held installation artifacts or documentation that contain Client information, to the extent Provider is not required to retain the information for legal, tax, accounting, dispute, or recordkeeping obligations.
-                      </p>
-                    </div>
-                  </div>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 9. No Guarantees</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Provider does not guarantee outcomes, revenue, efficiency, compliance results, hiring results, client acquisition, or operational performance.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    Provider’s obligation is limited solely to delivering the Install as described in this Agreement.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 10. Limitation of Liability</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    To the maximum extent permitted by law, Provider will not be liable for any indirect, incidental, special, consequential, exemplary, or punitive damages, including loss of profits, revenue, data, goodwill, or business interruption, arising out of or related to this Agreement, the Install, or Client’s use of the platform.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    Provider’s total aggregate liability under this Agreement will not exceed the amount actually paid by Client to Provider for the Install.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 11. Indemnification</h3>
-                  <p class="text-white/70 leading-relaxed mb-4">
-                    Client agrees to indemnify and hold harmless Provider from and against any claims, damages, liabilities, costs, and expenses (including reasonable attorneys’ fees) arising out of or related to:
-                  </p>
-                  <ul class="list-disc list-inside text-white/70 leading-relaxed space-y-2">
-                    <li>Client’s content, workflows, messaging, or representations made using the installed system,</li>
-                    <li>Client’s services or offerings to third parties,</li>
-                    <li>Client’s misuse of the platform,</li>
-                    <li>Client’s breach of this Agreement, or</li>
-                    <li>Client’s violation of applicable laws or third-party rights.</li>
-                  </ul>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 12. Confidentiality</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Each Party agrees to keep confidential any non-public business, technical, or operational information disclosed in connection with the Install and to use such information solely to perform obligations under this Agreement.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    This obligation does not apply to information that is public, independently developed, or rightfully obtained without restriction.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 13. Intellectual Property &amp; License</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Provider retains all rights in its templates, workflows, configuration methods, documentation, and systems used to perform the Install.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    Client receives a non-exclusive right to use the delivered configuration for Client’s internal business purposes. Client may not resell, sublicense, or redistribute Provider’s proprietary materials without written authorization.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 14. Termination</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    Either Party may terminate this Agreement if the other Party materially breaches and fails to cure within a reasonable time after written notice.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    If termination occurs after work has commenced, Client remains responsible for fees incurred and committed costs.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 15. Governing Law &amp; Venue</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    This Agreement is governed by the laws of the jurisdiction in which Provider operates, without regard to conflict-of-law principles.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    Any dispute will be resolved in the courts located in Provider’s local jurisdiction unless the Parties agree in writing to binding arbitration.
-                  </p>
-                </section>
-
-                <section class="mb-8 pb-8 border-b border-white/10">
-                  <h3 class="text-white font-semibold text-lg mb-3">Section 16. Entire Agreement</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    This Agreement constitutes the entire agreement between the Parties regarding platform installation services and supersedes all prior discussions or representations.
-                  </p>
-                  <p class="text-white/70 leading-relaxed mt-3">
-                    Any amendment must be in writing and accepted by both Parties.
-                  </p>
-                </section>
-
-                <section>
-                  <h3 class="text-white font-semibold text-lg mb-3">Electronic Acceptance</h3>
-                  <p class="text-white/70 leading-relaxed">
-                    By completing checkout or electronically accepting this Agreement, Client acknowledges that they have read, understood, and agreed to be bound by these terms.
-                  </p>
-                </section>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    (function initLegalOverlays(){
-      const overlay = document.getElementById('legal-overlay');
-      const privacy = document.getElementById('legal-privacy');
-      const terms = document.getElementById('legal-terms');
-      const back = document.getElementById('legal-back');
-
-      function show(kind){
-        if (!overlay || !privacy || !terms) return;
-        overlay.classList.remove('hidden');
-        privacy.classList.add('hidden');
-        terms.classList.add('hidden');
-        (kind === 'terms' ? terms : privacy).classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-        setTimeout(() => back && back.focus(), 25);
-      }
-
-      function hide(){
-        if (!overlay) return;
-        overlay.classList.add('hidden');
-        document.body.style.overflow = '';
-      }
-
-      window.openLegalOverlay = show;
-      window.closeLegalOverlay = hide;
-
-      overlay && overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) hide();
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && overlay && !overlay.classList.contains('hidden')) hide();
-      });
-
-      const y = document.getElementById('footer-year');
-      if (y) y.textContent = String(new Date().getFullYear());
-    })();
-  </script>
-
-<!-- ScriptBot (site-wide) -->
-  <div id="chat-root" class="fixed bottom-6 left-6 z-[9999] font-sans"><!-- Launcher --> <button id="chat-launch" type="button" class="group flex items-center gap-3 rounded-full px-4 py-3 bg-slate-900/60 border border-purple-500/30 shadow-lg backdrop-blur hover:border-purple-400/60 hover:bg-slate-900/75 transition" aria-controls="chat-panel" aria-expanded="false"> <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow"> <!-- chat icon -->
-     <svg class="h-5 w-5" viewbox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5.5A3.5 3.5 0 0 1 7.5 2h9A3.5 3.5 0 0 1 20 5.5v7A3.5 3.5 0 0 1 16.5 16H11l-4.2 3.15A1 1 0 0 1 5 18.35V16.1A3.5 3.5 0 0 1 4 12.5v-7Z" stroke="currentColor" stroke-width="1.8" class="text-white" /> <path d="M8 7.8h8M8 11h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" class="text-white" />
-     </svg></span> <span class="text-left"> <span class="block text-sm font-semibold text-white leading-none">ScriptBot</span> <span class="block text-xs text-white/60">Ask about TranscriptPro</span> </span> </button> <!-- Panel -->
-   <div id="chat-panel" class="hidden mt-3 w-[340px] sm:w-[380px] rounded-2xl border border-purple-500/25 bg-slate-900/60 shadow-2xl backdrop-blur" role="dialog" aria-label="ScriptBot chat"><!-- Header -->
-    <div class="flex items-center justify-between px-4 py-3 border-b border-white/10">
-     <div class="flex items-center gap-3"><span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow"> <span class="text-sm font-extrabold">SB</span> </span>
-      <div>
-       <div class="text-sm font-semibold text-white leading-none">
-        ScriptBot
-       </div>
-       <div class="text-xs text-white/60">
-        Support and quick answers
-       </div>
-      </div>
-     </div><button id="chat-close" type="button" class="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition" aria-label="Close chat">
-      <svg class="h-5 w-5" viewbox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-      </svg></button>
-    </div><!-- Log -->
-    <div id="chat-log" class="px-4 py-3 max-h-[360px] overflow-auto space-y-3">
-     <div class="rounded-xl bg-white/5 border border-white/10 p-3">
-      <div class="text-sm text-white"><span class="font-semibold text-purple-200">ScriptBot</span>: Ask a question about TranscriptPro or this page. I'll try to answer from the page content.
-      </div>
-      <div class="text-xs text-white/50 mt-2">
-       Tip: Try "pricing" or "how it works".
-      </div>
-     </div>
-    </div><!-- Composer -->
-    <form id="chat-form" class="p-4 border-t border-white/10 flex gap-2"><input id="chat-message" type="text" class="flex-1 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-purple-500/40" placeholder="Type your message..." autocomplete="off"> <button id="chat-send" type="submit" class="rounded-xl px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 transition shadow"> Send </button>
-    </form>
-   </div>
-  </div>
-  <script>
-  (function initScriptBot(){
-    const CHAT_ENDPOINT = "https://api.taxmonitor.pro/forms/support/chat-intake";
-    const CHAT_LOG_ENDPOINT = "https://api.taxmonitor.pro/forms/support/chat-log";
-
-    const $ = (id) => document.getElementById(id);
-
-    const launch = $("chat-launch");
-    const panel = $("chat-panel");
-    const close = $("chat-close");
-    const form = $("chat-form");
-    const msg = $("chat-message");
-    const log = $("chat-log");
-
-    function esc(s){
-      return String(s).replace(/[&<>"']/g, (c) => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-      }[c]));
-    }
-
-    function push(html){
-      const wrap = document.createElement("div");
-      wrap.innerHTML = html;
-      log.appendChild(wrap);
-      log.scrollTop = log.scrollHeight;
-    }
-
-    function tokenize(s){
-      return String(s).toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(Boolean);
-    }
-
-    function buildPageIndex(){
-      const roots = document.querySelectorAll("main, section, header, footer");
-      const chunks = [];
-      roots.forEach((r) => {
-        const text = (r.innerText || "").replace(/\s+/g, " ").trim();
-        if (text.length >= 120) chunks.push(text);
-      });
-      return chunks;
-    }
-
-    const pageIndex = buildPageIndex();
-
-    function searchBestAnswer(q){
-      const qTokens = new Set(tokenize(q));
-      if (!qTokens.size) return null;
-
-      let best = null;
-      let bestScore = 0;
-
-      for (const chunk of pageIndex){
-        const cTokens = tokenize(chunk);
-        let score = 0;
-        for (const t of cTokens){
-          if (qTokens.has(t)) score += 1;
-        }
-        if (score > bestScore){
-          bestScore = score;
-          best = chunk;
-        }
-      }
-
-      if (!best || bestScore < 3) return null;
-
-      // return a short snippet around the first match-ish area
-      return best.slice(0, 320) + (best.length > 320 ? "…" : "");
-    }
-
-    async function postJson(url, payload){
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {"content-type":"application/json"},
-        body: JSON.stringify(payload),
-        credentials: "include"
-      });
-      return res.ok;
-    }
-
-    // Open/close
-    function openPanel(){
-      panel.classList.remove("hidden");
-      launch.setAttribute("aria-expanded", "true");
-      setTimeout(() => msg && msg.focus(), 50);
-      // fire "session opened" log (best-effort)
-      postJson(CHAT_LOG_ENDPOINT, { eventId: crypto.randomUUID(), action: "open", page: location.pathname, ts: new Date().toISOString() }).catch(()=>{});
-    }
-
-    function closePanel(){
-      panel.classList.add("hidden");
-      launch.setAttribute("aria-expanded", "false");
-      // fire "session closed" log (best-effort)
-      postJson(CHAT_LOG_ENDPOINT, { eventId: crypto.randomUUID(), action: "close", page: location.pathname, ts: new Date().toISOString() }).catch(()=>{});
-    }
-
-    launch.addEventListener("click", openPanel);
-    close.addEventListener("click", closePanel);
-
-    // Submit
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const q = (msg.value || "").trim();
-      if (!q) return;
-
-      push(
-        `<div class="flex justify-end">
-          <div class="max-w-[85%] rounded-xl bg-purple-500/20 border border-purple-400/20 p-3 text-sm text-white">
-            <span class="font-semibold text-purple-100">You</span>: ${esc(q)}
-          </div>
-        </div>`
-      );
-      msg.value = "";
-
-      const ans = searchBestAnswer(q);
-
-      if (ans){
-        push(
-          `<div class="flex justify-start">
-            <div class="max-w-[85%] rounded-xl bg-white/5 border border-white/10 p-3 text-sm text-white">
-              <span class="font-semibold text-purple-200">ScriptBot</span>: ${esc(ans)}
-            </div>
-          </div>`
-        );
-      } else {
-        push(
-          `<div class="flex justify-start">
-            <div class="max-w-[85%] rounded-xl bg-white/5 border border-white/10 p-3 text-sm text-white">
-              <span class="font-semibold text-purple-200">ScriptBot</span>: I'm not confident from the page text. If you want, leave your email and we'll follow up.
-            </div>
-          </div>`
-        );
-      }
-
-      // best-effort server intake
-      postJson(CHAT_ENDPOINT, {
-        eventId: crypto.randomUUID(),
-        message: q,
-        page: location.pathname,
-        ts: new Date().toISOString()
-      }).catch(()=>{});
-    });
-  })();
-  </script><!-- /ScriptBot -->
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d2a0ee4c3d627d7',t:'MTc3MTg4NDY3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
