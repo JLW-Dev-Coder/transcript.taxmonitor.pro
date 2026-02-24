@@ -1037,111 +1037,13 @@ html, body, button, input, textarea, select {
       </div><button onclick="showPage('landing-page')" class="text-gray-500 hover:text-midnight transition-colors"> ← Return to Homepage </button>
      </div>
     </div>
-   </section><!-- Sales Page -->
-   <section id="sales-page" class="page-section">
-    <!-- Sales Nav -->
-    <nav class="bg-midnight sticky top-0 z-50">
-     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <button onclick="showPage('landing-page')" class="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
-       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-       </svg>
-       Back
-      </button>
+   </section>
+  
+   <!-- PARTIAL:pages/sales-page -->
 
-      <span id="sales-product-name" class="text-white font-bold">TranscriptPro<\/span>
-      <span id="sales-price" class="sr-only">$797/mo</span>
-
-      <button onclick="showCheckout('credits_25')" class="btn-primary text-sm py-2 px-4">Buy Credits<\/button>
-     </div>
-    </nav>
-
-    <!-- Sales Hero -->
-    <header class="gradient-hero py-20">
-     <div class="max-w-5xl mx-auto px-6 text-center text-white">
-      <div class="counter inline-block mb-6">⚙️ Enterprise CRM for Tax Professionals</div>
-      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">Serverless Tax Practice Automation</h1>
-      <p class="text-xl text-white/80 mb-10 max-w-3xl mx-auto">Contract-driven workflows. Immutable audit trails. ClickUp integration. Built on Cloudflare for 99.99% uptime, zero ops overhead.</p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
-       <button onclick="showCheckout('credits_25')" class="btn-primary text-lg">Buy Credits<\/button>
-       <button onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})" class="btn-secondary">Transparent Pricing</button>
-      </div>
-     </div>
-    </header>
-
-    <!-- Stack -->
-    <section class="py-20 bg-slate-800/40">
-     <div class="max-w-7xl mx-auto px-6">
-      <div class="text-center max-w-3xl mx-auto mb-14">
-       <div class="counter inline-block mb-4">The Tax Monitor Pro Stack</div>
-       <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-3">Designed like enterprise software. Operated like a landing page.</h2>
-       <p class="text-white/70">Four layers. One purpose: reliable automation with receipts you can actually defend.</p>
-      </div>
-
-      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-       <div class="glass rounded-2xl p-7 border border-slate-700/30">
-        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 bg-white/5 border border-white/10">
-         <span class="text-xl">☁️</span>
-        </div>
-        <h3 class="text-white font-semibold text-lg mb-2">Presentation Layer</h3>
-        <p class="text-white/70 text-sm leading-relaxed">Fast, secure UI served from Cloudflare Pages. Always online.</p>
-       </div>
-
-       <div class="glass rounded-2xl p-7 border border-slate-700/30">
-        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 bg-white/5 border border-white/10">
-         <span class="text-xl">⚡</span>
-        </div>
-        <h3 class="text-white font-semibold text-lg mb-2">Logic Layer</h3>
-        <p class="text-white/70 text-sm leading-relaxed">Cloudflare Workers validate, process, and orchestrate all events.</p>
-       </div>
-
-       <div class="glass rounded-2xl p-7 border border-slate-700/30">
-        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 bg-white/5 border border-white/10">
-         <span class="text-xl">💾</span>
-        </div>
-        <h3 class="text-white font-semibold text-lg mb-2">Storage Layer</h3>
-        <p class="text-white/70 text-sm leading-relaxed">Cloudflare R2 stores all canonical data and immutable receipts.</p>
-       </div>
-
-       <div class="glass rounded-2xl p-7 border border-slate-700/30">
-        <div class="w-12 h-12 rounded-2xl flex items-center justify-center mb-5 bg-white/5 border border-white/10">
-         <span class="text-xl">✅</span>
-        </div>
-        <h3 class="text-white font-semibold text-lg mb-2">Execution Layer</h3>
-        <p class="text-white/70 text-sm leading-relaxed">ClickUp tasks for accounts, orders, and support workflows.</p>
-       </div>
-      </div>
-     </div>
-    </section>
-
-    <!-- Capabilities -->
-    <section class="py-20 bg-midnight">
-     <div class="max-w-7xl mx-auto px-6">
-      <div class="text-center max-w-3xl mx-auto mb-14">
-       <div class="counter inline-block mb-4">Enterprise Capabilities Built In</div>
-       <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-3">The stuff you wish your current stack did by default</h2>
-       <p class="text-white/70">Clear contracts. No mystery state. No duplicated work. No "who changed this" nightmares.</p>
-      </div>
-
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-       <div class="glass rounded-2xl p-7 border border-slate-700/30">
-        <div class="flex items-start gap-3">
-         <div class="mt-0.5 w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/20 flex items-center justify-center text-purple-200 text-sm font-bold">✓</div>
-         <div>
-          <h3 class="text-white font-semibold mb-2">Contract-Driven Validation</h3>
-          <p class="text-white/70 text-sm leading-relaxed">JSON contracts define all business logic. No ambiguity. Complete audit trails on every event.</p>
-         </div>
-        </div>
-       </div>
-
-       <div class="glass rounded-2xl p-7 border border-slate-700/30">
-        <div class="flex items-start gap-3">
-         <div class="mt-0.5 w-6 h-6 rounded-full bg-purple-500/20 border border-purple-400/20 flex items-center justify-center text-purple-200 text-sm font-bold">✓</div>
-         <div>
-          <h3 class="text-white font-semibold mb-2">Idempotent &amp; Retry-Safe</h3>
-          <p class="text-white/70 text-sm leading-relaxed">Every event is append-only and idempotent. No duplicate tasks, emails, or records.</p>
-         </div>
-        </div>
-       </div>
+   <!-- PARTIAL:pages/checkout-page -->
+   
+  </div>
 
        <div class="glass rounded-2xl p-7 border border-slate-700/30">
         <div class="flex items-start gap-3">
