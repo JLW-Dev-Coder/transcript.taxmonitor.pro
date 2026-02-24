@@ -1,0 +1,124 @@
+<section id="sales-page" class="page-section">
+  <!-- Sales Nav -->
+  <nav class="bg-midnight sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <button onclick="showPage('landing-page')" class="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        Back
+      </button>
+
+      <span id="sales-product-name" class="text-white font-bold">TranscriptPro</span>
+      <span id="sales-price" class="sr-only">$797/mo</span>
+
+      <button onclick="showCheckout('credits_25')" class="btn-primary text-sm py-2 px-4">Buy Credits</button>
+    </div>
+  </nav>
+
+  <!-- Sales Hero -->
+  <header class="gradient-hero py-20">
+    <div class="max-w-5xl mx-auto px-6 text-center text-white">
+      <div class="counter inline-block mb-6">⚙️ Enterprise CRM for Tax Professionals</div>
+      <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">Serverless Tax Practice Automation</h1>
+      <p class="text-xl text-white/80 mb-10 max-w-3xl mx-auto">
+        Contract-driven workflows. Immutable audit trails. ClickUp integration. Built on Cloudflare for 99.99% uptime, zero ops overhead.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <button onclick="showCheckout('credits_25')" class="btn-primary text-lg">Buy Credits</button>
+        <button onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'})" class="btn-secondary">Transparent Pricing</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Pricing -->
+  <section id="pricing" class="py-20 bg-midnight">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <div class="counter inline-block mb-4">Transparent, Scalable Pricing</div>
+        <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-3">Pick the plan that matches your practice</h2>
+        <p class="text-white/70">All plans include 30-day free trial. No credit card required. Cancel anytime.</p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 items-stretch">
+        <div class="glass rounded-2xl p-8 border border-slate-700/30 flex flex-col">
+          <div class="text-white font-semibold text-lg">Starter</div>
+          <div class="text-white/60 text-sm mt-1">Perfect for smaller practices</div>
+          <div class="mt-6 flex items-end gap-2">
+            <div class="text-4xl font-extrabold text-white">$297</div>
+            <div class="text-white/60">/mo</div>
+          </div>
+          <ul class="mt-6 space-y-3 text-sm text-white/75">
+            <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>99.99% uptime SLA</span></li>
+            <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>ClickUp integration</span></li>
+            <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Email support</span></li>
+            <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Up to 500 accounts</span></li>
+          </ul>
+          <div class="mt-8">
+            <button onclick="showCheckout('credits_10')" class="btn-secondary w-full">Buy Credits</button>
+          </div>
+        </div>
+
+        <div class="gradient-border">
+          <div class="glass rounded-[20px] p-8 border border-purple-500/30 flex flex-col h-full">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <div class="text-white font-semibold text-lg">Professional</div>
+                <div class="text-white/60 text-sm mt-1">For growing tax practices</div>
+              </div>
+              <div class="counter">MOST POPULAR</div>
+            </div>
+
+            <div class="mt-6 flex items-end gap-2">
+              <div class="text-4xl font-extrabold text-white">$797</div>
+              <div class="text-white/60">/mo</div>
+            </div>
+
+            <ul class="mt-6 space-y-3 text-sm text-white/75">
+              <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Advanced compliance logging</span></li>
+              <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>All Starter features</span></li>
+              <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Priority support</span></li>
+              <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Up to 2,500 accounts</span></li>
+            </ul>
+
+            <div class="mt-8">
+              <button onclick="showCheckout('credits_25')" class="btn-primary w-full">Buy Credits</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass rounded-2xl p-8 border border-slate-700/30 flex flex-col">
+          <div class="text-white font-semibold text-lg">Enterprise</div>
+          <div class="text-white/60 text-sm mt-1">For large-scale operations</div>
+          <div class="mt-6 flex items-end gap-2">
+            <div class="text-4xl font-extrabold text-white">Custom</div>
+            <div class="text-white/60">/mo</div>
+          </div>
+          <ul class="mt-6 space-y-3 text-sm text-white/75">
+            <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>All Professional features</span></li>
+            <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Custom integrations</span></li>
+            <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Dedicated support</span></li>
+            <li class="flex items-center gap-2"><span class="text-purple-300">✓</span><span>Unlimited accounts</span></li>
+          </ul>
+          <div class="mt-8">
+            <button type="button" class="btn-secondary w-full" onclick="showToast('Sales will contact you shortly (or at least pretend to).', 'success')">Contact Sales</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-10 text-center text-white/60 text-sm">Credits never expire. No refunds.</div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-20 gradient-hero">
+    <div class="max-w-5xl mx-auto px-6 text-center">
+      <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-6">Want a system that can explain itself?</h2>
+      <p class="text-xl text-white/80 mb-8 max-w-3xl mx-auto">Most CRMs are just fancy forms. This one keeps receipts and enforces contracts so your operations stop drifting into chaos.</p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <button onclick="showCheckout('credits_25')" class="btn-primary text-lg">Buy Credits</button>
+        <button onclick="showPage('landing-page')" class="btn-secondary">Back to Home</button>
+      </div>
+    </div>
+  </section>
+</section>
