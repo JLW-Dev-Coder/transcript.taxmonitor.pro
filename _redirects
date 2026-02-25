@@ -1,21 +1,12 @@
-# Payment
-/payment-confirmation   /assets/confirmation.html   200
-
-# Product
-/transcript.taxmonitor.pro/assets/product.html   /product   301
-
-# Lead Magnet Landing
-/transcript.taxmonitor.pro/magnets/lead-magnet.html   /magnet   301
-
 # Guide
-/transcript.taxmonitor.pro/magnets/guide.html   /guide   301
-
-# Guide
-/guide.html                 /guide    301
-/magnets/guide.html         /guide    301
+/guide.html                 /guide                    301
+/magnets/guide.html         /guide                    301
 
 # Lead Magnet
-/magnets/lead-magnet.html   /magnet   301
+/magnets/lead-magnet.html   /magnet                   301
+
+# Payment
+/payment-confirmation       /assets/confirmation.html 200
 
 # Product
-/assets/product.html        /product  301
+/assets/product.html        /product                  301
