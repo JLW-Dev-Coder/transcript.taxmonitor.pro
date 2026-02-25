@@ -34,9 +34,9 @@
   <script src="/_sdk/element_sdk.js"></script>
   <script src="/_sdk/data_sdk.js"></script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/styles/site.css?v=1" />
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
   <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
@@ -46,50 +46,66 @@
       pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.js";
     }
   </script>
+
+  <style>
+    @keyframes tmFadeUp {
+      0% { opacity: 0; transform: translateY(14px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .tm-anim { opacity: 0; transform: translateY(14px); }
+    .tm-loaded .tm-anim { animation: tmFadeUp 700ms ease forwards; }
+    .tm-loaded .tm-anim.delay-1 { animation-delay: 80ms; }
+    .tm-loaded .tm-anim.delay-2 { animation-delay: 160ms; }
+    .tm-loaded .tm-anim.delay-3 { animation-delay: 240ms; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tm-anim { opacity: 1 !important; transform: none !important; }
+      .tm-loaded .tm-anim { animation: none !important; }
+    }
+  </style>
 </head>
 
 <body class="h-full noise font-sans">
-  <div id="app-container" class="h-full overflow-auto">
+  <div id="app-container" class="min-h-full overflow-auto">
 
-    <!-- PARTIAL:header -->
-
-    <!-- View Product (single page) -->
-    <section id="product" class="page-section active">
-
-      <!-- Sales / Product Nav (custom toolbar style) -->
-      <div class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
-        <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <div class="flex items-center gap-3 text-white">
-            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-slate-950 font-extrabold">TM</span>
-            <div class="leading-tight">
-              <div class="text-sm font-semibold">Transcript.Tax Monitor Pro</div>
-              <div class="text-[11px] text-white/60">About product</div>
-            </div>
+    <!-- Product Nav (shared style) -->
+    <header class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+        <a href="https://transcript.taxmonitor.pro/" class="flex items-center gap-3 text-white">
+          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-slate-950 font-extrabold">TM</span>
+          <div class="leading-tight">
+            <div class="text-sm font-semibold">Transcript.Tax Monitor Pro</div>
+            <div class="text-[11px] text-white/60">About product</div>
           </div>
+        </a>
 
-          <div class="flex items-center gap-2">
-            <a href="/" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/60 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition">
-              <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-              Back
-            </a>
+        <div class="flex items-center gap-2">
+          <a href="/" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/60 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition">
+            <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Back
+          </a>
 
-            <a href="#pricing" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-purple-600/90 px-4 py-2 text-sm font-semibold text-white backdrop-blur hover:bg-purple-600 transition">
-              <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="5" width="20" height="14" rx="2" />
-                <path d="M2 10h20" />
-                <path d="M6 15h3" />
-              </svg>
-              Buy Credits
-            </a>
-          </div>
+          <a href="#pricing" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-purple-600/90 px-4 py-2 text-sm font-semibold text-white backdrop-blur hover:bg-purple-600 transition">
+            <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="5" width="20" height="14" rx="2" />
+              <path d="M2 10h20" />
+              <path d="M6 15h3" />
+            </svg>
+            Buy Credits
+          </a>
         </div>
       </div>
+    </header>
+
+    <!-- View Product (single page) -->
+    <main id="product" class="page-section active">
 
       <!-- Hero -->
-      <header class="gradient-hero py-20">
-        <div class="max-w-5xl mx-auto px-6 text-center text-white">
+      <section class="gradient-hero py-20">
+        <div class="max-w-5xl mx-auto px-6 text-center text-white tm-anim">
           <div class="counter inline-block mb-6">
             <span class="inline-flex items-center gap-2">
               <svg class="w-4 h-4 text-gold" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -137,11 +153,11 @@
             </div>
           </div>
         </div>
-      </header>
+      </section>
 
       <!-- What you get -->
       <section id="features" class="py-20 bg-cream scroll-mt-28">
-        <div class="max-w-7xl mx-auto px-6">
+        <div class="max-w-7xl mx-auto px-6 tm-anim delay-1">
           <div class="text-center max-w-3xl mx-auto mb-16">
             <div class="counter inline-block mb-4">
               <span class="inline-flex items-center gap-2">
@@ -232,9 +248,9 @@
         </div>
       </section>
 
-      <!-- Pricing (matches site index pricing behavior: static links) -->
+      <!-- Pricing -->
       <section id="pricing" class="py-20 bg-cream scroll-mt-28">
-        <div class="max-w-7xl mx-auto px-6">
+        <div class="max-w-7xl mx-auto px-6 tm-anim delay-2">
           <div class="text-center max-w-3xl mx-auto mb-12">
             <div class="counter inline-block mb-4">
               <span class="inline-flex items-center gap-2">
@@ -351,7 +367,7 @@
 
       <!-- CTA -->
       <section class="py-20 gradient-hero">
-        <div class="max-w-4xl mx-auto px-6 text-center">
+        <div class="max-w-4xl mx-auto px-6 text-center tm-anim delay-3">
           <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-6">Want to see the report layout first?</h2>
           <p class="text-xl text-white/80 mb-8">Preview the client-facing format, then buy credits when you are ready.</p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -361,16 +377,35 @@
         </div>
       </section>
 
-    </section>
+    </main>
 
-    <!-- PARTIAL:footer -->
+    <!-- Footer (standalone, no partial injection) -->
+    <footer class="px-6 py-3 mt-1 border-t border-slate-800/60 bg-slate-950/80 backdrop-blur">
+      <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-slate-500 text-sm">© <span id="footer-year"></span> Transcript.Tax Monitor Pro. All rights reserved.</p>
+        <div class="flex items-center gap-6">
+          <a href="/legal/privacy.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Privacy Policy</a>
+          <a href="/legal/terms.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Terms of Service</a>
+        </div>
+      </div>
+    </footer>
 
     <!-- Toast Container (kept for consistency with site styles) -->
     <div id="toast-container"></div>
 
   </div>
+
+  <script>
+    (function () {
+      // Prevent the page from loading "flat".
+      requestAnimationFrame(() => document.documentElement.classList.add("tm-loaded"));
+
+      // Footer year
+      (function () {
+        const y = document.getElementById("footer-year");
+        if (y) y.textContent = String(new Date().getFullYear());
+      })();
+    })();
+  </script>
 </body>
 </html>
-
-
-
