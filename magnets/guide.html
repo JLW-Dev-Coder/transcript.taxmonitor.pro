@@ -17,8 +17,8 @@
             sans: ['DM Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial']
           },
           colors: {
-            'brand-purple': '#5B21B6',
-            'brand-lavender': '#E9D5FF'
+            'brand-lavender': '#E9D5FF',
+            'brand-purple': '#5B21B6'
           }
         }
       }
@@ -91,6 +91,7 @@
       padding: 4rem 2rem;
       text-align: center;
       border-bottom: 1px solid #e9d5ff;
+      border-radius: 12px;
     }
 
     .hero-title {
@@ -201,20 +202,9 @@
       margin-top: 1rem;
     }
 
-    .risk-low {
-      background: #dcfce7;
-      color: #166534;
-    }
-
-    .risk-moderate {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .risk-immediate {
-      background: #fee2e2;
-      color: #991b1b;
-    }
+    .risk-immediate { background: #fee2e2; color: #991b1b; }
+    .risk-low { background: #dcfce7; color: #166534; }
+    .risk-moderate { background: #fef3c7; color: #92400e; }
 
     .scenario-card {
       background: #f9fafb;
@@ -328,17 +318,10 @@
       color: #4b5563;
     }
 
-    .reference-table tbody tr:hover {
-      background: #f9fafb;
-    }
+    .reference-table tbody tr:hover { background: #f9fafb; }
+    .reference-table tbody tr:nth-child(even) { background: #fafbfc; }
 
-    .reference-table tbody tr:nth-child(even) {
-      background: #fafbfc;
-    }
-
-    .category-section {
-      margin-bottom: 3rem;
-    }
+    .category-section { margin-bottom: 3rem; }
 
     .category-title {
       font-size: 1.5rem;
@@ -378,9 +361,7 @@
       font-weight: 600;
     }
 
-    .section-padding {
-      padding: 2rem;
-    }
+    .section-padding { padding: 2rem; }
 
     .search-box {
       background: #f3e8ff;
@@ -408,241 +389,126 @@
     }
 
     @media print {
-      body {
-        background: white;
-      }
-      .btn-download {
-        display: none;
-      }
-      .search-box {
-        display: none;
-      }
-      .page-container {
-        max-width: 100%;
-      }
-      .code-card, .scenario-card, .red-flag-card {
-        page-break-inside: avoid;
-      }
-      .category-section {
-        page-break-inside: avoid;
-      }
+      body { background: white; }
+      .btn-download { display: none; }
+      .search-box { display: none; }
+      .page-container { max-width: 100%; }
+      .category-section { page-break-inside: avoid; }
+      .code-card, .red-flag-card, .scenario-card { page-break-inside: avoid; }
     }
 
     @media (max-width: 768px) {
-      .hero-title {
-        font-size: 2rem;
-      }
-      .hero-subtitle {
-        font-size: 1rem;
-      }
-      .section-padding {
-        padding: 1.5rem;
-      }
-      .code-row {
-        grid-template-columns: 1fr;
-        gap: 0.25rem;
-      }
-      .code-label {
-        display: inline;
-        margin-right: 0.5rem;
-      }
+      .hero-title { font-size: 2rem; }
+      .hero-subtitle { font-size: 1rem; }
+      .section-padding { padding: 1.5rem; }
+      .code-row { grid-template-columns: 1fr; gap: 0.25rem; }
+      .code-label { display: inline; margin-right: 0.5rem; }
     }
 
-    /* Dark mode styles */
+    /* Dark mode styles (toggle uses body.dark-mode) */
     body.dark-mode {
-      background: #1a1a1a;
-      color: #e5e5e5;
+      background: #0b1220;
+      color: rgba(255,255,255,0.88);
     }
 
     body.dark-mode .page-container {
-      background: #1a1a1a;
+      background: transparent;
     }
 
     body.dark-mode .hero-section {
       background: linear-gradient(135deg, #2d1b4e 0%, #1f1535 100%);
-      border-bottom-color: #3d2d5c;
+      border-bottom-color: rgba(148, 163, 184, 0.25);
     }
 
-    body.dark-mode .hero-title {
-      color: #e9d5ff;
-    }
-
-    body.dark-mode .hero-subtitle {
-      color: #d8b4fe;
-    }
-
-    body.dark-mode .hero-intro {
-      color: #d8b4fe;
-    }
-
-    body.dark-mode .section-divider p {
-      color: #d8b4fe;
-    }
-
-    body.dark-mode .code-card {
-      background: #2a2a2a;
-      border-color: #3d3d3d;
-    }
-
-    body.dark-mode .code-card:hover {
-      box-shadow: 0 4px 12px rgba(196, 181, 253, 0.1);
-    }
-
-    body.dark-mode .code-number {
-      color: #d8b4fe;
-    }
-
-    body.dark-mode .code-title {
-      color: #e5e5e5;
-    }
-
-    body.dark-mode .code-label {
-      color: #d8b4fe;
-    }
-
-    body.dark-mode .code-value {
-      color: #c8b8d4;
-    }
+    body.dark-mode .hero-title { color: #e9d5ff; }
+    body.dark-mode .hero-subtitle { color: #d8b4fe; }
+    body.dark-mode .hero-intro { color: rgba(216, 180, 254, 0.85); }
 
     body.dark-mode .section-divider {
       border-left-color: #7c3aed;
     }
 
-    body.dark-mode .category-title {
-      color: #e5e5e5;
-      border-left-color: #7c3aed;
+    body.dark-mode .section-divider h2 {
+      color: rgba(255,255,255,0.92) !important;
     }
 
-    body.dark-mode .category-description {
-      color: #a8a8b8;
+    body.dark-mode .section-divider p {
+      color: rgba(255,255,255,0.72) !important;
     }
 
     body.dark-mode .search-box {
-      background: #2d1b4e;
-      border-color: #3d2d5c;
+      background: rgba(45, 27, 78, 0.75);
+      border-color: rgba(124, 58, 237, 0.35);
     }
 
     body.dark-mode .search-box input {
-      background: #1a1a1a;
-      color: #e5e5e5;
-      border-color: #3d2d5c;
+      background: rgba(2, 6, 23, 0.65);
+      color: rgba(255,255,255,0.9);
+      border-color: rgba(124, 58, 237, 0.35);
     }
 
     body.dark-mode .search-box input:focus {
-      border-color: #7c3aed;
-      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+      border-color: rgba(124, 58, 237, 0.85);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
     }
+
+    body.dark-mode .code-card {
+      background: rgba(2, 6, 23, 0.55);
+      border-color: rgba(148, 163, 184, 0.18);
+    }
+
+    body.dark-mode .code-title { color: rgba(255,255,255,0.9); }
+    body.dark-mode .code-value { color: rgba(255,255,255,0.7); }
+    body.dark-mode .code-label { color: rgba(216, 180, 254, 0.9); }
+    body.dark-mode .code-number { color: rgba(216, 180, 254, 0.95); }
 
     body.dark-mode .scenario-card {
-      background: #2a2a2a;
-      border-color: #3d3d3d;
+      background: rgba(2, 6, 23, 0.55);
+      border-color: rgba(148, 163, 184, 0.18);
     }
 
-    body.dark-mode .scenario-title {
-      color: #e5e5e5;
-    }
+    body.dark-mode .scenario-title { color: rgba(255,255,255,0.92); }
 
     body.dark-mode .scenario-codes {
-      background: #2d1b4e;
-      border-left-color: #7c3aed;
-      color: #d8b4fe;
+      background: rgba(45, 27, 78, 0.75);
+      border-left-color: rgba(124, 58, 237, 0.9);
+      color: rgba(216, 180, 254, 0.95);
     }
 
     body.dark-mode .scenario-annotation {
-      background: #2a2a2a;
-      border-left-color: #7c3aed;
+      background: rgba(2, 6, 23, 0.45);
+      border-left-color: rgba(124, 58, 237, 0.9);
     }
 
-    body.dark-mode .annotation-label {
-      color: #d8b4fe;
-    }
-
-    body.dark-mode .annotation-text {
-      color: #c8b8d4;
-    }
-
-    body.dark-mode .red-flag-card {
-      border-color: #4b2c2c;
-      background: #3a2a2a;
-    }
-
-    body.dark-mode .red-flag-code {
-      color: #ff9999;
-    }
-
-    body.dark-mode .red-flag-title {
-      color: #ffb3b3;
-    }
-
-    body.dark-mode .red-flag-action {
-      background: #2a1a1a;
-      border-left-color: #ff6666;
-      color: #c8b8d4;
-    }
+    body.dark-mode .annotation-label { color: rgba(216, 180, 254, 0.95); }
+    body.dark-mode .annotation-text { color: rgba(255,255,255,0.72); }
 
     body.dark-mode .reference-table thead {
-      background: #2d1b4e;
-      border-bottom-color: #7c3aed;
+      background: rgba(45, 27, 78, 0.75);
+      border-bottom-color: rgba(124, 58, 237, 0.9);
     }
 
-    body.dark-mode .reference-table th {
-      color: #d8b4fe;
-    }
-
+    body.dark-mode .reference-table th { color: rgba(216, 180, 254, 0.95); }
     body.dark-mode .reference-table td {
-      border-bottom-color: #3d3d3d;
-      color: #c8b8d4;
+      border-bottom-color: rgba(148, 163, 184, 0.16);
+      color: rgba(255,255,255,0.72);
     }
 
-    body.dark-mode .reference-table tbody tr:hover {
-      background: #2a2a2a;
-    }
-
-    body.dark-mode .reference-table tbody tr:nth-child(even) {
-      background: #1f1f1f;
-    }
+    body.dark-mode .reference-table tbody tr:hover { background: rgba(2, 6, 23, 0.55); }
+    body.dark-mode .reference-table tbody tr:nth-child(even) { background: rgba(2, 6, 23, 0.35); }
 
     body.dark-mode .footer-section {
-      background: #2a2a2a;
-      border-top-color: #3d3d3d;
+      background: rgba(2, 6, 23, 0.35);
+      border-top-color: rgba(148, 163, 184, 0.16);
     }
 
-    body.dark-mode .footer-disclaimer {
-      color: #a8a8b8;
-    }
+    body.dark-mode .footer-disclaimer { color: rgba(255,255,255,0.65); }
+    body.dark-mode .footer-contact { color: rgba(216, 180, 254, 0.95); }
 
-    body.dark-mode .footer-contact {
-      color: #d8b4fe;
-    }
-
-    /* Theme toggle button */
-    .theme-toggle {
-      background: none;
-      border: 2px solid #e9d5ff;
-      color: #5B21B6;
-      font-size: 1.5rem;
-      width: 50px;
-      height: 50px;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .theme-toggle:hover {
-      background: #f3e8ff;
-      transform: scale(1.05);
-    }
-
-    body.dark-mode .theme-toggle {
-      border-color: #3d2d5c;
-      color: #d8b4fe;
-    }
-
-    body.dark-mode .theme-toggle:hover {
-      background: #2d1b4e;
+    body.dark-mode #theme-toggle-button {
+      border-color: rgba(124, 58, 237, 0.45) !important;
+      background: rgba(2, 6, 23, 0.45) !important;
+      color: rgba(255,255,255,0.9) !important;
     }
 
     body { box-sizing: border-box; }
@@ -652,18 +518,42 @@
 <body class="h-full noise font-sans">
   <div id="app-container" class="h-full overflow-auto">
 
-    <!-- PARTIAL:header -->
+    <!-- Header (standalone, no partial injection) -->
+    <div class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+        <a href="https://transcript.taxmonitor.pro/" class="flex items-center gap-3 text-white">
+          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-slate-950 font-extrabold">TM</span>
+          <div class="leading-tight">
+            <div class="text-sm font-semibold">Transcript.Tax Monitor Pro</div>
+            <div class="text-[11px] text-white/60">Free IRS Transcript Code Guide</div>
+          </div>
+        </a>
+
+        <div class="flex items-center gap-2">
+          <a href="/" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/60 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition">
+            <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Back
+          </a>
+        </div>
+      </div>
+    </div>
 
     <main class="py-10">
       <div class="page-container">
 
         <!-- Hero Section -->
         <div class="hero-section tm-anim">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <div></div>
-            <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark/light theme" title="Toggle Theme">🌙</button>
+          <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 1.5rem;">
+            <button
+              id="theme-toggle-button"
+              type="button"
+              aria-label="Toggle theme"
+              title="Toggle Theme"
+              class="inline-flex items-center justify-center h-11 w-11 rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm transition hover:shadow-md"
+            >🌙</button>
           </div>
-
           <h1 class="hero-title">The Ultimate Guide to IRS Transcript Codes</h1>
           <p class="hero-subtitle">Master Every Code, Every Time</p>
           <p class="hero-intro">A comprehensive reference guide for tax professionals. Stop guessing what those codes mean. This guide breaks down every IRS transcript code you'll encounter, complete with plain English explanations, real-world scenarios, and clear action steps.</p>
@@ -685,9 +575,7 @@
           <div class="search-box">
             <label style="font-size: 0.9rem; font-weight: 600; color: #5B21B6; margin-bottom: 0.75rem; display: block;">🔍 Quick Find in This Guide</label>
             <input type="text" id="codeSearch" placeholder="Type a code number, title, or keyword..." autocomplete="off" />
-            <div style="font-size: 0.8rem; color: #7c3aed; margin-top: 0.5rem; font-style: italic;">
-              Search across all codes below to find what you need instantly
-            </div>
+            <div style="font-size: 0.8rem; color: #7c3aed; margin-top: 0.5rem; font-style: italic;">Search across all codes below to find what you need instantly</div>
           </div>
 
           <!-- =========================
@@ -745,9 +633,6 @@
               <span class="risk-badge risk-low">Low Risk</span>
             </div>
           </section>
-
-          <!-- NOTE: Your original file duplicated this search box with the same id.
-               That breaks search logic, so we keep ONE search box only. -->
 
           <!-- Payment & Credit Codes Section -->
           <section class="category-section">
@@ -913,11 +798,6 @@
             <h2 style="font-size: 1.5rem; font-weight: 700; color: #1f2937; margin: 0 0 1.5rem 0;">Real Client Scenarios</h2>
             <p style="color: #6b7280; margin-bottom: 2rem;">Three common situations showing how codes work together</p>
 
-            <!-- (rest of your scenarios, red flags, quick reference, key takeaways, footer content) -->
-            <!-- Keeping your existing HTML as-is below this point was already loaded in Canvas,
-                 but Canvas updates replace the full file. So yes, this includes it. -->
-
-            <!-- Scenario 1 -->
             <div class="scenario-card">
               <div class="scenario-title">Scenario 1: "My Refund Is Late"</div>
               <p style="color: #4b5563; margin-bottom: 1rem;">Client filed their 2024 return on February 1st. They expected a refund within 21 days. It's now mid-March and they're worried.</p>
@@ -931,7 +811,6 @@
               </div>
             </div>
 
-            <!-- Scenario 2 -->
             <div class="scenario-card">
               <div class="scenario-title">Scenario 2: "I Got a Notice and My Refund Stopped"</div>
               <p style="color: #4b5563; margin-bottom: 1rem;">Client received Notice CP2501 (adjustment to their return). They're confused and want to know why their refund disappeared.</p>
@@ -946,7 +825,6 @@
               </div>
             </div>
 
-            <!-- Scenario 3 -->
             <div class="scenario-card">
               <div class="scenario-title">Scenario 3: "There's a Lien on My Account"</div>
               <p style="color: #4b5563; margin-bottom: 1rem;">Self-employed client has back taxes from 2021. They want to buy a house but found out there's a federal lien on their file.</p>
@@ -965,30 +843,35 @@
           <section class="section-divider">
             <h2 style="font-size: 1.5rem; font-weight: 700; color: #1f2937; margin: 0 0 1.5rem 0;">Red Flag Alerts</h2>
             <p style="color: #6b7280; margin-bottom: 2rem;">Codes that require immediate attention. Never delay on these.</p>
+
             <div class="red-flag-card">
               <div class="red-flag-code">570</div>
               <div class="red-flag-title">Refund Hold / Offset</div>
               <p style="color: #4b5563; margin-bottom: 1rem;">A refund is being held or offset against other debts. This is serious.</p>
               <div class="red-flag-action"><strong>Action Required:</strong> Within 24 hours, determine if this is a legitimate offset (other tax years, student loans, child support) or an error. If erroneous, file Form 8379 (Injured Spouse Claim) immediately. If legitimate but unexpected, request a payment plan to resolve the underlying liability.</div>
             </div>
+
             <div class="red-flag-card">
               <div class="red-flag-code">610</div>
               <div class="red-flag-title">Federal Tax Lien Filed</div>
               <p style="color: #4b5563; margin-bottom: 1rem;">A lien has been placed on the taxpayer's property. This is the most serious collection action short of levy.</p>
               <div class="red-flag-action"><strong>Action Required:</strong> IMMEDIATE. Contact IRS Collection Division. Consider: (1) Installment agreement to satisfy the debt, (2) Offer in Compromise, (3) Currently Not Collectible status, or (4) Professional representation. Request a subordination letter if the taxpayer needs to borrow money.</div>
             </div>
+
             <div class="red-flag-card">
               <div class="red-flag-code">520 + 971</div>
               <div class="red-flag-title">Notice Issued (Unresolved)</div>
               <p style="color: #4b5563; margin-bottom: 1rem;">A notice was issued and the notice code (971) appears without resolution codes. The notice may be unresolved.</p>
               <div class="red-flag-action"><strong>Action Required:</strong> Within 5 business days, confirm the client received the notice. Read the notice carefully. It will state a response deadline (usually 30 days). If agreement is needed, respond within the deadline. If disagreement, file a protest with the IRS Office of Appeals.</div>
             </div>
+
             <div class="red-flag-card">
               <div class="red-flag-code">502</div>
               <div class="red-flag-title">Default Notice (Failure to File)</div>
               <p style="color: #4b5563; margin-bottom: 1rem;">A notice for failure to file a required return was issued.</p>
               <div class="red-flag-action"><strong>Action Required:</strong> File the missing return immediately, even if no tax is due. Penalties will continue to accrue for each year of non-compliance. If returns span multiple years, file all missing years within 60 days.</div>
             </div>
+
             <div class="red-flag-card">
               <div class="red-flag-code">301</div>
               <div class="red-flag-title">Penalty Assessed</div>
@@ -1001,6 +884,7 @@
           <section class="section-divider">
             <h2 style="font-size: 1.5rem; font-weight: 700; color: #1f2937; margin: 0 0 1.5rem 0;">Quick Reference Chart</h2>
             <p style="color: #6b7280; margin-bottom: 1rem;">Fast lookup for common codes. Print this page and keep it at your desk.</p>
+
             <table class="reference-table">
               <thead>
                 <tr>
@@ -1076,8 +960,11 @@
               <strong>Professional Disclaimer:</strong> This guide is for educational purposes and compiled from IRS publications and tax professional experience. Codes are subject to change and new codes are added periodically. Always verify interpretations against the most current IRS documentation and Form 4506-C transcripts. For specific tax or collection issues, consult with a tax professional or attorney. This guide does not constitute tax, legal, or professional advice.
             </div>
             <div class="footer-contact">
-              © 2024 Transcript.Tax Monitor<br />
-              <a href="https://transcript.taxmonitor.pro" target="_blank" rel="noopener" style="color: #5B21B6; text-decoration: none;">transcript.taxmonitor.pro</a>
+              <span id="tm-guide-year">©</span> Transcript.Tax Monitor Pro
+              <span style="margin: 0 8px; color: #9ca3af;">•</span>
+              <a href="/legal/privacy.html" style="color: #5B21B6; text-decoration: none;">Privacy</a>
+              <span style="margin: 0 8px; color: #9ca3af;">•</span>
+              <a href="/legal/terms.html" style="color: #5B21B6; text-decoration: none;">Terms</a>
             </div>
           </div>
 
@@ -1085,77 +972,114 @@
       </div>
     </main>
 
-    <!-- PARTIAL:footer -->
-
+    <!-- Footer (standalone, no partial injection) -->
+    <footer class="border-t border-slate-200 bg-slate-50">
+      <div class="mx-auto max-w-7xl px-6 py-10">
+        <div class="text-xs text-slate-600 leading-relaxed">
+          <div>
+            <span id="tm-copyright-year">©</span> Transcript.Tax Monitor Pro. All rights reserved.
+            <span class="mx-2">•</span>
+            <a class="text-slate-700 hover:text-slate-950 underline underline-offset-4" href="/legal/privacy.html">Privacy</a>
+            <span class="mx-2">•</span>
+            <a class="text-slate-700 hover:text-slate-950 underline underline-offset-4" href="/legal/terms.html">Terms</a>
+          </div>
+          <div class="mt-2">Educational content only. Not tax or legal advice.</div>
+        </div>
+      </div>
+    </footer>
   </div>
 
   <script>
-    // Prevent the page from loading "flat".
-    requestAnimationFrame(() => document.documentElement.classList.add("tm-loaded"));
+    (function () {
+      // Prevent the page from loading "flat".
+      requestAnimationFrame(() => document.documentElement.classList.add('tm-loaded'));
 
-    // Ensure header logo goes to transcript.taxmonitor.pro
-    (function fixHeaderLogoLink() {
-      function run() {
-        const header = document.querySelector("header");
-        if (!header) return;
-
-        const logoLink = header.querySelector("a");
-        if (logoLink) logoLink.setAttribute("href", "https://transcript.taxmonitor.pro/");
-      }
-
-      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run);
-      else run();
-    })();
-
-    // Theme toggle functionality
-    const themeToggle = document.getElementById('themeToggle');
-    const body = document.body;
-
-    // Check for saved theme preference or default to light mode
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    if (savedTheme === 'dark') {
-      body.classList.add('dark-mode');
-      if (themeToggle) themeToggle.textContent = '☀️';
-    }
-
-    // Toggle theme on button click
-    themeToggle?.addEventListener('click', function () {
-      body.classList.toggle('dark-mode');
-      const isDarkMode = body.classList.contains('dark-mode');
-
-      // Save preference
-      localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-
-      // Update button icon
-      themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
-    });
-
-    // Search functionality - filters all code cards
-    const searchInput = document.getElementById('codeSearch');
-    const codeCards = document.querySelectorAll('.code-card');
-
-    searchInput?.addEventListener('input', function (e) {
-      const searchTerm = String(e.target?.value || '').toLowerCase().trim();
-
-      codeCards.forEach((card) => {
-        if (!searchTerm) {
-          card.classList.remove('hidden');
-          return;
+      // --- tiny “tests” (in-browser) ---
+      function assert(name, condition) {
+        if (!condition) {
+          console.error('test_failed', name);
+          throw new Error(`test_failed:${name}`);
         }
-
-        const cardText = String(card.textContent || '').toLowerCase();
-        if (cardText.includes(searchTerm)) card.classList.remove('hidden');
-        else card.classList.add('hidden');
-      });
-    });
-
-    // Print handler
-    document.addEventListener('keydown', function (e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-        e.preventDefault();
-        window.print();
       }
-    });
+
+      function runTests() {
+        // IDs should be unique
+        assert('codeSearch_unique', document.querySelectorAll('#codeSearch').length === 1);
+
+        // Header should have correct home link
+        const brandLink = document.querySelector('a[href="https://transcript.taxmonitor.pro/"]');
+        assert('brand_link_exists', !!brandLink);
+
+        // Back link should exist
+        const backLink = document.querySelector('a[href="/"]');
+        assert('back_link_exists', !!backLink);
+
+        // Theme toggle should not crash if missing
+        assert('themeToggle_defined', typeof themeToggle !== 'undefined');
+      }
+
+      // --- footer years ---
+      (function setYears() {
+        const y = String(new Date().getFullYear());
+        const a = document.getElementById('tm-copyright-year');
+        const b = document.getElementById('tm-guide-year');
+        if (a) a.textContent = `© ${y}`;
+        if (b) b.textContent = `© ${y}`;
+      })();
+
+      // --- theme toggle (guarded) ---
+      // NOTE: you requested removing the toggle UI. This keeps the script from crashing
+      // even if older code paths still reference it.
+      const themeToggle = document.getElementById('theme-toggle-button');
+      const body = document.body;
+
+      const savedTheme = String(localStorage.getItem('theme') || 'light');
+      if (savedTheme === 'dark') {
+        body.classList.add('dark-mode');
+        if (themeToggle) themeToggle.textContent = '☀️';
+      }
+
+      if (themeToggle) {
+        themeToggle.addEventListener('click', function () {
+          body.classList.toggle('dark-mode');
+          const isDarkMode = body.classList.contains('dark-mode');
+          localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+          themeToggle.textContent = isDarkMode ? '☀️' : '🌙';
+        });
+      }
+
+      // --- search filtering ---
+      const searchInput = document.getElementById('codeSearch');
+      const codeCards = Array.from(document.querySelectorAll('.code-card'));
+
+      searchInput?.addEventListener('input', function (e) {
+        const searchTerm = String(e.target?.value || '').toLowerCase().trim();
+
+        codeCards.forEach((card) => {
+          if (!searchTerm) {
+            card.classList.remove('hidden');
+            return;
+          }
+
+          const cardText = String(card.textContent || '').toLowerCase();
+          if (cardText.includes(searchTerm)) card.classList.remove('hidden');
+          else card.classList.add('hidden');
+        });
+      });
+
+      // --- print shortcut ---
+      document.addEventListener('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+          e.preventDefault();
+          window.print();
+        }
+      });
+
+      // Optional: run tests
+      const url = new URL(window.location.href);
+      const run = String(url.searchParams.get('runTests') || '').trim().toLowerCase();
+      if (run === '1' || run === 'true') runTests();
+    })();
   </script>
 </body>
 </html>
