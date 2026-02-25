@@ -212,7 +212,14 @@
        <!-- Upload Transcript PDF + Enter Your Token -->
        <div class="bg-slate-800/50 backdrop-blur border border-purple-500/30 rounded-2xl p-8 h-full flex flex-col">
         <div class="mb-6">
-          <h3 class="text-white font-bold text-lg">Enter Your Token</h3>
+          <h3 class="text-white font-bold text-lg flex items-center justify-between">
+  <span>Enter Your Token</span>
+  <svg class="w-7 h-7" aria-hidden="true" viewBox="0 0 28 28" fill="none">
+    <circle cx="14" cy="14" r="13" stroke="currentColor" stroke-opacity="0.35" stroke-width="2" />
+    <circle cx="14" cy="14" r="12" fill="currentColor" fill-opacity="0.10" />
+    <text x="14" y="18" text-anchor="middle" font-size="14" font-weight="800" fill="currentColor">1</text>
+  </svg>
+</h3>
         </div>
 
         <div class="space-y-8 flex-1 flex flex-col">
@@ -237,7 +244,14 @@
           </div>
 
           <div class="mt-8">
-            <h3 class="text-white font-bold text-lg mb-4">Upload Transcript PDF</h3>
+            <h3 class="text-white font-bold text-lg mb-4 flex items-center justify-between">
+  <span>Upload Transcript PDF</span>
+  <svg class="w-7 h-7" aria-hidden="true" viewBox="0 0 28 28" fill="none">
+    <circle cx="14" cy="14" r="13" stroke="currentColor" stroke-opacity="0.35" stroke-width="2" />
+    <circle cx="14" cy="14" r="12" fill="currentColor" fill-opacity="0.10" />
+    <text x="14" y="18" text-anchor="middle" font-size="14" font-weight="800" fill="currentColor">2</text>
+  </svg>
+</h3>
           </div>
 
           <!-- Firm Logo -->
@@ -272,18 +286,16 @@
        
        <!-- Parsed Report Preview -->
        <div class="bg-slate-800/50 backdrop-blur border border-purple-500/20 rounded-2xl p-8 h-full flex flex-col">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-white font-bold text-lg">Parsed Report Preview</h3>
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center border border-purple-500/30 bg-purple-500/10">
-            <svg class="w-5 h-5 text-purple-300" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8Z" />
-              <path d="M14 2v6h6" />
-              <path d="M8 13h8" />
-              <path d="M8 17h6" />
-              <path d="M17.5 15.5l1 1 2-2" />
-            </svg>
-          </div>
-        </div>
+        <div class="mb-4">
+  <h3 class="text-white font-bold text-lg flex items-center justify-between">
+    <span>Parsed Report Preview</span>
+    <svg class="w-7 h-7" aria-hidden="true" viewBox="0 0 28 28" fill="none">
+      <circle cx="14" cy="14" r="13" stroke="currentColor" stroke-opacity="0.35" stroke-width="2" />
+      <circle cx="14" cy="14" r="12" fill="currentColor" fill-opacity="0.10" />
+      <text x="14" y="18" text-anchor="middle" font-size="14" font-weight="800" fill="currentColor">3</text>
+    </svg>
+  </h3>
+</div>
 
         <div class="space-y-4 text-sm flex-1">
           <div class="flex justify-between items-center pb-3 border-b border-slate-700"><span class="text-white/70">Transcript Type</span> <span class="text-white font-medium">Form 4506-C (Account)</span></div>
@@ -319,6 +331,11 @@
               <span class="bg-slate-700/60 text-purple-300 px-2 py-1 rounded text-xs font-mono">977</span>
             </div>
           </div>
+
+        <div class="mt-6 bg-purple-600/10 border border-purple-500/30 rounded-lg p-4">
+          <p class="text-purple-300 text-sm font-medium mb-2">PREVIEW MODE</p>
+          <p class="text-white/70 text-sm">Click the sample report below to preview the full layout. Token access unlocks the Preview Report and Download buttons.</p>
+        </div>
 
           <!-- Mini report preview (click to open full report) -->
           <button id="mini-report-btn" type="button" class="mt-6 w-full text-left">
@@ -359,7 +376,7 @@
         </div>
 
         <div class="mt-6 grid grid-cols-2 gap-4">
-          <button id="preview-report-btn" type="button" class="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+          <button id="preview-report-btn" type="button" disabled class="bg-slate-700 text-slate-400 font-semibold py-3 rounded-lg cursor-not-allowed opacity-60 flex items-center justify-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
             Preview Report
           </button>
@@ -368,11 +385,6 @@
             </svg>
             Download
           </button>
-        </div>
-
-        <div class="mt-6 bg-purple-600/10 border border-purple-500/30 rounded-lg p-4">
-          <p class="text-purple-300 text-sm font-medium mb-2">PREVIEW MODE</p>
-          <p class="text-white/70 text-sm">This sample shows the quality of your client-ready reports. Full access unlocks unlimited processing.</p>
         </div>
        </div>
 
@@ -654,16 +666,18 @@
             );
 
             // Parser token elements should exist
+            assert("parser_token_available_exists", !!document.getElementById("parser-token-available"));
             assert("parser_token_input_exists", !!document.getElementById("parser-token-id"));
             assert("parser_token_save_exists", !!document.getElementById("parser-save-token"));
-            assert("parser_token_available_exists", !!document.getElementById("parser-token-available"));
 
             // Report preview UI should exist
             assert("mini_report_btn_exists", !!document.getElementById("mini-report-btn"));
+            assert("report_overlay_back_exists", !!document.getElementById("report-overlay-back"));
+            assert("report_overlay_exists", !!document.getElementById("report-overlay"));
+            assert("report_overlay_iframe_exists", !!document.getElementById("report-overlay-iframe"));
 
             // renderPricing should exist
             assert("render_pricing_exists", typeof renderPricing === "function");
-          }
           }
 
           function renderPricing() {
@@ -1011,19 +1025,16 @@
 
   <!-- Full-viewport report preview overlay -->
   <div id="report-overlay" class="fixed inset-0 z-[100] hidden bg-slate-950/95">
-    <div class="h-full w-full flex flex-col">
-      <div class="shrink-0 border-b border-slate-800/70 bg-slate-950/80 backdrop-blur">
-        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-          <button id="report-overlay-back" type="button" class="inline-flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-white transition">
-            <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-            Back
-          </button>
-          <div class="text-sm text-white/60">Report preview</div>
-        </div>
-      </div>
-      <div class="flex-1">
+    <div class="h-full w-full">
+      <div class="relative h-full w-full">
+        <button id="report-overlay-back" type="button" class="absolute left-4 top-4 z-[101] inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/70 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition">
+          <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          Back
+        </button>
+
+        <div class="h-full w-full">
         <iframe id="report-overlay-iframe" class="h-full w-full" title="Report preview" src="" loading="lazy"></iframe>
       </div>
     </div>
@@ -1071,7 +1082,6 @@
         const overlay = document.getElementById("report-overlay");
 
         mini?.addEventListener("click", openOverlay);
-        previewBtn?.addEventListener("click", openOverlay);
         back?.addEventListener("click", closeOverlay);
 
         // Escape closes overlay
