@@ -343,7 +343,7 @@
               <div class="flex items-start justify-between gap-4">
                 <div>
                   <div class="text-white font-semibold">Preview client-ready report</div>
-                  <div class="text-white/60 text-xs mt-1">Tap to view the full report layout.</div>
+                  <div class="text-white/60 text-xs mt-1">Tap to preview inside page.</div>
                 </div>
                 <div class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border border-purple-500/30 bg-purple-500/10">
                   <svg class="w-4 h-4 text-purple-300" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -373,17 +373,24 @@
               </div>
             </div>
           </button>
+
+          <div id="mini-report-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-6">
+            <div class="relative w-full max-w-5xl h-[85vh] bg-slate-950 rounded-2xl overflow-hidden border border-purple-500/20">
+              <button id="mini-report-close" class="absolute top-4 right-4 text-white/70 hover:text-white text-sm">Close ✕</button>
+              <iframe id="mini-report-iframe" src="" class="w-full h-full border-0"></iframe>
+            </div>
+          </div>
         </div>
 
         <div class="mt-6">
-          <button id="preview-report-btn" type="button" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+          <a id="preview-report-btn" href="/report.html" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2" rel="noopener">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1" />
               <path d="M12 12v6" />
               <path d="M9 15l3 3 3-3" />
             </svg>
             Preview Report &amp; Download
-          </button>
+          </a>
         </div>
        </div>
 
@@ -788,15 +795,14 @@
             assert("parser_token_available_exists", !!document.getElementById("parser-token-available"));
             assert("parser_token_input_exists", !!document.getElementById("parser-token-id"));
             assert("parser_token_save_exists", !!document.getElementById("parser-save-token"));
-
             // Report preview UI should exist
             assert("mini_report_btn_exists", !!document.getElementById("mini-report-btn"));
-            assert("report_overlay_back_exists", !!document.getElementById("report-overlay-back"));
-            assert("report_overlay_exists", !!document.getElementById("report-overlay"));
-            assert("report_overlay_iframe_exists", !!document.getElementById("report-overlay-iframe"));
-
-            // renderPricing should exist
+            assert("preview_report_btn_exists", !!document.getElementById("preview-report-btn"));
+// renderPricing should exist
             assert("render_pricing_exists", typeof renderPricing === "function");
+
+            // Cal config should not contain invalid tokens
+            assert("cal_namespace_exists", typeof window.Cal === "function");
           }
 
           function renderPricing() {
@@ -873,7 +879,9 @@
             const el = document.getElementById("parser-token-status");
             if (!el) return;
             el.textContent = String(text || "");
-            el.className = "mt-2 text-[11px] " + (tone === "error" ? "text-red-300" : tone === "ok" ? "text-green-300" : "text-white/50");
+            el.className =
+              "mt-2 text-[11px] " +
+              (tone === "error" ? "text-red-300" : tone === "ok" ? "text-green-300" : "text-white/50");
           }
 
           function setParserAvailable(val) {
@@ -883,8 +891,6 @@
           }
 
           async function fetchTokenBalance(tokenId) {
-            // IMPORTANT: This is a single read-only call.
-            // Confirm the endpoint you want for token availability.
             const candidates = ["https://api.taxmonitor.pro", window.location.origin].filter(Boolean).sort();
             let lastErr = null;
 
@@ -894,7 +900,11 @@
                 const res = await fetch(url);
                 const text = await res.text();
                 let data;
-                try { data = JSON.parse(text); } catch { data = { raw: text }; }
+                try {
+                  data = JSON.parse(text);
+                } catch {
+                  data = { raw: text };
+                }
                 if (!res.ok) throw new Error(data?.error || data?.message || `Request failed (${res.status})`);
                 return { ok: true, base, data };
               } catch (e) {
@@ -954,7 +964,6 @@
               });
             }
 
-            // Passive refresh if token already exists.
             if (existing) {
               setParserTokenStatus("Checking token availability…", "neutral");
               fetchTokenBalance(existing).then((out) => {
@@ -966,12 +975,53 @@
             }
           }
 
+          function initMiniReportOverlay() {
+            const btn = document.getElementById("mini-report-btn");
+            const closeBtn = document.getElementById("mini-report-close");
+            const frame = document.getElementById("mini-report-iframe");
+            const overlay = document.getElementById("mini-report-overlay");
+
+            if (!btn || !closeBtn || !frame || !overlay) return;
+
+            function openOverlay() {
+              overlay.classList.remove("hidden");
+              overlay.setAttribute("aria-hidden", "false");
+              frame.src = "/report-preview.html";
+              document.body.style.overflow = "hidden";
+            }
+
+            function closeOverlay() {
+              overlay.classList.add("hidden");
+              overlay.setAttribute("aria-hidden", "true");
+              frame.src = "";
+              document.body.style.overflow = "";
+            }
+
+            btn.addEventListener("click", (e) => {
+              e.preventDefault();
+              openOverlay();
+            });
+
+            closeBtn.addEventListener("click", (e) => {
+              e.preventDefault();
+              closeOverlay();
+            });
+
+            overlay.addEventListener("click", (e) => {
+              if (e.target === overlay) closeOverlay();
+            });
+
+            document.addEventListener("keydown", (e) => {
+              if (e.key === "Escape" && !overlay.classList.contains("hidden")) closeOverlay();
+            });
+          }
+
           function initAll() {
-            // Tests should not run in production unless explicitly asked.
             const url = new URL(window.location.href);
             const run = String(url.searchParams.get("runTests") || "").trim().toLowerCase();
             if (run === "1" || run === "true") runTests();
 
+            initMiniReportOverlay();
             initParserTokenControls();
             renderPricing();
           }
@@ -1001,7 +1051,7 @@
    <!-- Toast Container -->
   <div id="toast-container"></div>
 
-  <!-- Cal element-click embed code begins -->
+  <!-- Cal.com embed (single loader + config). Fixes the invalid token syntax error. -->
   <script type="text/javascript">
     (function (C, A, L) {
       let p = function (a, ar) { a.q.push(ar); };
@@ -1032,158 +1082,25 @@
 
     Cal("init", "tax-monitor-transcript-support", { origin: "https://app.cal.com" });
 
+    // Brand color: purple for BOTH themes.
     Cal.ns["tax-monitor-transcript-support"]("ui", {
       cssVarsPerTheme: {
-        light: { "cal-brand": "#a855f7" },
-        dark: { "cal-brand": "#a855f7" }
+        dark: { "cal-brand": "#a855f7" },
+        light: { "cal-brand": "#a855f7" }
       },
       hideEventTypeDetails: false,
       layout: "month_view"
     });
-  </script>
-  <!-- Cal element-click embed code ends -->
 
-  <!-- CAL.COM FLOATING SUPPORT -->
-  <script type="text/javascript" id="cal-embed-loader">
-    (function (C, A, L) { let p = function (a, ar) { a.q.push(ar); }; let d = C.document; C.Cal = C.Cal || function () { let cal = C.Cal; let ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { const api = function () { p(api, arguments); }; const namespace = ar[1]; api.q = api.q || []; if(typeof namespace === "string"){cal.ns[namespace] = cal.ns[namespace] || api;p(cal.ns[namespace], ar);p(cal, ["initNamespace", namespace]);} else p(cal, ar); return;} p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-  </script>
-
-  <script type="text/javascript" id="cal-embed-config">
-    Cal("init", "tax-monitor-transcript-support", {origin:"https://app.cal.com"});
-
+    // Floating support button
     Cal.ns["tax-monitor-transcript-support"]("floatingButton", {
-      "calLink":"tax-monitor-pro/tax-monitor-transcript-support",
-      "config":{
-        "layout":"month_view",
-        "useSlotsViewOnSmallScreen":"true"
-      },
-      "buttonText":"Book Transcript Support"
-    });
-
-    Cal.ns["tax-monitor-transcript-support"]("ui", {
-      "cssVarsPerTheme":{
-        "light":{"cal-brand":"#292929"},
-        "dark":{"cal-brand":"#a855f7"}
-      },
-      "hideEventTypeDetails":false,
-      "layout":"month_view"
+      calLink: "tax-monitor-pro/tax-monitor-transcript-support",
+      buttonText: "Book Transcript Support",
+      config: {
+        layout: "month_view",
+        useSlotsViewOnSmallScreen: "true"
+      }
     });
   </script>
-  <!-- END CAL.COM FLOATING SUPPORT -->
-   
-
-
-  <!-- Full-viewport report preview overlay -->
-  <div id="report-overlay" class="fixed inset-0 z-[100] hidden bg-slate-950/95">
-    <div class="h-full w-full">
-      <div class="relative h-full w-full">
-        <button id="report-overlay-back" type="button" class="absolute left-4 top-4 z-[101] inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/70 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition">
-          <svg class="w-5 h-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-          Back
-        </button>
-
-        <div class="h-full w-full">
-        <iframe id="report-overlay-iframe" class="h-full w-full" title="Report preview" src="" loading="lazy"></iframe>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    (function () {
-      const REPORT_SRC = "/assets/report.html";
-
-      function fileToDataUrl(file) {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(String(reader.result || ""));
-          reader.onerror = () => reject(new Error("file_read_failed"));
-          reader.readAsDataURL(file);
-        });
-      }
-
-      async function storeBrandLogoFromInput() {
-        const input = document.getElementById("brand-logo");
-        if (!input) return;
-
-        input.addEventListener("change", async () => {
-          const file = input.files && input.files[0];
-          if (!file) return;
-          if (!String(file.type || "").startsWith("image/")) return;
-
-          try {
-            const dataUrl = await fileToDataUrl(file);
-            if (!dataUrl.startsWith("data:image/")) return;
-            localStorage.setItem("tmp_report_logo", dataUrl);
-          } catch (_) {
-            // Silent fail. Users love that.
-          }
-        });
-      }
-
-      storeBrandLogoFromInput();
-
-      function openOverlay() {
-        const overlay = document.getElementById("report-overlay");
-        const iframe = document.getElementById("report-overlay-iframe");
-        if (!overlay || !iframe) return;
-
-        // Preserve scroll position so humans don't lose their place and spiral.
-        const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
-        overlay.dataset.scrollY = String(scrollY);
-
-        iframe.src = REPORT_SRC;
-        overlay.classList.remove("hidden");
-        document.documentElement.style.overflow = "hidden";
-        document.body.style.overflow = "hidden";
-      }
-
-      function closeOverlay() {
-        const overlay = document.getElementById("report-overlay");
-        const iframe = document.getElementById("report-overlay-iframe");
-        if (!overlay || !iframe) return;
-
-        overlay.classList.add("hidden");
-        document.documentElement.style.overflow = "";
-        document.body.style.overflow = "";
-
-        // Clear src to stop any ongoing work in the iframe
-        iframe.src = "";
-
-        const scrollY = Number(overlay.dataset.scrollY || "0");
-        window.scrollTo(0, Number.isFinite(scrollY) ? scrollY : 0);
-      }
-
-      function wire() {
-        const mini = document.getElementById("mini-report-btn");
-        const previewBtn = document.getElementById("preview-report-btn");
-        const back = document.getElementById("report-overlay-back");
-        const overlay = document.getElementById("report-overlay");
-
-        mini?.addEventListener("click", openOverlay);
-        previewBtn?.addEventListener("click", openOverlay);
-        back?.addEventListener("click", closeOverlay);
-
-        // Escape closes overlay
-        window.addEventListener("keydown", (e) => {
-          if (e.key === "Escape") closeOverlay();
-        });
-
-        // Clicking the dark backdrop closes (but not clicks inside the iframe)
-        overlay?.addEventListener("click", (e) => {
-          if (e.target === overlay) closeOverlay();
-        });
-      }
-
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", wire);
-      } else {
-        wire();
-      }
-    })();
-  </script>
-
 </body>
 </html>
-
