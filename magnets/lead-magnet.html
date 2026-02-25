@@ -27,6 +27,24 @@
     <link rel="stylesheet" href="/styles/site.css?v=1" />
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+
+    <style>
+      @keyframes tmFadeUp {
+        0% { opacity: 0; transform: translateY(14px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+
+      .tm-anim { opacity: 0; transform: translateY(14px); }
+      .tm-loaded .tm-anim { animation: tmFadeUp 700ms ease forwards; }
+      .tm-loaded .tm-anim.delay-1 { animation-delay: 80ms; }
+      .tm-loaded .tm-anim.delay-2 { animation-delay: 160ms; }
+      .tm-loaded .tm-anim.delay-3 { animation-delay: 240ms; }
+
+      @media (prefers-reduced-motion: reduce) {
+        .tm-anim { opacity: 1 !important; transform: none !important; }
+        .tm-loaded .tm-anim { animation: none !important; }
+      }
+    </style>
   </head>
 
   <body class="h-full noise font-sans">
@@ -35,14 +53,14 @@
 
       <!-- Lead Magnet Nav (matches product toolbar style) -->
       <div class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
-        <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <div class="flex items-center gap-3 text-white">
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+          <a href="https://transcript.taxmonitor.pro/" class="flex items-center gap-3 text-white">
             <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-slate-950 font-extrabold">TM</span>
             <div class="leading-tight">
               <div class="text-sm font-semibold">Transcript.Tax Monitor Pro</div>
               <div class="text-[11px] text-white/60">Free IRS Transcript Code Guide</div>
             </div>
-          </div>
+          </a>
 
           <div class="flex items-center gap-2">
             <a href="/" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/60 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition">
@@ -65,9 +83,9 @@
       </div>
 
       <section class="min-h-[85vh] gradient-hero flex items-center py-12">
-        <div class="max-w-6xl mx-auto px-6 w-full grid lg:grid-cols-2 gap-12 items-center">
+        <div class="max-w-7xl mx-auto px-6 w-full grid lg:grid-cols-2 gap-12 items-center">
           <!-- Left -->
-          <div class="text-white">
+          <div class="text-white tm-anim">
             
 
             <div class="counter inline-block mb-4">
@@ -128,7 +146,7 @@
           </div>
 
           <!-- Right (Form) -->
-          <div class="card-elevated p-8 max-w-md mx-auto w-full">
+          <div class="card-elevated p-8 max-w-md mx-auto w-full tm-anim delay-2">
             <h3 class="font-display text-2xl font-bold text-midnight text-center mb-2">Get Instant Access</h3>
             <p class="text-gray-500 text-center mb-6">Enter your details below</p>
 
@@ -165,6 +183,10 @@
 
     <script>
       (function () {
+        // Prevent the page from loading "flat".
+        // Adds a tiny entrance animation matching the main site vibe.
+        requestAnimationFrame(() => document.documentElement.classList.add("tm-loaded"));
+
         const form = document.getElementById("lead-form");
         const errorEl = document.getElementById("lead-error");
 
