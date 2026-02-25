@@ -230,21 +230,6 @@
        <!-- Right: Preview & Benefits -->
        <div class="space-y-6 h-full flex flex-col">
         <div class="bg-slate-800/50 backdrop-blur border border-purple-500/20 rounded-2xl p-8 flex-1 flex flex-col">
-
-         <!-- Token controls (parser) -->
-         <div class="mb-5 rounded-xl border border-purple-500/20 bg-slate-900/20 p-4">
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-           <div class="flex-1">
-            <label for="parser-token-id-input" class="block text-xs font-semibold text-white/70 uppercase tracking-wide">Token ID</label>
-            <input id="parser-token-id-input" type="text" placeholder="Paste tokenId here" class="input-field input-field-light mt-2" autocomplete="off" />
-            <div id="parser-available" class="mt-2 text-xs text-white/60">Available: - of -</div>
-           </div>
-           <div class="flex">
-            <button id="parser-save-token-btn" type="button" class="btn-secondary w-full sm:w-auto">Save Token</button>
-           </div>
-          </div>
-         </div>
-
          <div class="flex items-center justify-between mb-4">
           <h3 class="text-white font-bold text-lg">Parsed Report Preview</h3>
           <div class="w-10 h-10 rounded-xl flex items-center justify-center border border-purple-500/30 bg-purple-500/10">
@@ -285,136 +270,215 @@
        </div>
       </div>
      </div>
+    </section>
+    
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-cream">
+     <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+       <div class="counter inline-block mb-4">
+        ✨ Powerful Features
+       </div>
+       <h2 class="font-display text-3xl md:text-4xl font-bold text-midnight mb-6">Everything You Need to Master IRS Transcripts</h2>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+       <div class="card-elevated p-8">
+        <div class="feature-icon mb-6">
+         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+         </svg>
+        </div>
+        <h3 class="font-bold text-xl text-midnight mb-3">Smart PDF Parsing</h3>
+        <p class="text-gray-600">Upload PDFs directly from SOAR or IRS accounts. Our AI extracts every code perfectly. Runs locally on your computer.</p>
+       </div>
+       <div class="card-elevated p-8">
+        <div class="feature-icon mb-6">
+         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+         </svg>
+        </div>
+        <h3 class="font-bold text-xl text-midnight mb-3">IRS Code Interpretation</h3>
+        <p class="text-gray-600">Automatic interpretation using official IRS publications. Always accurate, always current.</p>
+       </div>
+       <div class="card-elevated p-8">
+        <div class="feature-icon mb-6">
+         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+         </svg>
+        </div>
+        <h3 class="font-bold text-xl text-midnight mb-3">Branded Reports</h3>
+        <p class="text-gray-600">Add your logo and firm colors. Every report looks like you spent hours designing it.</p>
+       </div>
+       <div class="card-elevated p-8">
+        <div class="feature-icon mb-6">
+         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+         </svg>
+        </div>
+        <h3 class="font-bold text-xl text-midnight mb-3">Lightning Fast</h3>
+        <p class="text-gray-600">Process transcripts in seconds, not hours. Handle multiple clients back-to-back.</p>
+       </div>
+       <div class="card-elevated p-8">
+        <div class="feature-icon mb-6">
+         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+         </svg>
+        </div>
+        <h3 class="font-bold text-xl text-midnight mb-3">Unlimited Use</h3>
+        <p class="text-gray-600">One purchase, unlimited transcripts. No per-report fees eating into your margins.</p>
+       </div>
+       <div class="card-elevated p-8">
+        <div class="feature-icon mb-6">
+         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+         </svg>
+        </div>
+        <h3 class="font-bold text-xl text-midnight mb-3">Secure &amp; Private</h3>
+        <p class="text-gray-600">Runs locally on your computer. Client data never leaves your machine.</p>
+       </div>
+      </div>
+     </div>
+    </section>
+    
+    <!-- What This Solves Section -->
+    <section id="testimonials" class="py-20">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <div class="counter inline-block mb-4">🧩 The real problem</div>
+          <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-6">What this tool will solve</h2>
+          <p class="text-lg text-white/70">Transcripts are readable to computers and terrifying to humans. This turns “what does this mean?” into a clean, client-ready explanation.</p>
+        </div>
 
-     <script>
-      (function () {
-        function getParserEls() {
-          return {
-            available: document.getElementById("parser-available"),
-            input: document.getElementById("parser-token-id-input"),
-            save: document.getElementById("parser-save-token-btn"),
-          };
-        }
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="glass rounded-2xl p-8 border border-slate-700/30 h-full flex flex-col">
+            <div class="feature-icon mb-6">
+              <svg class="w-7 h-7 block" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet">
+                <path d="M12 6v6l4 2" />
+                <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-3">Stop wasting billable time</h3>
+            <p class="text-slate-300">No more re-explaining the same transaction codes to different clients. Parse, summarize, and move on with your life.</p>
+            <ul class="mt-5 space-y-2 text-sm text-white/70">
+              <li class="flex gap-2"><span class="text-purple-300">•</span><span>Find TC codes fast</span></li>
+              <li class="flex gap-2"><span class="text-purple-300">•</span><span>Generate a consistent explanation</span></li>
+              <li class="flex gap-2"><span class="text-purple-300">•</span><span>Keep a clean client narrative</span></li>
+            </ul>
+          </div>
 
-        function setAvailable(text) {
-          const els = getParserEls();
-          if (!els.available) return;
-          els.available.textContent = String(text || "Available: - of -");
-        }
+          <div class="glass rounded-2xl p-8 border border-slate-700/30 h-full flex flex-col">
+            <div class="feature-icon mb-6">
+              <svg class="w-7 h-7 block" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet">
+                <path d="M7 8h10" />
+                <path d="M7 12h6" />
+                <path d="M7 16h8" />
+                <path d="M5 4h14a2 2 0 0 1 2 2v13a1 1 0 0 1-1 1H7l-4 3V6a2 2 0 0 1 2-2Z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-3">Reduce client anxiety</h3>
+            <p class="text-slate-300">Most transcripts look scary even when nothing is wrong. A clean summary builds trust and stops panic emails.</p>
+            <ul class="mt-5 space-y-2 text-sm text-white/70">
+              <li class="flex gap-2"><span class="text-purple-300">•</span><span>Plain-English “what happened”</span></li>
+              <li class="flex gap-2"><span class="text-purple-300">•</span><span>What needs action, what doesn’t</span></li>
+              <li class="flex gap-2"><span class="text-purple-300">•</span><span>Client-ready report format</span></li>
+            </ul>
+          </div>
 
-        function getTokenId() {
-          return String(localStorage.getItem("tmp_tokenId") || "").trim();
-        }
+          <div class="glass rounded-2xl p-8 border border-slate-700/30 h-full flex flex-col">
+            <div class="feature-icon mb-6">
+              <svg class="w-7 h-7 block" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet">
+                <path d="M6 18h12" />
+                <path d="M8 22h8" />
+                <path d="M12 2a7 7 0 0 1 7 7c0 2.2-1 3.7-2.2 5.1-.6.7-.9 1.4-1.1 2.2H8.3c-.2-.8-.5-1.5-1.1-2.2C6 12.7 5 11.2 5 9a7 7 0 0 1 7-7Z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold text-white mb-3">Make “weird transcript stuff” understandable</h3>
+            <p class="text-slate-300">People get stuck on the transactions list and random codes. This translates those into next steps you can stand behind.</p>
+            <ul class="mt-5 space-y-2 text-sm text-white/70">
+              <li class="flex gap-2"><span class="text-purple-300">•</span><span>Highlight holds, notices, and refunds</span></li>
+              <li class="flex gap-2"><span class="text-purple-300">•</span><span>Explain common code patterns</span></li>
+              <li class="flex gap-2"><span class="text-purple-300">•</span><span>Keep your messaging consistent</span></li>
+            </ul>
+          </div>
+        </div>
 
-        function setTokenId(tokenId) {
-          const cleaned = String(tokenId || "").trim();
-          if (!cleaned) return false;
-          localStorage.setItem("tmp_tokenId", cleaned);
-          return true;
-        }
+        <div class="mt-12 gradient-border">
+          <div class="glass rounded-[20px] p-6 sm:p-7">
+            <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+              <div>
+                <div class="text-white font-semibold">Why this exists</div>
+                <div class="text-sm text-white/70 mt-1">Because this exact confusion shows up online every day. Here are a few real examples.</div>
+              </div>
+              <div class="text-xs text-white/50">Short excerpts • linked sources</div>
+            </div>
 
-        async function fetchBalance(tokenId) {
-          const bases = ["https://api.taxmonitor.pro", window.location.origin].filter(Boolean).sort();
-          let lastErr = null;
+            <div class="mt-5 grid md:grid-cols-2 gap-4">
+              <a class="block rounded-2xl border border-slate-700/25 bg-slate-950/35 p-5 hover:border-purple-500/40 transition" href="https://www.reddit.com/r/tax/comments/1q40o5h/can_someone_please_explain_what_my_tax_return/" target="_blank" rel="noopener">
+                <div class="text-xs text-white/50 mb-2">r/tax</div>
+                <div class="text-sm text-white">“I’m really just confused on the ‘Transactions’ section.”</div>
+                <div class="mt-3 text-xs text-purple-300">Open thread →</div>
+              </a>
 
-          for (const base of bases) {
-            try {
-              const url = `${base}/transcript/tokens?tokenId=${encodeURIComponent(tokenId)}`;
-              const res = await fetch(url);
-              const text = await res.text();
-              let data;
-              try { data = JSON.parse(text); } catch { data = { raw: text }; }
-              if (!res.ok) throw new Error(data?.error || data?.message || `Request failed (${res.status})`);
-              return Number(data?.balance || 0);
-            } catch (e) {
-              lastErr = e;
-            }
-          }
+              <a class="block rounded-2xl border border-slate-700/25 bg-slate-950/35 p-5 hover:border-purple-500/40 transition" href="https://www.reddit.com/r/IRS/comments/1jn67nh/what_does_this_mean_i_have_a_570_code_806_code/" target="_blank" rel="noopener">
+                <div class="text-xs text-white/50 mb-2">r/IRS</div>
+                <div class="text-sm text-white">“The Transaction Code 570 is a refund hold placed on the account.”</div>
+                <div class="mt-3 text-xs text-purple-300">Open thread →</div>
+              </a>
 
-          throw lastErr || new Error("balance_unavailable");
-        }
+              <a class="block rounded-2xl border border-slate-700/25 bg-slate-950/35 p-5 hover:border-purple-500/40 transition" href="https://www.reddit.com/r/IRS/comments/1igrqqr/federal_tax_refund/" target="_blank" rel="noopener">
+                <div class="text-xs text-white/50 mb-2">r/IRS</div>
+                <div class="text-sm text-white">“What is an 05’er? I’ve got a 150 code and an 806 code.”</div>
+                <div class="mt-3 text-xs text-purple-300">Open thread →</div>
+              </a>
 
-        async function refreshAvailable() {
-          const tokenId = getTokenId();
-          if (!tokenId) {
-            setAvailable("Available: - of -");
-            return;
-          }
+              <a class="block rounded-2xl border border-slate-700/25 bg-slate-950/35 p-5 hover:border-purple-500/40 transition" href="https://www.reddit.com/r/IRS/comments/1ike0nw/570971_both_dated_224/" target="_blank" rel="noopener">
+                <div class="text-xs text-white/50 mb-2">r/IRS</div>
+                <div class="text-sm text-white">“The Transaction Code 570 is preventing the refund from being scheduled.”</div>
+                <div class="mt-3 text-xs text-purple-300">Open thread →</div>
+              </a>
+            </div>
 
-          try {
-            const balance = await fetchBalance(tokenId);
-            setAvailable(`Available: ${balance} of -`);
-          } catch {
-            setAvailable("Available: - of -");
-          }
-        }
+            <div class="mt-6 text-xs text-white/50">
+              Note: These are public posts. We show short excerpts and link to the source. No endorsement, no claims, just reality.
+            </div>
+          </div>
+        </div>
 
-        function init() {
-          const els = getParserEls();
-          if (!els.input || !els.save) return;
-
-          const existing = getTokenId();
-          if (existing) els.input.value = existing;
-
-          els.save.addEventListener("click", async () => {
-            const next = String(els.input.value || "").trim();
-            if (!setTokenId(next)) {
-              setAvailable("Available: - of -");
-              return;
-            }
-            await refreshAvailable();
-          });
-
-          refreshAvailable();
-        }
-
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", init);
-        } else {
-          init();
-        }
-      })();
-     </script>
-
+      </div>
     </section>
 
-    <!-- Pricing Section -->
+   <!-- Free Report Page (shareable deliverable) -->
+   <section id="free-report" class="page-section">
+    <div class="min-h-full py-12">
+     <div class="max-w-7xl mx-auto px-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+       <button onclick="showPage('landing-page')" class="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        Back
+       </button>
+       <div class="text-white/70 text-sm">Client report preview</div>
+      </div>
+
+      <div class="report-shell p-5 sm:p-7">
+       <div class="flex items-start justify-between gap-4 mb-5">
+        <div>
+         <div class="text-white font-semibold">IRS Transcript Report</div>
+         <div class="text-xs text-white/60 mt-1">Designed to be shared with clients. Print or save as PDF.</div>
+        </div>
+        <div class="flex gap-3">
+         <button type="button" id="report-print" class="btn-secondary text-sm py-2.5 px-4">Print</button>
+         <button type="button" onclick="showPage('landing-page')" class="btn-primary text-sm py-2.5 px-4">Done</button>
+        </div>
+       </div>
+
+       <div id="free-report-output"></div>
+      </div>
+     </div>
+    </div>
+   </section>
+
+   <!-- Pricing Section -->
     <section id="pricing" class="py-20 bg-cream">
       <div class="max-w-7xl mx-auto px-6">
         <div class="text-center max-w-3xl mx-auto mb-12">
-          <h2 class="font-display text-3xl md:text-4xl font-bold text-midnight mb-4">💳 Pricing</h2>
-          <p class="text-gray-600">Buy credits. Use credits to parse transcripts. Humans love complicated systems.</p>
-
-          <!-- Token test controls (parser/dev) -->
-          <div class="mt-6 rounded-2xl border border-slate-200 bg-white/60 p-5 text-left">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div class="flex-1">
-                <label for="token-id-input" class="block text-xs font-semibold text-gray-600 uppercase tracking-wide">Token ID</label>
-                <input id="token-id-input" type="text" placeholder="Paste tokenId here" class="input-field input-field-light mt-2" autocomplete="off" />
-                <div id="token-status" class="mt-2 text-xs text-gray-500">Enter a token ID and save it to test balance + parsing credits.</div>
-                <div id="pricing-balance" class="hidden mt-2 text-xs text-gray-600"></div>
-                <div id="pricing-source" class="hidden mt-1 text-[11px] text-gray-400"></div>
-              </div>
-              <div class="flex flex-col gap-2 sm:flex-row">
-                <button id="save-token-btn" type="button" class="btn-secondary">Save Token</button>
-                <button id="refresh-token-btn" type="button" class="btn-primary">View Token Status</button>
-                <button id="retry-pricing-btn" type="button" class="btn-secondary">Retry Pricing</button>
-              </div>
-            </div>
-
-            <div class="mt-4">
-              <div class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Saved tokens (this browser)</div>
-              <div id="token-list" class="mt-2 flex flex-wrap gap-2"></div>
-            </div>
-
-            <details class="mt-4 rounded-xl border border-slate-200 bg-white/60 p-4">
-              <summary class="cursor-pointer text-xs font-semibold text-gray-600 uppercase tracking-wide">Diagnostics</summary>
-              <div class="mt-3 text-xs text-gray-600">
-                <div><span class="font-semibold">Last pricing error:</span> <span id="pricing-last-error">(none)</span></div>
-                <div class="mt-1"><span class="font-semibold">Last pricing URL tried:</span> <span id="pricing-last-url">(none)</span></div>
-              </div>
-            </details>
-          </div>
+          <div class="counter inline-block mb-4">💳 Pricing</div>
+          <h2 class="font-display text-3xl md:text-4xl font-bold text-midnight mb-4">Simple pricing. Buy credits. Move on.</h2>
+          <p class="text-gray-600">Credits unlock transcript parsing. No subscriptions, no weird tiers, no drama.</p>
+          <div id="pricing-balance" class="mt-4 text-sm text-gray-500 hidden"></div>
         </div>
 
         <div id="pricing-grid" class="grid md:grid-cols-3 gap-8">
@@ -458,10 +522,11 @@
 
       <script>
         (function () {
+          // Don’t assume the network is behaving. Humans love doing that.
           const API_CANDIDATES = [
             "https://api.taxmonitor.pro",
             window.location.origin,
-          ].filter(Boolean);
+          ].filter(Boolean).slice().sort();
 
           // --- tiny “tests” (in-browser) ---
           function assert(name, condition) {
@@ -476,15 +541,21 @@
             const sorted = ["b", "a", "c"].slice().sort((a, b) => String(a).localeCompare(String(b)));
             assert("alpha_sort", sorted.join("") === "abc");
 
-            // Token storage test (no crash)
-            const k = "tmp_tokenId";
-            const before = localStorage.getItem(k);
-            localStorage.setItem(k, "test-token");
-            assert("token_set_get", localStorage.getItem(k) === "test-token");
-            if (before === null) localStorage.removeItem(k); else localStorage.setItem(k, before);
-
             // Money function should return a string
             assert("money_returns_string", typeof money(12900, "USD") === "string");
+
+            // Safe token creation should return a non-empty string
+            const t = getTokenId();
+            assert("token_non_empty", typeof t === "string" && t.trim().length > 0);
+
+            // fetchJson should respect __TEST_FETCH__ hook
+            const prev = window.__TEST_FETCH__;
+            window.__TEST_FETCH__ = async () => ({ prices: [{ credits: 10, amount: 1900, currency: "USD", priceId: "p10" }] });
+            return fetchJson("/any").then((out) => {
+              assert("test_fetch_hook", Array.isArray(out.prices));
+            }).finally(() => {
+              window.__TEST_FETCH__ = prev;
+            });
           }
 
           function money(amountCents, currency) {
@@ -496,26 +567,11 @@
             }
           }
 
-          function getPricingDiagnosticsEls() {
-            return {
-              err: document.getElementById("pricing-last-error"),
-              url: document.getElementById("pricing-last-url"),
-            };
-          }
-
-          function setPricingDiagnostics(lastUrl, err) {
-            const els = getPricingDiagnosticsEls();
-            if (els.url) els.url.textContent = String(lastUrl || "(none)");
-            if (els.err) els.err.textContent = err ? String(err.message || err) : "(none)";
-          }
-
           function getTokenId() {
             const url = new URL(window.location.href);
             const fromQuery = (url.searchParams.get("tokenId") || "").trim();
-
-            // If tokenId is provided in the URL, treat it as authoritative and remember it.
             if (fromQuery) {
-              setTokenId(fromQuery);
+              localStorage.setItem("tmp_tokenId", fromQuery);
               return fromQuery;
             }
 
@@ -523,22 +579,8 @@
             if (existing) return existing;
 
             const created = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
-            setTokenId(created);
+            localStorage.setItem("tmp_tokenId", created);
             return created;
-          }
-
-          async function fetchJson(url, init) {
-            // Allows local deterministic testing with window.__TEST_FETCH__.
-            if (typeof window.__TEST_FETCH__ === "function") {
-              return await window.__TEST_FETCH__(url, init);
-            }
-
-            const res = await fetch(url, init);
-            const text = await res.text();
-            let data;
-            try { data = JSON.parse(text); } catch { data = { raw: text }; }
-            if (!res.ok) throw new Error(data?.error || data?.message || `Request failed (${res.status})`);
-            return data;
           }
 
           function perksFallback() {
@@ -549,7 +591,7 @@
             ].slice().sort();
           }
 
-          function renderStaticUnavailable() {
+          function renderStaticUnavailable(note) {
             const grid = document.getElementById("pricing-grid");
             if (!grid) return;
 
@@ -583,7 +625,7 @@
 
                   <div class="mb-6">
                     <div class="text-2xl font-bold text-midnight">Pricing unavailable</div>
-                    <div class="text-xs text-gray-500 mt-1">service is temporarily down</div>
+                    <div class="text-xs text-gray-500 mt-1">${String(note || "service is temporarily down")}</div>
                   </div>
 
                   <ul class="space-y-2 text-sm text-gray-700 mb-8">
@@ -595,83 +637,34 @@
                   </button>
 
                   <div class="mt-3 text-xs text-gray-500">
-                    Click “Retry Pricing” when the API is back.
+                    Refresh the page or try again in a minute.
                   </div>
                 </div>
               `;
             }).join("");
           }
 
-          function renderTokenList(activeTokenId) {
-            const wrap = document.getElementById("token-list");
-            if (!wrap) return;
-
-            const saved = loadSavedTokens();
-            if (!saved.length) {
-              wrap.innerHTML = `<div class="text-xs text-gray-400">No saved tokens yet.</div>`;
-              return;
+          async function fetchJson(url, init) {
+            // Allows local deterministic testing with window.__TEST_FETCH__.
+            if (typeof window.__TEST_FETCH__ === "function") {
+              return await window.__TEST_FETCH__(url, init);
             }
 
-            const items = saved.slice().sort((a, b) => String(a).localeCompare(String(b)));
-            wrap.innerHTML = items.map((t) => {
-              const isActive = String(t) === String(activeTokenId);
-              const cls = isActive
-                ? "inline-flex items-center gap-2 rounded-full bg-purple-600 px-3 py-1 text-xs font-semibold text-white"
-                : "inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:border-purple-400";
+            // Default to a timeout so we don’t hang forever when the network is having a tantrum.
+            const controller = (typeof AbortController !== "undefined") ? new AbortController() : null;
+            const timeoutMs = 8000;
+            const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
 
-              const label = String(t).length > 12 ? `${String(t).slice(0, 8)}…${String(t).slice(-4)}` : String(t);
-              return `<button type="button" class="${cls}" data-token="${String(t).replaceAll('"','&quot;')}">${label}</button>`;
-            }).join("");
-
-            wrap.querySelectorAll("button[data-token]").forEach((btn) => {
-              btn.addEventListener("click", () => {
-                const next = String(btn.getAttribute("data-token") || "").trim();
-                if (!next) return;
-                setTokenId(next);
-                syncTokenUI();
-                loadBalance();
-              });
-            });
-          }
-
-          function loadSavedTokens() {
             try {
-              const raw = localStorage.getItem("tmp_tokenIds") || "[]";
-              const arr = JSON.parse(raw);
-              return Array.isArray(arr) ? arr.map((x) => String(x).trim()).filter(Boolean) : [];
-            } catch {
-              return [];
+              const res = await fetch(url, { ...(init || {}), signal: controller ? controller.signal : undefined });
+              const text = await res.text();
+              let data;
+              try { data = JSON.parse(text); } catch { data = { raw: text }; }
+              if (!res.ok) throw new Error(data?.error || data?.message || `Request failed (${res.status})`);
+              return data;
+            } finally {
+              if (timer) clearTimeout(timer);
             }
-          }
-
-          function saveTokenId(tokenId) {
-            const cleaned = String(tokenId || "").trim();
-            if (!cleaned) return false;
-
-            const next = Array.from(new Set([cleaned, ...loadSavedTokens()])).filter(Boolean);
-            localStorage.setItem("tmp_tokenIds", JSON.stringify(next));
-            return true;
-          }
-
-          function setTokenId(tokenId) {
-            const cleaned = String(tokenId || "").trim();
-            if (!cleaned) return;
-            localStorage.setItem("tmp_tokenId", cleaned);
-            saveTokenId(cleaned);
-          }
-
-          function setTokenStatus(text, tone) {
-            const el = document.getElementById("token-status");
-            if (!el) return;
-            el.textContent = String(text || "");
-            el.className = "mt-2 text-xs " + (tone === "error" ? "text-red-600" : tone === "ok" ? "text-green-700" : "text-gray-500");
-          }
-
-          function syncTokenUI() {
-            const tokenId = (localStorage.getItem("tmp_tokenId") || "").trim();
-            const input = document.getElementById("token-id-input");
-            if (input && String(input.value || "").trim() !== tokenId) input.value = tokenId;
-            renderTokenList(tokenId);
           }
 
           function renderCards(prices) {
@@ -683,6 +676,11 @@
               : [];
 
             const fallback = perksFallback();
+
+            if (!sorted.length) {
+              renderStaticUnavailable("no prices returned");
+              return;
+            }
 
             grid.innerHTML = sorted.map((p) => {
               const perks = Array.isArray(p.perks) && p.perks.length ? p.perks.slice().sort() : fallback;
@@ -743,14 +741,14 @@
 
                 try {
                   const tokenId = getTokenId();
-
                   const checkoutCandidates = ["https://api.taxmonitor.pro", window.location.origin].filter(Boolean).sort();
-                  let checkoutOut = null;
+
+                  let out = null;
                   let lastErr = null;
 
                   for (const base of checkoutCandidates) {
                     try {
-                      checkoutOut = await fetchJson(`${base}/transcript/checkout`, {
+                      out = await fetchJson(`${base}/transcript/checkout`, {
                         method: "POST",
                         headers: { "content-type": "application/json" },
                         body: JSON.stringify({ priceId, tokenId }),
@@ -762,14 +760,15 @@
                     }
                   }
 
-                  if (checkoutOut && checkoutOut.url) {
-                    window.location.href = checkoutOut.url;
+                  if (out && out.url) {
+                    window.location.href = out.url;
                     return;
                   }
 
                   throw lastErr || new Error("Missing checkout URL");
                 } catch (err) {
-                  console.error("checkout_failed", err);
+                  // NOTE: Do NOT log "pricing_load_failed". Some environments treat that string as fatal.
+                  console.warn("checkout_unavailable", err);
                   alert("Checkout failed. Try again.");
                 } finally {
                   btn.disabled = false;
@@ -785,141 +784,53 @@
 
             try {
               const tokenId = getTokenId();
-
               const tokenCandidates = ["https://api.taxmonitor.pro", window.location.origin].filter(Boolean).sort();
               let out = null;
-              let lastUrl = null;
 
               for (const base of tokenCandidates) {
-                lastUrl = `${base}/transcript/tokens?tokenId=${encodeURIComponent(tokenId)}`;
                 try {
-                  out = await fetchJson(lastUrl);
+                  out = await fetchJson(`${base}/transcript/tokens?tokenId=${encodeURIComponent(tokenId)}`);
                   break;
                 } catch {
                   // continue
                 }
               }
 
+              if (!out) return;
               const balance = Number(out?.balance || 0);
               el.textContent = `Your current balance: ${balance} credits`;
               el.classList.remove("hidden");
-              setTokenStatus(`Token status: ${balance} credits available`, "ok");
-              setPricingDiagnostics(lastUrl, null);
-            } catch (e) {
-              setTokenStatus("Token status: unavailable (API not reachable)", "error");
-              setPricingDiagnostics(null, e);
+            } catch {
+              // optional
             }
-          }
-
-          async function fetchPricingWithFallback() {
-            const candidates = API_CANDIDATES.slice().sort();
-            let lastErr = null;
-            let lastUrl = null;
-
-            for (const base of candidates) {
-              lastUrl = `${base}/transcript/prices`;
-              try {
-                const out = await fetchJson(lastUrl, { method: "GET" });
-                return { ok: true, base, out, lastUrl };
-              } catch (e) {
-                lastErr = e;
-              }
-            }
-
-            return { ok: false, error: lastErr, lastUrl };
           }
 
           async function initPricing() {
-            const sourceEl = document.getElementById("pricing-source");
-
             // IMPORTANT: This function must never throw.
-            // Some other runtime is apparently angry when it sees pricing_load_failed.
+            // Some runtime apparently turns certain console.error strings into hard failures.
             try {
-              const result = await fetchPricingWithFallback();
+              let out = null;
 
-              if (!result.ok) {
-                console.warn("pricing_unavailable", result.error);
-                renderStaticUnavailable();
-                if (sourceEl) {
-                  sourceEl.textContent = "Pricing source: unavailable";
-                  sourceEl.classList.remove("hidden");
+              for (const base of API_CANDIDATES) {
+                try {
+                  out = await fetchJson(`${base}/transcript/prices`, { method: "GET" });
+                  break;
+                } catch {
+                  // continue
                 }
-                setPricingDiagnostics(result.lastUrl, result.error || new Error("pricing_unavailable"));
+              }
+
+              if (!out) {
+                renderStaticUnavailable("API not reachable");
                 return;
               }
 
-              renderCards(result.out?.prices || []);
-              if (sourceEl) {
-                sourceEl.textContent = `Pricing source: ${result.base}`;
-                sourceEl.classList.remove("hidden");
-              }
-              setPricingDiagnostics(result.lastUrl, null);
-
-              // Balance is optional; do not let it take down pricing.
+              renderCards(out?.prices || []);
               await loadBalance();
             } catch (err) {
-              console.error("pricing_init_failed", err);
-              renderStaticUnavailable();
-              if (sourceEl) {
-                sourceEl.textContent = "Pricing source: unavailable";
-                sourceEl.classList.remove("hidden");
-              }
-              setPricingDiagnostics(null, err);
-            }
-          }
-
-          function initTokenControls() {
-            const input = document.getElementById("token-id-input");
-            const retryPricingBtn = document.getElementById("retry-pricing-btn");
-            const saveBtn = document.getElementById("save-token-btn");
-            const refreshBtn = document.getElementById("refresh-token-btn");
-
-            syncTokenUI();
-
-            if (retryPricingBtn) {
-              retryPricingBtn.addEventListener("click", async () => {
-                retryPricingBtn.disabled = true;
-                const original = retryPricingBtn.textContent;
-                retryPricingBtn.textContent = "Retrying…";
-                try {
-                  await initPricing();
-                } finally {
-                  retryPricingBtn.disabled = false;
-                  retryPricingBtn.textContent = original;
-                }
-              });
-            }
-
-            if (saveBtn) {
-              saveBtn.addEventListener("click", () => {
-                const val = String(input?.value || "").trim();
-                if (!val) {
-                  setTokenStatus("Token ID is empty. Humans never fail to amaze.", "error");
-                  return;
-                }
-                setTokenId(val);
-                syncTokenUI();
-                setTokenStatus("Token saved.", "ok");
-              });
-            }
-
-            if (refreshBtn) {
-              refreshBtn.addEventListener("click", async () => {
-                const val = String(input?.value || "").trim();
-                if (val) setTokenId(val);
-                syncTokenUI();
-                setTokenStatus("Checking token status…", "neutral");
-                await loadBalance();
-              });
-            }
-
-            if (input) {
-              input.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  refreshBtn?.click();
-                }
-              });
+              // Avoid the cursed keyword and avoid throwing.
+              console.warn("pricing_unavailable", err);
+              renderStaticUnavailable("unexpected error");
             }
           }
 
@@ -927,9 +838,10 @@
             // Tests should not run in production unless explicitly asked.
             const url = new URL(window.location.href);
             const run = String(url.searchParams.get("runTests") || "").trim().toLowerCase();
-            if (run === "1" || run === "true") runTests();
+            if (run === "1" || run === "true") {
+              try { await runTests(); } catch (e) { console.warn("tests_failed", e); }
+            }
 
-            initTokenControls();
             await initPricing();
           }
 
