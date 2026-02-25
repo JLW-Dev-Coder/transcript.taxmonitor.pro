@@ -1,42 +1,60 @@
 <!-- partials/footer.html -->
-<footer class="border-t border-white/10 bg-slate-950/40 text-white/70">
-  <div class="mx-auto max-w-7xl px-6 py-10">
-    <div class="grid gap-10 md:grid-cols-3">
-      <div>
-        <div class="flex items-center gap-3">
-          <img src="/assets/logo.svg" alt="Tax Monitor Pro" class="h-8 w-8" />
-          <div class="font-semibold text-white">Transcript.Tax Monitor Pro</div>
-        </div>
-        <p class="mt-3 text-sm leading-relaxed text-white/60">
-          IRS transcript parsing and client-ready reporting for tax pros who would rather not spend their lives translating transaction codes.
+<footer class="border-t border-slate-800/60 bg-slate-950">
+  <div class="mx-auto max-w-7xl px-6 py-12">
+    <div class="grid gap-10 md:grid-cols-3 md:items-start">
+
+      <!-- Brand -->
+      <div class="flex flex-col gap-4">
+        <a href="/index.html" class="flex items-center gap-3">
+          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 text-slate-950 font-bold">
+            TM
+          </span>
+          <div class="flex flex-col leading-tight">
+            <span class="font-semibold tracking-tight text-white">Transcript.Tax Monitor Pro</span>
+            <span class="text-xs text-slate-400">Transcript automation</span>
+          </div>
+        </a>
+        <p class="text-sm text-slate-400">
+          IRS transcript automation that turns raw codes into clear, client-ready insights.
         </p>
       </div>
 
-      <div>
-        <div class="text-sm font-semibold text-white">Resources</div>
-        <ul class="mt-3 space-y-2 text-sm">
-          <li><a class="hover:text-white" href="/magnets/guide.html">Free Guide</a></li>
-          <li><a class="hover:text-white" href="/assets/product.html">Product</a></li>
-          <li><a class="hover:text-white" href="/pricing.html">Pricing</a></li>
-        </ul>
+      <!-- Links (match header nav) -->
+      <div class="flex flex-col gap-4">
+        <h3 class="text-sm font-semibold text-white">Links</h3>
+        <nav class="grid gap-2 text-sm">
+          <a href="#features" class="text-slate-300 hover:text-white transition">Features</a>
+          <a href="#how-it-works" class="text-slate-300 hover:text-white transition">How It Works</a>
+          <a href="#pricing" class="text-slate-300 hover:text-white transition">Pricing</a>
+          <a href="#use-cases" class="text-slate-300 hover:text-white transition">Use Cases</a>
+        </nav>
+
+        <div class="mt-2 h-px w-full bg-slate-800/80"></div>
+
+        <h3 class="text-sm font-semibold text-white">Resources</h3>
+        <nav class="grid gap-2 text-sm">
+          <a href="/guide.html" class="text-slate-300 hover:text-white transition">IRS Transcript Code Guide</a>
+          <a href="https://taxmonitor.pro" class="text-slate-300 hover:text-white transition">Tax Monitor Pro</a>
+        </nav>
       </div>
 
-      <div>
-        <div class="text-sm font-semibold text-white">Legal</div>
-        <ul class="mt-3 space-y-2 text-sm">
-          <li><a class="hover:text-white" href="/legal/privacy.html">Privacy</a></li>
-          <li><a class="hover:text-white" href="/legal/terms.html">Terms</a></li>
-        </ul>
-
-        <div class="mt-6 text-xs text-white/50">
-          © <span id="year"></span> Tax Monitor Pro. All rights reserved.
+      <!-- Legal -->
+      <div class="flex flex-col gap-4 md:items-end">
+        <h3 class="text-sm font-semibold text-white md:text-right">Legal</h3>
+        <div class="grid gap-2 text-sm md:text-right">
+          <a href="/legal/privacy.html" class="text-slate-300 hover:text-white transition">Privacy</a>
+          <a href="/legal/terms.html" class="text-slate-300 hover:text-white transition">Terms</a>
         </div>
+        <p class="text-sm text-slate-500 md:text-right">© <span id="footer-year"></span> Transcript.Tax Monitor Pro</p>
       </div>
+
     </div>
   </div>
-
-  <script>
-    document.getElementById("year").textContent = String(new Date().getFullYear());
-  </script>
-
 </footer>
+
+<script>
+  (function () {
+    var el = document.getElementById('footer-year');
+    if (el) el.textContent = String(new Date().getFullYear());
+  })();
+</script>
