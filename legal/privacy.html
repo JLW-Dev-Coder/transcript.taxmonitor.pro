@@ -17,17 +17,6 @@
     body { box-sizing: border-box; }
     * { font-family: "DM Sans", system-ui, sans-serif; }
 
-    .amber-glow {
-      background: radial-gradient(ellipse 700px 420px at 50% -140px, rgba(245, 158, 11, 0.12), transparent 60%);
-    }
-
-    .grid-overlay {
-      background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 80px 80px;
-    }
-
     .glass-card {
       background: rgba(30, 35, 45, 0.6);
       backdrop-filter: blur(20px);
@@ -45,6 +34,22 @@
     .section-divider {
       border-color: rgba(255, 255, 255, 0.06);
     }
+
+    @keyframes tmFadeUp {
+      0% { opacity: 0; transform: translateY(14px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .tm-anim { opacity: 0; transform: translateY(14px); }
+    .tm-loaded .tm-anim { animation: tmFadeUp 700ms ease forwards; }
+    .tm-loaded .tm-anim.delay-1 { animation-delay: 80ms; }
+    .tm-loaded .tm-anim.delay-2 { animation-delay: 160ms; }
+    .tm-loaded .tm-anim.delay-3 { animation-delay: 240ms; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tm-anim { opacity: 1 !important; transform: none !important; }
+      .tm-loaded .tm-anim { animation: none !important; }
+    }
   </style>
 
   <style>@view-transition { navigation: auto; }</style>
@@ -52,15 +57,23 @@
 </head>
 
 <body class="h-full bg-slate-950 text-slate-300 overflow-auto">
-  <div id="app" class="min-h-screen flex flex-col grid-overlay">
-    <div class="amber-glow min-h-screen flex flex-col">
+  <div id="app" class="min-h-screen flex flex-col">
+      <!-- Sticky Header (standalone) -->
+      <header class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
+        <div class="mx-auto flex max-w-7xl items-center justify-end px-6 py-4">
+          <a href="https://transcript.taxmonitor.pro/" class="inline-flex items-center justify-center rounded-2xl border border-slate-800/60 bg-slate-950/60 p-4 text-white/80 backdrop-blur hover:text-white hover:scale-105 transition" aria-label="Close">
+            <svg class="h-[32px] w-[32px]" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6L6 18" />
+              <path d="M6 6l12 12" />
+            </svg>
+          </a>
+        </div>
+      </header>
 
-      <!-- PARTIAL:header -->
-
-      <main class="flex-1 max-w-[900px] mx-auto px-6 py-12">
+      <main class="flex-1 max-w-[900px] mx-auto px-6 py-12 tm-anim">
         <!-- Brand Header (inside legal content) -->
-        <div class="text-center mb-10">
-          <div class="flex items-center justify-center gap-3 mb-2">
+        <div class="text-center mb-10 tm-anim delay-1">
+          <a href="https://transcript.taxmonitor.pro/" class="inline-flex items-center justify-center gap-3 mb-2" aria-label="Transcript.Tax Monitor Pro">
             <div class="badge-gradient w-10 h-10 rounded-lg flex items-center justify-center shadow-lg">
               <span class="text-slate-950 font-bold text-sm tracking-tight">TM</span>
             </div>
@@ -68,18 +81,18 @@
               <h1 class="text-white font-semibold text-lg leading-tight">Tax Monitor Pro</h1>
               <p class="text-slate-500 text-xs">Owned by Lenore, Inc.</p>
             </div>
-          </div>
+          </a>
         </div>
 
         <!-- Page Title -->
-        <div class="text-center mb-8">
+        <div class="text-center mb-8 tm-anim delay-2">
           <h2 class="text-3xl font-bold text-white mb-2">Privacy Policy</h2>
           <p class="text-slate-400 text-base mb-3">Install Data Handling</p>
           <p class="text-slate-500 text-sm">Last updated: February 10, 2026</p>
         </div>
 
         <!-- Glass Content Card -->
-        <div class="glass-card rounded-2xl p-8 md:p-10">
+        <div class="glass-card rounded-2xl p-8 md:p-10 tm-anim delay-3">
           <section class="mb-8 pb-8 border-b section-divider">
             <p class="text-slate-400 leading-relaxed">
               This Privacy Policy explains how Lenore, Inc. (“Provider”) may access and handle Client information during platform installs.
@@ -158,14 +171,23 @@
           </section>
         </div>
       </main>
-
-      <!-- PARTIAL:footer -->
-
-    </div>
-  </div>
+      <!-- Footer (standalone) -->
+      <footer class="px-6 py-3 mt-1 border-t border-slate-800/60 bg-slate-950/80 backdrop-blur">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <p class="text-slate-500 text-sm">© <span id="footer-year"></span> Transcript.Tax Monitor Pro. All rights reserved.</p>
+          <div class="flex items-center gap-6">
+            <a href="/legal/privacy.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Privacy Policy</a>
+            <a href="/legal/terms.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Terms of Service</a>
+          </div>
+        </div>
+      </footer>
+</div>
 
   <script>
     (function () {
+      // Prevent the page from loading "flat".
+      requestAnimationFrame(() => document.documentElement.classList.add("tm-loaded"));
+
       var y = document.getElementById('footer-year');
       if (y) y.textContent = String(new Date().getFullYear());
     })();
