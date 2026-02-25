@@ -269,6 +269,19 @@ GET /app/payments
 GET /app/reports/{reportId}
 ```
 
+## Token Balance (Index Page)
+
+The site `/index.html` checks token availability via a **read model** call before enabling parsing. The client logic:
+
+* Stores token ID in `localStorage.tmp_tokenId`
+* Calls `GET /transcript/tokens?tokenId=...`
+* Expects JSON with a numeric `balance`
+* Tries base URLs in order: `https://api.taxmonitor.pro`, then `window.location.origin` (sorted)
+
+If the endpoint is unreachable or returns non-2xx, the UI shows “Token status unavailable (API not reachable).”
+
+This endpoint must be **read-only** (no receipts, no mutations).
+
 Purpose:
 
 Return canonical R2-derived data for rendering only.
@@ -655,24 +668,445 @@ Canonical effects:
 
 Event source: Transcript parse pipeline (mutation endpoint).
 
-Not yet locked.
+The Worker must support four IRS transcript types:
 
-Expected minimum fields (draft):
+* Account Transcript
+* Record of Account Transcript
+* Tax Return Transcript
+* Wage & Income Transcript
 
-* `eventId`
+Each transcript type produces a normalized `transcripts/{transcriptId}.json` object and may produce a derived `reports/{reportId}.json` render model.
+
+---
+
+### Account Transcript (Authoritative for Balance + TC Timeline)
+
+This transcript type is the primary source for:
+
+* Account balance
+* Transaction code timeline
+* IRS posting dates
+
+#### Normalized Transcript Object (`transcripts/{transcriptId}.json`)
+
+Top-level keys (alphabetical):
+
 * `accountId`
+* `createdAt`
 * `reportId`
-* `creditsUsed`
-* `parsedAt`
-* `taxYears[]`
-* `transcriptCodes[]`
+* `source`
+* `taxPeriodEnding`
+* `taxpayerName`
+* `transactions[]`
+* `transcriptType`
 
-Canonical effects:
+`transcriptType` must equal:
+
+```
+"ACCOUNT"
+```
+
+`source` keys (alphabetical):
+
+* `filename`
+* `pages`
+* `sha256`
+* `sourceType` (must equal "pdf")
+
+`transactions[]` keys (alphabetical):
+
+* `amount`
+* `code`
+* `cycle` (optional)
+* `date`
+* `description`
+
+Example:
+
+```json
+{
+  "accountId": "acct_123",
+  "createdAt": "2026-02-25T12:34:56.000Z",
+  "reportId": "rpt_abc123",
+  "source": {
+    "filename": "irs-account-transcript.pdf",
+    "pages": 4,
+    "sha256": "abc...",
+    "sourceType": "pdf"
+  },
+  "taxPeriodEnding": "12/31/2024",
+  "taxpayerName": "John A Smith",
+  "transactions": [
+    {
+      "amount": "$0.00",
+      "code": "150",
+      "cycle": "20252405",
+      "date": "06/16/2025",
+      "description": "Tax return filed"
+    }
+  ],
+  "transcriptType": "ACCOUNT"
+}
+```
+
+---
+
+#### Derived Report Model (`reports/{reportId}.json`)
+
+The Worker derives a UI-ready model for `assets/report.html`.
+
+Top-level keys (alphabetical):
+
+* `actionRequired`
+* `currentBalance`
+* `logo`
+* `logoWidth`
+* `noticesIssued`
+* `preparedBy`
+* `refundStatus`
+* `reportDate`
+* `riskLevel`
+* `summary`
+* `taxPeriodEnding`
+* `taxpayerName`
+* `transactions[]`
+
+`transactions[]` keys (alphabetical):
+
+* `code`
+* `date`
+* `description`
+* `impact`
+
+Rules:
+
+* `currentBalance` is extracted directly from the transcript when present.
+* `transactions[]` is derived from the IRS "TRANSACTIONS" table.
+* `impact` is generated deterministically from the TC code.
+* `summary`, `riskLevel`, `refundStatus`, and `actionRequired` are rule-based fields derived from normalized data.
+* If `transactions[]` is empty, Page 2 (Technical Analysis) does not render.
+
+Canonical effects (Account Transcript only):
 
 * Persist `transcripts/{transcriptId}.json`
 * Persist `reports/{reportId}.json`
 * Reduce `accounts/{accountId}.transcriptCredits` only after report persistence
-* Project Transcript Report ID CF and Transcript Event ID CF
+* Project Transcript Event ID CF
+* Project Transcript Report ID CF
+
+---
+
+### Record of Account Transcript (Composite: Balance + Return Data)
+
+This transcript type combines:
+
+* Account Transcript data (balance + transaction codes)
+* Tax Return Transcript data (return metadata + line items)
+
+It is the most complete single-source transcript and may serve as the preferred input when available.
+
+#### Normalized Transcript Object (`transcripts/{transcriptId}.json`)
+
+Top-level keys (alphabetical):
+
+* `accountId`
+* `createdAt`
+* `reportId`
+* `returnData`
+* `source`
+* `taxPeriodEnding`
+* `taxpayerName`
+* `transactions[]`
+* `transcriptType`
+
+`transcriptType` must equal:
+
+```
+"RECORD_OF_ACCOUNT"
+```
+
+`returnData` keys (alphabetical):
+
+* `filingStatus`
+* `receivedDate`
+* `returnProcessedDate`
+* `totalTax`
+
+`source` keys (alphabetical):
+
+* `filename`
+* `pages`
+* `sha256`
+* `sourceType` (must equal "pdf")
+
+`transactions[]` keys (alphabetical):
+
+* `amount`
+* `code`
+* `cycle` (optional)
+* `date`
+* `description`
+
+Example:
+
+```json
+{
+  "accountId": "acct_123",
+  "createdAt": "2026-02-25T12:34:56.000Z",
+  "reportId": "rpt_abc123",
+  "returnData": {
+    "filingStatus": "Single",
+    "receivedDate": "03/15/2024",
+    "returnProcessedDate": "06/16/2025",
+    "totalTax": "$0.00"
+  },
+  "source": {
+    "filename": "irs-record-of-account.pdf",
+    "pages": 6,
+    "sha256": "def...",
+    "sourceType": "pdf"
+  },
+  "taxPeriodEnding": "12/31/2024",
+  "taxpayerName": "John A Smith",
+  "transactions": [
+    {
+      "amount": "$0.00",
+      "code": "150",
+      "cycle": "20252405",
+      "date": "06/16/2025",
+      "description": "Tax return filed"
+    }
+  ],
+  "transcriptType": "RECORD_OF_ACCOUNT"
+}
+```
+
+---
+
+#### Derived Report Model (`reports/{reportId}.json`)
+
+Uses the same render schema as Account Transcript.
+
+Differences in derivation rules:
+
+* `currentBalance` extracted from Account section.
+* `summary` may incorporate `returnData` values.
+* `riskLevel` may consider discrepancies between return totals and account balance.
+* `transactions[]` derived from the embedded Account Transcript section.
+
+Canonical effects (Record of Account only):
+
+* Persist `transcripts/{transcriptId}.json`
+* Persist `reports/{reportId}.json`
+* Reduce `accounts/{accountId}.transcriptCredits` only after report persistence
+* Project Transcript Event ID CF
+* Project Transcript Report ID CF
+
+---
+
+### Tax Return Transcript (Return Metadata Only — No Account Balance)
+
+This transcript type contains return-level data but does not contain a transaction code ledger or authoritative account balance.
+
+It may produce a client-ready report, but Page 2 (Technical Analysis) will only render if synthetic or derived transactions are generated.
+
+#### Normalized Transcript Object (`transcripts/{transcriptId}.json`)
+
+Top-level keys (alphabetical):
+
+* `accountId`
+* `createdAt`
+* `reportId`
+* `returnData`
+* `source`
+* `taxPeriodEnding`
+* `taxpayerName`
+* `transcriptType`
+
+`transcriptType` must equal:
+
+```
+"TAX_RETURN"
+```
+
+`returnData` keys (alphabetical):
+
+* `adjustedGrossIncome`
+* `filingStatus`
+* `receivedDate`
+* `returnProcessedDate`
+* `totalPayments`
+* `totalTax`
+
+`source` keys (alphabetical):
+
+* `filename`
+* `pages`
+* `sha256`
+* `sourceType` (must equal "pdf")
+
+Example:
+
+```json
+{
+  "accountId": "acct_123",
+  "createdAt": "2026-02-25T12:34:56.000Z",
+  "reportId": "rpt_abc123",
+  "returnData": {
+    "adjustedGrossIncome": "$85,000.00",
+    "filingStatus": "Single",
+    "receivedDate": "03/15/2024",
+    "returnProcessedDate": "06/16/2025",
+    "totalPayments": "$10,000.00",
+    "totalTax": "$9,500.00"
+  },
+  "source": {
+    "filename": "irs-tax-return-transcript.pdf",
+    "pages": 5,
+    "sha256": "ghi...",
+    "sourceType": "pdf"
+  },
+  "taxPeriodEnding": "12/31/2024",
+  "taxpayerName": "John A Smith",
+  "transcriptType": "TAX_RETURN"
+}
+```
+
+---
+
+#### Derived Report Model (`reports/{reportId}.json`)
+
+Uses the same render schema as Account Transcript with the following derivation rules:
+
+* `currentBalance` must be set to "N/A" unless an Account Transcript or Record of Account Transcript is also present.
+* `transactions[]` may be empty.
+* If `transactions[]` is empty, Page 2 (Technical Analysis) does not render.
+* `summary` is derived from `returnData` (filing status, tax owed vs payments).
+* `riskLevel` is based on discrepancies between `totalTax` and `totalPayments`.
+* `actionRequired` is "Yes" if `totalTax > totalPayments`.
+
+Canonical effects (Tax Return only):
+
+* Persist `transcripts/{transcriptId}.json`
+* Persist `reports/{reportId}.json`
+* Reduce `accounts/{accountId}.transcriptCredits` only after report persistence
+* Project Transcript Event ID CF
+* Project Transcript Report ID CF
+
+---
+
+### Wage & Income Transcript (Third-Party Information Returns — Future Tax Planning)
+
+This transcript type contains third-party IRS information returns (W-2, 1099 series, 1098 series, SSA-1099, broker statements, etc.).
+
+It does not include:
+
+* Account balance
+* Transaction code ledger
+
+This dataset can be used in the future to support tax planning, reconciliation, and return completeness checks.
+
+#### Normalized Transcript Object (`transcripts/{transcriptId}.json`)
+
+Top-level keys (alphabetical):
+
+* `accountId`
+* `createdAt`
+* `incomeDocuments[]`
+* `reportId`
+* `source`
+* `taxPeriodEnding`
+* `taxpayerName`
+* `transcriptType`
+
+`transcriptType` must equal:
+
+```
+"WAGE_INCOME"
+```
+
+`source` keys (alphabetical):
+
+* `filename`
+* `pages`
+* `sha256`
+* `sourceType` (must equal "pdf")
+
+`incomeDocuments[]` keys (alphabetical):
+
+* `documentType`
+* `ein` (optional)
+* `payerName`
+* `recipientName`
+* `taxYear`
+* `values` (object)
+
+Rules:
+
+* `values` should preserve IRS field names where possible.
+* Unknown/unsupported fields must be ignored (rejectUnknownValues applies at contract validation).
+
+Example:
+
+```json
+{
+  "accountId": "acct_123",
+  "createdAt": "2026-02-25T12:34:56.000Z",
+  "incomeDocuments": [
+    {
+      "documentType": "W2",
+      "ein": "12-3456789",
+      "payerName": "ACME Corporation",
+      "recipientName": "John A Smith",
+      "taxYear": "2024",
+      "values": {
+        "wages": "$85,000.00",
+        "federalIncomeTaxWithheld": "$10,000.00"
+      }
+    },
+    {
+      "documentType": "1099-INT",
+      "payerName": "Example Bank",
+      "recipientName": "John A Smith",
+      "taxYear": "2024",
+      "values": {
+        "interestIncome": "$120.00"
+      }
+    }
+  ],
+  "reportId": "rpt_abc123",
+  "source": {
+    "filename": "irs-wage-income-transcript.pdf",
+    "pages": 8,
+    "sha256": "jkl...",
+    "sourceType": "pdf"
+  },
+  "taxPeriodEnding": "12/31/2024",
+  "taxpayerName": "John A Smith",
+  "transcriptType": "WAGE_INCOME"
+}
+```
+
+---
+
+#### Derived Report Model (`reports/{reportId}.json`)
+
+Uses the same render schema as Account Transcript with the following derivation rules:
+
+* `currentBalance` must be set to "N/A" unless an Account Transcript or Record of Account Transcript is also present.
+* `transactions[]` must be empty.
+* If `transactions[]` is empty, Page 2 (Technical Analysis) does not render.
+* `summary` is derived from totals across `incomeDocuments[]`.
+* `riskLevel` may be derived from mismatch checks (future).
+* `actionRequired` is "N/A" unless additional transcript types are present.
+
+Canonical effects (Wage & Income only):
+
+* Persist `transcripts/{transcriptId}.json`
+* Persist `reports/{reportId}.json`
+* Reduce `accounts/{accountId}.transcriptCredits` only after report persistence
+* Project Transcript Event ID CF
+* Project Transcript Report ID CF
 
 ---
 
