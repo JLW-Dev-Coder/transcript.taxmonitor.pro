@@ -44,6 +44,22 @@
   </script>
 
   <style>
+    @keyframes tmFadeUp {
+      0% { opacity: 0; transform: translateY(14px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .tm-anim { opacity: 0; transform: translateY(14px); }
+    .tm-loaded .tm-anim { animation: tmFadeUp 700ms ease forwards; }
+    .tm-loaded .tm-anim.delay-1 { animation-delay: 80ms; }
+    .tm-loaded .tm-anim.delay-2 { animation-delay: 160ms; }
+    .tm-loaded .tm-anim.delay-3 { animation-delay: 240ms; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tm-anim { opacity: 1 !important; transform: none !important; }
+      .tm-loaded .tm-anim { animation: none !important; }
+    }
+
     html, body {
       height: 100%;
       margin: 0;
@@ -57,8 +73,10 @@
     }
 
     .page-container {
-      max-width: 900px;
+      max-width: 80rem; /* matches Tailwind max-w-7xl */
       margin: 0 auto;
+      padding-left: 1.5rem; /* matches px-6 */
+      padding-right: 1.5rem; /* matches px-6 */
       background: #ffffff;
     }
 
@@ -640,7 +658,7 @@
       <div class="page-container">
 
         <!-- Hero Section -->
-        <div class="hero-section">
+        <div class="hero-section tm-anim">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <div></div>
             <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark/light theme" title="Toggle Theme">🌙</button>
@@ -654,7 +672,7 @@
         </div>
 
         <!-- Main Content -->
-        <div class="section-padding">
+        <div class="section-padding tm-anim delay-1">
 
           <!-- Introduction Section -->
           <section class="section-divider">
@@ -1072,6 +1090,23 @@
   </div>
 
   <script>
+    // Prevent the page from loading "flat".
+    requestAnimationFrame(() => document.documentElement.classList.add("tm-loaded"));
+
+    // Ensure header logo goes to transcript.taxmonitor.pro
+    (function fixHeaderLogoLink() {
+      function run() {
+        const header = document.querySelector("header");
+        if (!header) return;
+
+        const logoLink = header.querySelector("a");
+        if (logoLink) logoLink.setAttribute("href", "https://transcript.taxmonitor.pro/");
+      }
+
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run);
+      else run();
+    })();
+
     // Theme toggle functionality
     const themeToggle = document.getElementById('themeToggle');
     const body = document.body;
