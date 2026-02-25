@@ -49,9 +49,7 @@
 
   <body class="h-full noise font-sans">
     <div id="app-container" class="min-h-full overflow-auto">
-      <!-- PARTIAL:header -->
-
-      <!-- Lead Magnet Nav (matches product toolbar style) -->
+<!-- Lead Magnet Nav (matches product toolbar style) -->
       <div class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
         <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
           <a href="https://transcript.taxmonitor.pro/" class="flex items-center gap-3 text-white">
@@ -69,16 +67,7 @@
               </svg>
               Back
             </a>
-
-            <a href="#download-guide" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-purple-600/90 px-4 py-2 text-sm font-semibold text-white backdrop-blur hover:bg-purple-600 transition">
-              <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 3v12" />
-                <path d="M8 11l4 4 4-4" />
-                <path d="M5 21h14" />
-              </svg>
-              Download as PDF
-            </a>
-          </div>
+</div>
         </div>
       </div>
 
@@ -177,15 +166,29 @@
           </div>
         </div>
       </section>
-
-      <!-- PARTIAL:footer -->
-    </div>
+      <!-- Footer (standalone, no partial injection) -->
+      <footer class="px-6 py-3 mt-1 border-t border-slate-800/60 bg-slate-950/80 backdrop-blur">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <p class="text-slate-500 text-sm">© <span id="footer-year"></span> Transcript.Tax Monitor Pro. All rights reserved.</p>
+          <div class="flex items-center gap-6">
+            <a href="/legal/privacy.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Privacy Policy</a>
+            <a href="/legal/terms.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Terms of Service</a>
+          </div>
+        </div>
+      </footer>
+</div>
 
     <script>
       (function () {
         // Prevent the page from loading "flat".
         // Adds a tiny entrance animation matching the main site vibe.
         requestAnimationFrame(() => document.documentElement.classList.add("tm-loaded"));
+
+        // Footer year
+        (function () {
+          const y = document.getElementById("footer-year");
+          if (y) y.textContent = String(new Date().getFullYear());
+        })();
 
         const form = document.getElementById("lead-form");
         const errorEl = document.getElementById("lead-error");
