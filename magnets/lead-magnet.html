@@ -33,6 +33,37 @@
     <div id="app-container" class="min-h-full overflow-auto">
       <!-- PARTIAL:header -->
 
+      <!-- Lead Magnet Nav (matches product toolbar style) -->
+      <div class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
+        <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+          <div class="flex items-center gap-3 text-white">
+            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-slate-950 font-extrabold">TM</span>
+            <div class="leading-tight">
+              <div class="text-sm font-semibold">Transcript.Tax Monitor Pro</div>
+              <div class="text-[11px] text-white/60">Free guide</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <a href="/" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/60 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition">
+              <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+              Back
+            </a>
+
+            <a href="#download-guide" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-purple-600/90 px-4 py-2 text-sm font-semibold text-white backdrop-blur hover:bg-purple-600 transition">
+              <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3v12" />
+                <path d="M8 11l4 4 4-4" />
+                <path d="M5 21h14" />
+              </svg>
+              Download Guide
+            </a>
+          </div>
+        </div>
+      </div>
+
       <section class="min-h-[85vh] gradient-hero flex items-center py-12">
         <div class="max-w-6xl mx-auto px-6 w-full grid lg:grid-cols-2 gap-12 items-center">
           <!-- Left -->
@@ -122,7 +153,7 @@
                 <input type="text" id="lead-firm" placeholder="Smith Tax Services" class="input-field input-field-light" />
               </div>
 
-              <button type="submit" id="lead-submit-btn" class="btn-primary w-full text-center">
+              <button type="submit" id="download-guide" class="btn-primary w-full text-center scroll-mt-28">
                 Download Free Guide →
               </button>
 
