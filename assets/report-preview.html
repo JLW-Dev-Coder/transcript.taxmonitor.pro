@@ -39,8 +39,26 @@
   </script>
 
   <style>
+    @keyframes tmFadeUp {
+      0% { opacity: 0; transform: translateY(14px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .tm-anim { opacity: 0; transform: translateY(14px); }
+    .tm-loaded .tm-anim { animation: tmFadeUp 700ms ease forwards; }
+    .tm-loaded .tm-anim.delay-1 { animation-delay: 80ms; }
+    .tm-loaded .tm-anim.delay-2 { animation-delay: 160ms; }
+    .tm-loaded .tm-anim.delay-3 { animation-delay: 240ms; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tm-anim { opacity: 1 !important; transform: none !important; }
+      .tm-loaded .tm-anim { animation: none !important; }
+    }
+
     /*
       Report-only styling.
+      This page is intentionally standalone and shareable.
+    */
       This page is intentionally standalone and shareable.
     */
 
@@ -76,7 +94,7 @@
     }
 
     .report-shell {
-      max-width: 7xl;
+      max-width: 80rem; /* matches Tailwind max-w-7xl */
     }
 
     /* Pages */
@@ -413,16 +431,17 @@
  </head>
 
  <body class="h-full noise font-sans">
-  <!-- Simple viewer toolbar (this page is opened from “Preview & Download”) -->
+  <!-- Simple viewer toolbar (standalone, no partial injection) -->
   <div class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
-    <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-      <div class="flex items-center gap-3 text-white">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+      <a href="https://transcript.taxmonitor.pro/" class="flex items-center gap-3 text-white">
         <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-slate-950 font-extrabold">TM</span>
         <div class="leading-tight">
           <div class="text-sm font-semibold">Transcript.Tax Monitor Pro</div>
-          <div class="text-[11px] text-white/60">Sample Report</div>
+          <div class="text-[11px] text-white/60">Sample IRS Transcript Report</div>
         </div>
-      </div>
+      </a>
+
 
       <div class="flex items-center gap-2">
         <a href="/" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/60 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition">
@@ -466,10 +485,30 @@
   </div>
 
   <div class="report-container">
-   <div id="reportOutput"></div>
+   <div id="reportOutput" class="tm-anim delay-1"></div>
   </div>
 
+  <!-- Footer (standalone, no partial injection) -->
+  <footer class="px-6 py-3 mt-1 border-t border-slate-800/60 bg-slate-950/80 backdrop-blur">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-slate-500 text-sm">© <span id="footer-year"></span> Transcript.Tax Monitor Pro. All rights reserved.</p>
+      <div class="flex items-center gap-6">
+        <a href="/legal/privacy.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Privacy Policy</a>
+        <a href="/legal/terms.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Terms of Service</a>
+      </div>
+    </div>
+  </footer>
+
   <script>
+    (function () {
+      // Prevent the page from loading "flat".
+      requestAnimationFrame(() => document.documentElement.classList.add("tm-loaded"));
+
+      // Footer year
+      const y = document.getElementById("footer-year");
+      if (y) y.textContent = String(new Date().getFullYear());
+    })();
+
     // Sample preview mode (no logo changes, no downloads)
     window.__SAMPLE_REPORT__ = true;
 
