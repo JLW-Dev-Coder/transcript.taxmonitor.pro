@@ -30,7 +30,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles/site.css?v=1" />
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
-  <link rel="icon" type="apple-touch-icon" href="/assets/favicon.ico" />
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
 
   <script>
     if (typeof pdfjsLib !== 'undefined') {
@@ -522,11 +522,8 @@
 
       <script>
         (function () {
-          // Don’t assume the network is behaving. Humans love doing that.
-          const API_CANDIDATES = [
-            "https://api.taxmonitor.pro",
-            window.location.origin,
-          ].filter(Boolean).slice().sort();
+          // Pricing is intentionally static right now. No API calls, no surprises, no "pricing_load_failed" drama.
+          // Humans can reintroduce the API later when the universe is feeling cooperative.
 
           // --- tiny “tests” (in-browser) ---
           function assert(name, condition) {
@@ -534,28 +531,6 @@
               console.error("test_failed", name);
               throw new Error(`test_failed:${name}`);
             }
-          }
-
-          function runTests() {
-            // Alphabetical sort test
-            const sorted = ["b", "a", "c"].slice().sort((a, b) => String(a).localeCompare(String(b)));
-            assert("alpha_sort", sorted.join("") === "abc");
-
-            // Money function should return a string
-            assert("money_returns_string", typeof money(12900, "USD") === "string");
-
-            // Safe token creation should return a non-empty string
-            const t = getTokenId();
-            assert("token_non_empty", typeof t === "string" && t.trim().length > 0);
-
-            // fetchJson should respect __TEST_FETCH__ hook
-            const prev = window.__TEST_FETCH__;
-            window.__TEST_FETCH__ = async () => ({ prices: [{ credits: 10, amount: 1900, currency: "USD", priceId: "p10" }] });
-            return fetchJson("/any").then((out) => {
-              assert("test_fetch_hook", Array.isArray(out.prices));
-            }).finally(() => {
-              window.__TEST_FETCH__ = prev;
-            });
           }
 
           function money(amountCents, currency) {
@@ -567,22 +542,6 @@
             }
           }
 
-          function getTokenId() {
-            const url = new URL(window.location.href);
-            const fromQuery = (url.searchParams.get("tokenId") || "").trim();
-            if (fromQuery) {
-              localStorage.setItem("tmp_tokenId", fromQuery);
-              return fromQuery;
-            }
-
-            const existing = (localStorage.getItem("tmp_tokenId") || "").trim();
-            if (existing) return existing;
-
-            const created = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
-            localStorage.setItem("tmp_tokenId", created);
-            return created;
-          }
-
           function perksFallback() {
             return [
               "Client-ready report preview",
@@ -591,99 +550,62 @@
             ].slice().sort();
           }
 
-          function renderStaticUnavailable(note) {
+          // Payment Links (authoritative for now)
+          const PAYMENT_LINKS = [
+            {
+              amount: 1900,
+              credits: 10,
+              currency: "USD",
+              label: "Transcript Tax Monitor — 10 Credits",
+              recommended: false,
+              url: "https://billing.taxmonitor.pro/b/4gM8wOaAe1oKcUEdTkaR203",
+            },
+            {
+              amount: 2900,
+              credits: 25,
+              currency: "USD",
+              label: "Transcript Tax Monitor — 25 Credits",
+              recommended: true,
+              url: "https://billing.taxmonitor.pro/b/cNi14m5fU3wS1bW9D4aR204",
+            },
+            {
+              amount: 12900,
+              credits: 100,
+              currency: "USD",
+              label: "Transcript Tax Monitor — 100 Credits",
+              recommended: false,
+              url: "https://billing.taxmonitor.pro/b/dRm8wO7o27N83k47uWaR205",
+            },
+          ].slice().sort((a, b) => Number(a.credits || 0) - Number(b.credits || 0));
+
+          function runTests() {
+            // Alphabetical sort test (existing behavior)
+            const sorted = ["b", "a", "c"].slice().sort((a, b) => String(a).localeCompare(String(b)));
+            assert("alpha_sort", sorted.join("") === "abc");
+
+            // Money function should return a string (existing behavior)
+            assert("money_returns_string", typeof money(12900, "USD") === "string");
+
+            // Payment links must exist and be https
+            assert("payment_links_non_empty", Array.isArray(PAYMENT_LINKS) && PAYMENT_LINKS.length >= 3);
+            assert(
+              "payment_links_https",
+              PAYMENT_LINKS.every((p) => typeof p.url === "string" && p.url.startsWith("https://"))
+            );
+
+            // Packs should be sorted ascending by credits
+            const credits = PAYMENT_LINKS.map((p) => Number(p.credits || 0));
+            const sortedCredits = credits.slice().sort((a, b) => a - b);
+            assert("credits_sorted", credits.join(",") === sortedCredits.join(","));
+          }
+
+          function renderPricing() {
             const grid = document.getElementById("pricing-grid");
             if (!grid) return;
 
-            const packs = [
-              { credits: 10, recommended: false },
-              { credits: 25, recommended: true },
-              { credits: 100, recommended: false },
-            ];
+            const fallbackPerks = perksFallback();
 
-            grid.innerHTML = packs.map((p) => {
-              const featured = Boolean(p.recommended);
-              const badge = featured
-                ? `<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-purple-600 text-white">Most popular</div>`
-                : `<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-slate-900/5 text-slate-700">Credits pack</div>`;
-
-              const cardClass = featured
-                ? "card-elevated p-8 border-2 border-purple-500/30 relative"
-                : "card-elevated p-8";
-
-              return `
-                <div class="${cardClass}">
-                  <div class="flex items-center justify-between mb-5">
-                    ${badge}
-                    <div class="text-xs text-gray-500">Transcript.Tax Monitor Pro</div>
-                  </div>
-
-                  <div class="mb-5">
-                    <div class="text-4xl font-extrabold text-midnight leading-none">${Number(p.credits)}</div>
-                    <div class="text-sm text-gray-600 mt-1">credits</div>
-                  </div>
-
-                  <div class="mb-6">
-                    <div class="text-2xl font-bold text-midnight">Pricing unavailable</div>
-                    <div class="text-xs text-gray-500 mt-1">${String(note || "service is temporarily down")}</div>
-                  </div>
-
-                  <ul class="space-y-2 text-sm text-gray-700 mb-8">
-                    ${perksFallback().map((perk) => `<li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>${perk}</span></li>`).join("")}
-                  </ul>
-
-                  <button class="btn-secondary w-full text-center" disabled>
-                    Checkout unavailable
-                  </button>
-
-                  <div class="mt-3 text-xs text-gray-500">
-                    Refresh the page or try again in a minute.
-                  </div>
-                </div>
-              `;
-            }).join("");
-          }
-
-          async function fetchJson(url, init) {
-            // Allows local deterministic testing with window.__TEST_FETCH__.
-            if (typeof window.__TEST_FETCH__ === "function") {
-              return await window.__TEST_FETCH__(url, init);
-            }
-
-            // Default to a timeout so we don’t hang forever when the network is having a tantrum.
-            const controller = (typeof AbortController !== "undefined") ? new AbortController() : null;
-            const timeoutMs = 8000;
-            const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
-
-            try {
-              const res = await fetch(url, { ...(init || {}), signal: controller ? controller.signal : undefined });
-              const text = await res.text();
-              let data;
-              try { data = JSON.parse(text); } catch { data = { raw: text }; }
-              if (!res.ok) throw new Error(data?.error || data?.message || `Request failed (${res.status})`);
-              return data;
-            } finally {
-              if (timer) clearTimeout(timer);
-            }
-          }
-
-          function renderCards(prices) {
-            const grid = document.getElementById("pricing-grid");
-            if (!grid) return;
-
-            const sorted = Array.isArray(prices)
-              ? prices.slice().sort((a, b) => (Number(a.credits || 0) - Number(b.credits || 0)))
-              : [];
-
-            const fallback = perksFallback();
-
-            if (!sorted.length) {
-              renderStaticUnavailable("no prices returned");
-              return;
-            }
-
-            grid.innerHTML = sorted.map((p) => {
-              const perks = Array.isArray(p.perks) && p.perks.length ? p.perks.slice().sort() : fallback;
+            grid.innerHTML = PAYMENT_LINKS.map((p) => {
               const featured = Boolean(p.recommended);
 
               const badge = featured
@@ -716,133 +638,32 @@
                   </div>
 
                   <ul class="space-y-2 text-sm text-gray-700 mb-8">
-                    ${perks.map((perk) => `<li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>${perk}</span></li>`).join("")}
+                    ${fallbackPerks.map((perk) => `<li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>${perk}</span></li>`).join("")}
                   </ul>
 
-                  <button class="${ctaClass}" data-price-id="${String(p.priceId || "")}">
-                    Buy credits
-                  </button>
+                  <a class="${ctaClass}" href="${String(p.url)}" target="_blank" rel="noopener">
+                    Pay with Stripe
+                  </a>
 
                   <div class="mt-3 text-xs text-gray-500">
-                    Uses your saved token ID for instant crediting.
+                    Opens a secure Stripe checkout.
                   </div>
                 </div>
               `;
             }).join("");
-
-            grid.querySelectorAll("button[data-price-id]").forEach((btn) => {
-              btn.addEventListener("click", async () => {
-                const priceId = String(btn.getAttribute("data-price-id") || "").trim();
-                if (!priceId) return;
-
-                btn.disabled = true;
-                const original = btn.textContent;
-                btn.textContent = "Redirecting...";
-
-                try {
-                  const tokenId = getTokenId();
-                  const checkoutCandidates = ["https://api.taxmonitor.pro", window.location.origin].filter(Boolean).sort();
-
-                  let out = null;
-                  let lastErr = null;
-
-                  for (const base of checkoutCandidates) {
-                    try {
-                      out = await fetchJson(`${base}/transcript/checkout`, {
-                        method: "POST",
-                        headers: { "content-type": "application/json" },
-                        body: JSON.stringify({ priceId, tokenId }),
-                      });
-                      lastErr = null;
-                      break;
-                    } catch (e) {
-                      lastErr = e;
-                    }
-                  }
-
-                  if (out && out.url) {
-                    window.location.href = out.url;
-                    return;
-                  }
-
-                  throw lastErr || new Error("Missing checkout URL");
-                } catch (err) {
-                  // NOTE: Do NOT log "pricing_load_failed". Some environments treat that string as fatal.
-                  console.warn("checkout_unavailable", err);
-                  alert("Checkout failed. Try again.");
-                } finally {
-                  btn.disabled = false;
-                  btn.textContent = original;
-                }
-              });
-            });
           }
 
-          async function loadBalance() {
-            const el = document.getElementById("pricing-balance");
-            if (!el) return;
-
-            try {
-              const tokenId = getTokenId();
-              const tokenCandidates = ["https://api.taxmonitor.pro", window.location.origin].filter(Boolean).sort();
-              let out = null;
-
-              for (const base of tokenCandidates) {
-                try {
-                  out = await fetchJson(`${base}/transcript/tokens?tokenId=${encodeURIComponent(tokenId)}`);
-                  break;
-                } catch {
-                  // continue
-                }
-              }
-
-              if (!out) return;
-              const balance = Number(out?.balance || 0);
-              el.textContent = `Your current balance: ${balance} credits`;
-              el.classList.remove("hidden");
-            } catch {
-              // optional
-            }
-          }
-
-          async function initPricing() {
-            // IMPORTANT: This function must never throw.
-            // Some runtime apparently turns certain console.error strings into hard failures.
-            try {
-              let out = null;
-
-              for (const base of API_CANDIDATES) {
-                try {
-                  out = await fetchJson(`${base}/transcript/prices`, { method: "GET" });
-                  break;
-                } catch {
-                  // continue
-                }
-              }
-
-              if (!out) {
-                renderStaticUnavailable("API not reachable");
-                return;
-              }
-
-              renderCards(out?.prices || []);
-              await loadBalance();
-            } catch (err) {
-              // Avoid the cursed keyword and avoid throwing.
-              console.warn("pricing_unavailable", err);
-              renderStaticUnavailable("unexpected error");
-            }
-          }
-
-          async function initAll() {
+          function initAll() {
             // Tests should not run in production unless explicitly asked.
             const url = new URL(window.location.href);
             const run = String(url.searchParams.get("runTests") || "").trim().toLowerCase();
-            if (run === "1" || run === "true") {
-              try { await runTests(); } catch (e) { console.warn("tests_failed", e); }
-            }
+            if (run === "1" || run === "true") runTests();
 
-            await initPricing();
+            // We keep this element around but don’t show it until token/balance is reintroduced.
+            const balance = document.getElementById("pricing-balance");
+            if (balance) balance.classList.add("hidden");
+
+            renderPricing();
           }
 
           if (document.readyState === "loading") {
@@ -1010,4 +831,3 @@
    
 </body>
 </html>
-
