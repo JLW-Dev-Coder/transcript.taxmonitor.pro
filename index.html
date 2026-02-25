@@ -481,341 +481,96 @@
           <div class="counter inline-block mb-4">💳 Pricing</div>
           <h2 class="font-display text-3xl md:text-4xl font-bold text-midnight mb-4">Simple pricing. Buy credits. Move on.</h2>
           <p class="text-gray-600">Credits unlock transcript parsing. No subscriptions, no weird tiers, no drama.</p>
-          <div id="pricing-balance" class="mt-4 text-sm text-gray-500 hidden"></div>
-          <div id="pricing-error" class="mt-4 text-sm text-red-600 hidden"></div>
+          <div class="mt-4 text-xs text-gray-500">We use Stripe Checkout for payment processing.</div>
         </div>
 
-        <div id="pricing-grid" class="grid md:grid-cols-3 gap-8">
-          <!-- Cards injected by JS -->
-          <div class="card-elevated p-8 animate-pulse">
-            <div class="h-6 bg-gray-200 rounded w-1/2 mb-3"></div>
-            <div class="h-10 bg-gray-200 rounded w-3/4 mb-6"></div>
-            <div class="space-y-2 mb-8">
-              <div class="h-3 bg-gray-200 rounded"></div>
-              <div class="h-3 bg-gray-200 rounded w-5/6"></div>
-              <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+        <div class="grid md:grid-cols-3 gap-8">
+          <!-- 10 Credits -->
+          <div class="card-elevated p-8">
+            <div class="flex items-center justify-between mb-5">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-slate-900/5 text-slate-700">Credits pack</div>
+              <div class="text-xs text-gray-500">Transcript.Tax Monitor Pro</div>
             </div>
-            <div class="h-10 bg-gray-200 rounded"></div>
+
+            <div class="mb-5">
+              <div class="text-4xl font-extrabold text-midnight leading-none">10</div>
+              <div class="text-sm text-gray-600 mt-1">credits</div>
+            </div>
+
+            <div class="mb-6">
+              <div class="text-2xl font-bold text-midnight">$19.00</div>
+              <div class="text-xs text-gray-500 mt-1">one-time purchase</div>
+            </div>
+
+            <ul class="space-y-2 text-sm text-gray-700 mb-8">
+              <li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>Client-ready report preview</span></li>
+              <li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>Credits never expire</span></li>
+              <li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>Instant token delivery</span></li>
+            </ul>
+
+            <a class="btn-secondary w-full text-center inline-flex items-center justify-center" href="https://billing.taxmonitor.pro/b/4gM8wOaAe1oKcUEdTkaR203" target="_blank" rel="noopener">Buy credits</a>
+            <div class="mt-3 text-xs text-gray-500">After checkout, you’ll receive a token you can use immediately.</div>
           </div>
-          <div class="card-elevated p-8 animate-pulse hidden md:block">
-            <div class="h-6 bg-gray-200 rounded w-1/2 mb-3"></div>
-            <div class="h-10 bg-gray-200 rounded w-3/4 mb-6"></div>
-            <div class="space-y-2 mb-8">
-              <div class="h-3 bg-gray-200 rounded"></div>
-              <div class="h-3 bg-gray-200 rounded w-5/6"></div>
-              <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+
+          <!-- 25 Credits -->
+          <div class="card-elevated p-8 border-2 border-purple-500/30 relative">
+            <div class="flex items-center justify-between mb-5">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-purple-600 text-white">Most popular</div>
+              <div class="text-xs text-gray-500">Transcript.Tax Monitor Pro</div>
             </div>
-            <div class="h-10 bg-gray-200 rounded"></div>
+
+            <div class="mb-5">
+              <div class="text-4xl font-extrabold text-midnight leading-none">25</div>
+              <div class="text-sm text-gray-600 mt-1">credits</div>
+            </div>
+
+            <div class="mb-6">
+              <div class="text-2xl font-bold text-midnight">$29.00</div>
+              <div class="text-xs text-gray-500 mt-1">one-time purchase</div>
+            </div>
+
+            <ul class="space-y-2 text-sm text-gray-700 mb-8">
+              <li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>Client-ready report preview</span></li>
+              <li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>Credits never expire</span></li>
+              <li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>Instant token delivery</span></li>
+            </ul>
+
+            <a class="btn-primary w-full text-center inline-flex items-center justify-center" href="https://billing.taxmonitor.pro/b/cNi14m5fU3wS1bW9D4aR204" target="_blank" rel="noopener">Buy credits</a>
+            <div class="mt-3 text-xs text-gray-500">After checkout, you’ll receive a token you can use immediately.</div>
           </div>
-          <div class="card-elevated p-8 animate-pulse hidden md:block">
-            <div class="h-6 bg-gray-200 rounded w-1/2 mb-3"></div>
-            <div class="h-10 bg-gray-200 rounded w-3/4 mb-6"></div>
-            <div class="space-y-2 mb-8">
-              <div class="h-3 bg-gray-200 rounded"></div>
-              <div class="h-3 bg-gray-200 rounded w-5/6"></div>
-              <div class="h-3 bg-gray-200 rounded w-2/3"></div>
+
+          <!-- 100 Credits -->
+          <div class="card-elevated p-8">
+            <div class="flex items-center justify-between mb-5">
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-slate-900/5 text-slate-700">Credits pack</div>
+              <div class="text-xs text-gray-500">Transcript.Tax Monitor Pro</div>
             </div>
-            <div class="h-10 bg-gray-200 rounded"></div>
+
+            <div class="mb-5">
+              <div class="text-4xl font-extrabold text-midnight leading-none">100</div>
+              <div class="text-sm text-gray-600 mt-1">credits</div>
+            </div>
+
+            <div class="mb-6">
+              <div class="text-2xl font-bold text-midnight">$129.00</div>
+              <div class="text-xs text-gray-500 mt-1">one-time purchase</div>
+            </div>
+
+            <ul class="space-y-2 text-sm text-gray-700 mb-8">
+              <li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>Client-ready report preview</span></li>
+              <li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>Credits never expire</span></li>
+              <li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>Instant token delivery</span></li>
+            </ul>
+
+            <a class="btn-secondary w-full text-center inline-flex items-center justify-center" href="https://billing.taxmonitor.pro/b/dRm8wO7o27N83k47uWaR205" target="_blank" rel="noopener">Buy credits</a>
+            <div class="mt-3 text-xs text-gray-500">After checkout, you’ll receive a token you can use immediately.</div>
           </div>
         </div>
 
         <div class="mt-10 text-center text-xs text-gray-500">
-          Payments are processed by Stripe. Credits apply instantly after checkout.
+          Payments are processed by Stripe. Credits apply after you redeem your token.
         </div>
       </div>
-
-      <script>
-        (function () {
-          // --- Pricing loader (hardened) ---
-          function readApiBase() {
-            const meta = document.querySelector('meta[name="tm-api-base"]');
-            const fromMeta = (meta && meta.getAttribute('content') || '').trim();
-            if (fromMeta) return fromMeta.replace(/\/$/, '');
-
-            // Optional escape hatch for local dev
-            const fromGlobal = (window.__TM_API_BASE__ || '').toString().trim();
-            if (fromGlobal) return fromGlobal.replace(/\/$/, '');
-
-            // Default
-            return 'https://api.taxmonitor.pro';
-          }
-
-          const API_BASE = readApiBase();
-
-          function money(amountCents, currency) {
-            const amt = Number(amountCents || 0) / 100;
-            try {
-              return new Intl.NumberFormat(undefined, { style: "currency", currency: String(currency || "USD") }).format(amt);
-            } catch {
-              return `$${amt.toFixed(2)}`;
-            }
-          }
-
-          function getTokenId() {
-            const url = new URL(window.location.href);
-            const fromQuery = (url.searchParams.get("tokenId") || "").trim();
-            if (fromQuery) {
-              localStorage.setItem("tmp_tokenId", fromQuery);
-              return fromQuery;
-            }
-
-            const existing = (localStorage.getItem("tmp_tokenId") || "").trim();
-            if (existing) return existing;
-
-            const created = (crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now());
-            localStorage.setItem("tmp_tokenId", created);
-            return created;
-          }
-
-          function setError(msg) {
-            const el = document.getElementById('pricing-error');
-            if (!el) return;
-            el.textContent = msg;
-            el.classList.remove('hidden');
-          }
-
-          function clearError() {
-            const el = document.getElementById('pricing-error');
-            if (!el) return;
-            el.textContent = '';
-            el.classList.add('hidden');
-          }
-
-          async function fetchJson(url, init) {
-            const controller = new AbortController();
-            const timeoutMs = 12000;
-            const timeoutId = setTimeout(() => controller.abort(new Error('timeout')), timeoutMs);
-
-            let res;
-            let text = '';
-            try {
-              res = await fetch(url, { ...init, signal: controller.signal });
-              text = await res.text();
-            } catch (err) {
-              clearTimeout(timeoutId);
-              const e = new Error(`Network error calling ${url}: ${err && err.message ? err.message : String(err)}`);
-              e.cause = err;
-              throw e;
-            } finally {
-              clearTimeout(timeoutId);
-            }
-
-            let data;
-            try { data = JSON.parse(text); } catch { data = { raw: text }; }
-
-            if (!res.ok) {
-              const msg = (data && (data.error || data.message)) ? String(data.error || data.message) : `Request failed (${res.status})`;
-              const e = new Error(msg);
-              e.status = res.status;
-              e.url = url;
-              e.body = data;
-              throw e;
-            }
-
-            return data;
-          }
-
-          function renderCards(prices) {
-            const grid = document.getElementById("pricing-grid");
-            if (!grid) return;
-
-            const sorted = Array.isArray(prices) ? prices.slice().sort((a, b) => (Number(a.credits || 0) - Number(b.credits || 0))) : [];
-
-            const perksFallback = [
-              "Client-ready report preview",
-              "Credits applied instantly",
-              "Local PDF parsing (no uploads)",
-            ].slice().sort();
-
-            grid.innerHTML = sorted.map((p) => {
-              const perks = Array.isArray(p.perks) && p.perks.length ? p.perks.slice().sort() : perksFallback;
-              const featured = Boolean(p.recommended);
-
-              const badge = featured
-                ? `<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-purple-600 text-white">Most popular</div>`
-                : `<div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-slate-900/5 text-slate-700">Credits pack</div>`;
-
-              const cardClass = featured
-                ? "card-elevated p-8 border-2 border-purple-500/30 relative"
-                : "card-elevated p-8";
-
-              const ctaClass = featured
-                ? "btn-primary w-full text-center"
-                : "btn-secondary w-full text-center";
-
-              return `
-                <div class="${cardClass}">
-                  <div class="flex items-center justify-between mb-5">
-                    ${badge}
-                    <div class="text-xs text-gray-500">${String(p.label || "Transcript.Tax Monitor Pro")}</div>
-                  </div>
-
-                  <div class="mb-5">
-                    <div class="text-4xl font-extrabold text-midnight leading-none">${Number(p.credits || 0)}</div>
-                    <div class="text-sm text-gray-600 mt-1">credits</div>
-                  </div>
-
-                  <div class="mb-6">
-                    <div class="text-2xl font-bold text-midnight">${money(p.amount, p.currency)}</div>
-                    <div class="text-xs text-gray-500 mt-1">one-time purchase</div>
-                  </div>
-
-                  <ul class="space-y-2 text-sm text-gray-700 mb-8">
-                    ${perks.map((perk) => `<li class="flex items-start gap-2"><span class="text-purple-600">✓</span><span>${perk}</span></li>`).join("")}
-                  </ul>
-
-                  <button class="${ctaClass}" data-price-id="${String(p.priceId || "")}">
-                    Buy credits
-                  </button>
-
-                  <div class="mt-3 text-xs text-gray-500">
-                    Uses your saved token ID for instant crediting.
-                  </div>
-                </div>
-              `;
-            }).join("");
-
-            grid.querySelectorAll("button[data-price-id]").forEach((btn) => {
-              btn.addEventListener("click", async () => {
-                const priceId = String(btn.getAttribute("data-price-id") || "").trim();
-                if (!priceId) return;
-
-                btn.disabled = true;
-                const original = btn.textContent;
-                btn.textContent = "Redirecting...";
-
-                try {
-                  clearError();
-                  const tokenId = getTokenId();
-                  const out = await fetchJson(`${API_BASE}/transcript/checkout`, {
-                    method: "POST",
-                    headers: { "content-type": "application/json" },
-                    // Note: worker currently ignores extra fields, but we send them for forward compatibility.
-                    // Expected confirmation flow:
-                    // - Stripe success_url -> https://transcript.taxmonitor.pro/payment-confirmation
-                    // - _redirects -> /assets/confirmation.html
-                    body: JSON.stringify({
-                      priceId,
-                      tokenId,
-                      returnUrlBase: window.location.origin,
-                      successPath: "/payment-confirmation",
-                    }),
-                  });
-
-                  if (out && out.url) {
-                    window.location.href = out.url;
-                    return;
-                  }
-
-                  throw new Error("Missing checkout URL");
-                } catch (err) {
-                  console.error("checkout_failed", err);
-                  setError("Checkout failed. Please refresh and try again.");
-                  alert("Checkout failed. Try again.");
-                } finally {
-                  btn.disabled = false;
-                  btn.textContent = original;
-                }
-              });
-            });
-          }
-
-          async function loadBalance() {
-            const el = document.getElementById("pricing-balance");
-            if (!el) return;
-
-            try {
-              const tokenId = getTokenId();
-              const out = await fetchJson(`${API_BASE}/transcript/tokens?tokenId=${encodeURIComponent(tokenId)}`);
-              const balance = Number(out && out.balance ? out.balance : 0);
-              el.textContent = `Your current balance: ${balance} credits`;
-              el.classList.remove("hidden");
-            } catch {
-              // optional; don't block pricing
-            }
-          }
-
-          function renderFallbackCard(reason) {
-            const grid = document.getElementById("pricing-grid");
-            if (!grid) return;
-            grid.innerHTML = `
-              <div class="card-elevated p-8 md:col-span-3">
-                <div class="font-semibold text-midnight mb-2">Pricing temporarily unavailable</div>
-                <div class="text-gray-600 text-sm">${reason}</div>
-                <div class="text-gray-500 text-xs mt-3">API base: ${API_BASE}</div>
-              </div>
-            `;
-          }
-
-          function validatePricesPayload(out) {
-            // expected: { prices: [{ amount, credits, currency, label, perks, priceId, recommended }] }
-            if (!out || typeof out !== 'object') return false;
-            if (!Array.isArray(out.prices)) return false;
-            return true;
-          }
-
-          async function initPricing() {
-            try {
-              clearError();
-              const out = await fetchJson(`${API_BASE}/transcript/prices`, { method: "GET" });
-
-              if (!validatePricesPayload(out)) {
-                throw new Error('Unexpected /transcript/prices response shape');
-              }
-
-              renderCards(out.prices || []);
-              loadBalance();
-            } catch (err) {
-              console.error("pricing_load_failed", err);
-
-              // Give a human-readable hint without lying.
-              const hint = (err && err.status)
-                ? `Server responded with ${err.status}.`
-                : `Could not reach pricing service.`;
-
-              // The #1 real-world cause is CORS when the page is not served from an allowed origin.
-              // Your Worker only allows:
-              // - https://taxmonitor.pro
-              renderFallbackCard("Refresh the page or try again in a minute.");
-            }
-          }
-
-          // --- Minimal tests (dev-only via ?test=1) ---
-          function runTests() {
-            const url = new URL(window.location.href);
-            const enabled = (url.searchParams.get('test') || '').trim() === '1';
-            if (!enabled) return;
-
-            function assert(name, cond) {
-              if (!cond) throw new Error(`test_failed: ${name}`);
-              console.log(`test_ok: ${name}`);
-            }
-
-            // money
-            assert('money_usd', money(1999, 'USD').includes('19'));
-            assert('money_fallback', typeof money('nope', 'USD') === 'string');
-
-            // token persistence
-            const first = getTokenId();
-            const second = getTokenId();
-            assert('token_stable', first === second);
-
-            // payload validation
-            assert('validatePricesPayload_true', validatePricesPayload({ prices: [] }) === true);
-            assert('validatePricesPayload_false', validatePricesPayload({}) === false);
-          }
-
-          if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", function () {
-              runTests();
-              initPricing();
-            });
-          } else {
-            runTests();
-            initPricing();
-          }
-        })();
-      </script>
     </section>
 
     <section class="py-20 gradient-hero">
