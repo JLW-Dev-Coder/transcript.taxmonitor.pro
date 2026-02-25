@@ -166,7 +166,7 @@
     </section>
     
     <!-- Parser Section -->
-    <section class="py-20 bg-gradient-to-b from-slate-900 to-slate-800">
+    <section id="How-It-Works" class="py-20 bg-gradient-to-b from-slate-900 to-slate-800">
      <style>
       /* Client report (shareable) */
       .report-shell { background: rgba(15, 23, 42, 0.55); border: 1px solid rgba(148,163,184,.16); border-radius: 20px; box-shadow: 0 18px 45px rgba(0,0,0,.35); backdrop-filter: blur(10px); }
@@ -375,16 +375,15 @@
           </button>
         </div>
 
-        <div class="mt-6 grid grid-cols-2 gap-4">
-          <button id="preview-report-btn" type="button" disabled class="bg-slate-700 text-slate-400 font-semibold py-3 rounded-lg cursor-not-allowed opacity-60 flex items-center justify-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-            Preview Report
-          </button>
-          <button type="button" disabled class="bg-slate-700 text-slate-400 font-semibold py-3 rounded-lg cursor-not-allowed opacity-60 flex items-center justify-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        <div class="mt-6">
+          <a href="/assets/report.html" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1" />
+              <path d="M12 12v6" />
+              <path d="M9 15l3 3 3-3" />
             </svg>
-            Download
-          </button>
+            Preview Report & Download
+          </a>
         </div>
        </div>
 
@@ -533,7 +532,127 @@
       </div>
     </section>
 
-   <!-- Free Report Page (shareable deliverable) -->
+    <!-- Use Cases Section -->
+    <section id="Use-Cases" class="py-20 bg-gradient-to-b from-slate-900 to-slate-800">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <div class="counter inline-block mb-4">
+            <span class="inline-flex items-center gap-2">
+              <svg class="w-4 h-4 text-gold" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3l2.2 4.6 5 .7-3.6 3.5.9 5-4.5-2.4L7.5 17l.9-5L4.8 8.3l5-.7L12 3z" />
+              </svg>
+              <span>Use cases</span>
+            </span>
+          </div>
+          <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-6">Real transcript problems this solves</h2>
+          <p class="text-lg text-white/70">These are real threads where people get stuck on transcript codes, holds, refunds, and confusing timelines. This tool turns that chaos into a clean report you can send to clients.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <a class="glass rounded-2xl p-7 border border-slate-700/30 hover:border-purple-500/40 transition h-full flex flex-col" href="https://www.reddit.com/r/IRS/comments/1r9uyfz/got_an_846_code_drop_your_bank_deposit_timing_here/" target="_blank" rel="noopener">
+            <div class="flex items-start justify-between gap-4">
+              <div class="text-white font-semibold">846 refund timing confusion</div>
+              <div class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border border-purple-500/30 bg-purple-500/10">
+                <svg class="w-4 h-4 text-purple-300" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-white/70">People see “846” and a date, then spiral because deposits do not match WMR or bank timing.</div>
+            <div class="mt-5 text-xs text-purple-300 inline-flex items-center gap-2">Read thread <span aria-hidden="true">→</span></div>
+          </a>
+
+          <a class="glass rounded-2xl p-7 border border-slate-700/30 hover:border-purple-500/40 transition h-full flex flex-col" href="https://www.reddit.com/r/IRS/comments/1v70k4u/irs_transcript_code_420_is_anyone_experiencing_a/" target="_blank" rel="noopener">
+            <div class="flex items-start justify-between gap-4">
+              <div class="text-white font-semibold">420 audit code and delay stress</div>
+              <div class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border border-purple-500/30 bg-purple-500/10">
+                <svg class="w-4 h-4 text-purple-300" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-white/70">A single “420” makes the transcript look like a disaster. Clients need a calm summary of what it actually means.</div>
+            <div class="mt-5 text-xs text-purple-300 inline-flex items-center gap-2">Read thread <span aria-hidden="true">→</span></div>
+          </a>
+
+          <a class="glass rounded-2xl p-7 border border-slate-700/30 hover:border-purple-500/40 transition h-full flex flex-col" href="https://www.reddit.com/r/IRS/comments/fmdy88/424_examination_request/" target="_blank" rel="noopener">
+            <div class="flex items-start justify-between gap-4">
+              <div class="text-white font-semibold">424 examination request panic</div>
+              <div class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border border-purple-500/30 bg-purple-500/10">
+                <svg class="w-4 h-4 text-purple-300" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-white/70">Clients see “Examination Request” and think it is an audit notice. Your report clarifies status and next steps.</div>
+            <div class="mt-5 text-xs text-purple-300 inline-flex items-center gap-2">Read thread <span aria-hidden="true">→</span></div>
+          </a>
+
+          <a class="glass rounded-2xl p-7 border border-slate-700/30 hover:border-purple-500/40 transition h-full flex flex-col" href="https://www.reddit.com/r/IRS/comments/1c3k6sy/help_code_810/" target="_blank" rel="noopener">
+            <div class="flex items-start justify-between gap-4">
+              <div class="text-white font-semibold">810 refund freeze confusion</div>
+              <div class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border border-purple-500/30 bg-purple-500/10">
+                <svg class="w-4 h-4 text-purple-300" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-white/70">“810” reads like the end of the world. This turns it into a plain-English explanation and a client-facing timeline.</div>
+            <div class="mt-5 text-xs text-purple-300 inline-flex items-center gap-2">Read thread <span aria-hidden="true">→</span></div>
+          </a>
+
+          <a class="glass rounded-2xl p-7 border border-slate-700/30 hover:border-purple-500/40 transition h-full flex flex-col" href="https://www.reddit.com/r/IRS/comments/1jpoiws/code_290_additional_tax_assessments/" target="_blank" rel="noopener">
+            <div class="flex items-start justify-between gap-4">
+              <div class="text-white font-semibold">290 “additional tax” even at $0</div>
+              <div class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border border-purple-500/30 bg-purple-500/10">
+                <svg class="w-4 h-4 text-purple-300" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-white/70">The transcript says “additional tax assessed” and people panic, even when the amount is zero. Translate it once, send it forever.</div>
+            <div class="mt-5 text-xs text-purple-300 inline-flex items-center gap-2">Read thread <span aria-hidden="true">→</span></div>
+          </a>
+
+          <a class="glass rounded-2xl p-7 border border-slate-700/30 hover:border-purple-500/40 transition h-full flex flex-col" href="https://www.reddit.com/r/IRS/comments/1jn67nh/what_does_this_mean_i_have_a_570_code_806_code/" target="_blank" rel="noopener">
+            <div class="flex items-start justify-between gap-4">
+              <div class="text-white font-semibold">570 hold with 806 credits</div>
+              <div class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border border-purple-500/30 bg-purple-500/10">
+                <svg class="w-4 h-4 text-purple-300" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-white/70">Clients see “570” and “806” and ask if they are in trouble. Your report shows what is normal vs what needs action.</div>
+            <div class="mt-5 text-xs text-purple-300 inline-flex items-center gap-2">Read thread <span aria-hidden="true">→</span></div>
+          </a>
+
+          <a class="glass rounded-2xl p-7 border border-slate-700/30 hover:border-purple-500/40 transition h-full flex flex-col" href="https://www.reddit.com/r/IRS/comments/1igrqqr/federal_tax_refund/" target="_blank" rel="noopener">
+            <div class="flex items-start justify-between gap-4">
+              <div class="text-white font-semibold">150 and 806 “what is this?”</div>
+              <div class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border border-purple-500/30 bg-purple-500/10">
+                <svg class="w-4 h-4 text-purple-300" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-white/70">Basic codes still trip people up. Your client does not want code definitions. They want “What does this mean for me?”</div>
+            <div class="mt-5 text-xs text-purple-300 inline-flex items-center gap-2">Read thread <span aria-hidden="true">→</span></div>
+          </a>
+
+          <a class="glass rounded-2xl p-7 border border-slate-700/30 hover:border-purple-500/40 transition h-full flex flex-col" href="https://www.reddit.com/r/IRS/comments/1ike0nw/570971_both_dated_224/" target="_blank" rel="noopener">
+            <div class="flex items-start justify-between gap-4">
+              <div class="text-white font-semibold">570 and 971 timeline questions</div>
+              <div class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border border-purple-500/30 bg-purple-500/10">
+                <svg class="w-4 h-4 text-purple-300" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-white/70">Same codes, same dates, different outcomes. The report makes the sequence readable and highlights what matters.</div>
+            <div class="mt-5 text-xs text-purple-300 inline-flex items-center gap-2">Read thread <span aria-hidden="true">→</span></div>
+          </a>
+
+          <a class="glass rounded-2xl p-7 border border-slate-700/30 hover:border-purple-500/40 transition h-full flex flex-col" href="https://www.reddit.com/r/tax/comments/1q40o5h/can_someone_please_explain_what_my_tax_return/" target="_blank" rel="noopener">
+            <div class="flex items-start justify-between gap-4">
+              <div class="text-white font-semibold">Transactions section is unreadable</div>
+              <div class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center border border-purple-500/30 bg-purple-500/10">
+                <svg class="w-4 h-4 text-purple-300" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6" /></svg>
+              </div>
+            </div>
+            <div class="mt-3 text-sm text-white/70">The classic: “I am really just confused on the transactions section.” Your deliverable should never look like a transcript.</div>
+            <div class="mt-5 text-xs text-purple-300 inline-flex items-center gap-2">Read thread <span aria-hidden="true">→</span></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Free Report Page (shareable deliverable) -->
    <section id="free-report" class="page-section">
     <div class="min-h-full py-12">
      <div class="max-w-7xl mx-auto px-6">
@@ -871,84 +990,7 @@
 
    </section>
    
-   <!-- Lead Magnet Page -->
-   <section id="lead-magnet" class="page-section">
-    <div class="min-h-full gradient-hero flex items-center py-12">
-     <div class="max-w-6xl mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
-      <div class="text-white"><button onclick="showPage('landing-page')" class="flex items-center gap-2 text-white/70 hover:text-white mb-8 transition-colors">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg> Back to Home </button>
-       <div class="counter inline-block mb-4">
-        <span class="inline-flex items-center gap-2">
-          <svg class="w-4 h-4 text-gold" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 19a2 2 0 0 0 2 2h12" />
-            <path d="M6 2h12a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" />
-            <path d="M8 6h8" />
-            <path d="M8 10h8" />
-            <path d="M8 14h6" />
-          </svg>
-          <span>FREE DOWNLOAD</span>
-        </span>
-       </div>
-       <h1 class="font-display text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6">The Ultimate Guide to IRS Transcript Codes</h1>
-       <p class="text-xl text-white/80 mb-8">Stop guessing what those cryptic codes mean. Our comprehensive 32-page guide breaks down every transcript code you'll encounter, complete with real-world examples and action steps.</p>
-       <div class="space-y-4 mb-8">
-        <div class="check-item">
-         <div class="check-icon">
-          ✓
-         </div>
-         <div>
-          <p class="font-semibold">Complete Code Reference</p>
-          <p class="text-white/70 text-sm">All 150+ IRS transcript codes explained in plain English</p>
-         </div>
-        </div>
-        <div class="check-item">
-         <div class="check-icon">
-          ✓
-         </div>
-         <div>
-          <p class="font-semibold">Real Client Scenarios</p>
-          <p class="text-white/70 text-sm">See how codes appear in actual transcripts with annotations</p>
-         </div>
-        </div>
-        <div class="check-item">
-         <div class="check-icon">
-          ✓
-         </div>
-         <div>
-          <p class="font-semibold">Quick Reference Chart</p>
-          <p class="text-white/70 text-sm">Printable cheat sheet for your desk</p>
-         </div>
-        </div>
-        <div class="check-item">
-         <div class="check-icon">
-          ✓
-         </div>
-         <div>
-          <p class="font-semibold">Red Flag Alerts</p>
-          <p class="text-white/70 text-sm">Codes that require immediate attention highlighted</p>
-         </div>
-        </div>
-       </div>
-      </div>
-      <div class="card-elevated p-8 max-w-md mx-auto w-full">
-       <h3 class="font-display text-2xl font-bold text-midnight text-center mb-2">Get Instant Access</h3>
-       <p class="text-gray-500 text-center mb-6">Enter your details below</p>
-       <form id="lead-form" class="space-y-4">
-        <div><label for="lead-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label> <input type="text" id="lead-name" placeholder="John Smith" class="input-field input-field-light" required>
-        </div>
-        <div><label for="lead-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label> <input type="email" id="lead-email" placeholder="john@taxfirm.com" class="input-field input-field-light" required>
-        </div>
-        <div><label for="lead-firm" class="block text-sm font-medium text-gray-700 mb-1">Firm Name (Optional)</label> <input type="text" id="lead-firm" placeholder="Smith Tax Services" class="input-field input-field-light">
-        </div><button type="submit" id="lead-submit-btn" class="btn-primary w-full text-center"> Download Free Guide → </button>
-        <p class="text-xs text-gray-400 text-center">We respect your privacy. Unsubscribe anytime.</p>
-       </form>
-      </div>
-     </div>
-    </div>
-   </section>
-   
-  <!-- Toast Container -->
+   <!-- Toast Container -->
   <div id="toast-container"></div>
 
   <!-- Cal element-click embed code begins -->
