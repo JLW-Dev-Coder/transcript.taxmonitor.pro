@@ -6,26 +6,26 @@
 
 ## Table of Contents (Alphabetical)
 
-* Authentication Model
-* ClickUp Projection Layer
-* Contracts (Mutation Ingress Only)
-* Core Stack
-* Data Model (R2 Canonical Authority)
-* Domains & Routing
-* Event Trigger System
-* Idempotency & Safety
-* Lifecycle State Model (Order StepBooleans)
-* Operational Checklist
-* Payloads (Stripe, Transcript Report, Cal Support)
-* Processing Contract (Write Order)
-* Read Models (Worker GET Endpoints)
-* Report Rendering Contract
-* Repository Structure (Exact Tree)
-* Security & Legal Controls
-* Stripe Payments (Payment Links + Confirmation Redirect)
-* System Architecture
-* What Transcript.Tax Monitor Pro Is
-* Worker Environment Variables
+* [Authentication Model](#authentication-model)
+* [ClickUp Projection Layer](#clickup-projection-layer)
+* [Contracts (Mutation Ingress Only)](#contracts-mutation-ingress-only)
+* [Core Stack](#core-stack-alphabetical)
+* [Data Model (R2 Canonical Authority)](#data-model-r2-canonical-authority)
+* [Domains & Routing](#domains--routing)
+* [Event Trigger System](#event-trigger-system)
+* [Idempotency & Safety](#idempotency--safety)
+* [Lifecycle State Model (Order StepBooleans)](#lifecycle-state-model-order-stepbooleans)
+* [Operational Checklist](#operational-checklist)
+* [Payloads (Stripe, Transcript Report, Cal Support)](#payloads-stripe-transcript-report-cal-support)
+* [Processing Contract (Write Order)](#processing-contract-write-order)
+* [Read Models (Worker GET Endpoints)](#read-models-worker-get-endpoints)
+* [Report Rendering Contract](#report-rendering-contract)
+* [Repository Structure (Exact Tree)](#repository-structure-exact-tree)
+* [Security & Legal Controls](#security--legal-controls)
+* [Stripe Payments (Payment Links + Confirmation Redirect)](#stripe-payments-payment-links--confirmation-redirect)
+* [System Architecture](#system-architecture)
+* [What Transcript.Tax Monitor Pro Is](#what-transcripttax-monitor-pro-is)
+* [Worker Environment Variables](#worker-environment-variables)
 
 ---
 
