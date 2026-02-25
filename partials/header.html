@@ -51,4 +51,29 @@
       </div>
     </div>
   </div>
+  <script>
+    (function () {
+      // Favicons must live in <head>. This partial is injected into <body>, so we patch them in.
+      var head = document.head;
+      if (!head) return;
+
+      var icons = [
+        { rel: 'icon', href: '/assets/favicon.ico', type: 'image/x-icon' },
+        { rel: 'icon', href: '/assets/logo.svg', type: 'image/svg+xml' }
+      ];
+
+      function hasIcon(href) {
+        return !!head.querySelector('link[rel~="icon"][href="' + href + '"]');
+      }
+
+      icons.forEach(function (i) {
+        if (hasIcon(i.href)) return;
+        var link = document.createElement('link');
+        link.rel = i.rel;
+        link.href = i.href;
+        link.type = i.type;
+        head.appendChild(link);
+      });
+    })();
+  </script>
 </header>
