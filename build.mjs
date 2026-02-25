@@ -5,7 +5,7 @@ import path from "node:path";
 const ROOT = process.cwd();
 const DIST = path.join(ROOT, "dist");
 
-// Alphabetical because order matters and chaos is optional
+// Alphabetical
 const DIRECTORIES = [
   "_sdk",
   "assets",
