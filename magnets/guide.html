@@ -518,8 +518,8 @@
 <body class="h-full noise font-sans">
   <div id="app-container" class="h-full overflow-auto">
 
-    <!-- Header (standalone, no partial injection) -->
-    <div class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
+    <!-- Sticky Header (standalone) -->
+    <header class="tm-no-print sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
       <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
         <a href="https://transcript.taxmonitor.pro/" class="flex items-center gap-3 text-white">
           <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-slate-950 font-extrabold">TM</span>
@@ -530,7 +530,10 @@
         </a>
 
         <div class="flex items-center gap-2">
-          <a href="/" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/60 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition">
+          <a
+            href="/"
+            class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/60 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition"
+          >
             <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
@@ -538,7 +541,7 @@
           </a>
         </div>
       </div>
-    </div>
+    </header>
 
     <main class="py-10">
       <div class="page-container">
@@ -972,21 +975,16 @@
       </div>
     </main>
 
-    <!-- Footer (standalone, no partial injection) -->
-    <footer class="border-t border-slate-200 bg-slate-50">
-      <div class="mx-auto max-w-7xl px-6 py-10">
-        <div class="text-xs text-slate-600 leading-relaxed">
-          <div>
-            <span id="tm-copyright-year">©</span> Transcript.Tax Monitor Pro. All rights reserved.
-            <span class="mx-2">•</span>
-            <a class="text-slate-700 hover:text-slate-950 underline underline-offset-4" href="/legal/privacy.html">Privacy</a>
-            <span class="mx-2">•</span>
-            <a class="text-slate-700 hover:text-slate-950 underline underline-offset-4" href="/legal/terms.html">Terms</a>
+    <!-- Footer (standalone) -->
+      <footer class="tm-no-print px-6 py-3 mt-1 border-t border-slate-800/60 bg-slate-950/80 backdrop-blur">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <p class="text-slate-500 text-sm">© <span id="footer-year"></span> Transcript.Tax Monitor Pro. All rights reserved.</p>
+          <div class="flex items-center gap-6">
+            <a href="/legal/privacy.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Privacy Policy</a>
+            <a href="/legal/terms.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Terms of Service</a>
           </div>
-          <div class="mt-2">Educational content only. Not tax or legal advice.</div>
         </div>
-      </div>
-    </footer>
+      </footer>
   </div>
 
   <script>
@@ -1021,9 +1019,9 @@
       // --- footer years ---
       (function setYears() {
         const y = String(new Date().getFullYear());
-        const a = document.getElementById('tm-copyright-year');
+        const a = document.getElementById('footer-year');
         const b = document.getElementById('tm-guide-year');
-        if (a) a.textContent = `© ${y}`;
+        if (a) a.textContent = y;
         if (b) b.textContent = `© ${y}`;
       })();
 
