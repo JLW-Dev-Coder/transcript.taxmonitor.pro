@@ -1,6 +1,6 @@
 // build.mjs (repo-root)
-// Purpose: build dist/ for Cloudflare Pages by injecting /partials/*.html into root HTML pages
-// and copying static folders into dist/ so non-index routes work.
+// Purpose: build dist/ for Cloudflare Pages by injecting /partials/*.html
+// into ALL HTML files (root + copied folders) and copying static folders into dist/.
 
 import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -61,9 +61,7 @@ function injectNamedPartials(html, partialMap) {
 
   for (const name of Object.keys(partialMap).sort()) {
     const markerRe = new RegExp(`<!--\\s*PARTIAL:${name}\\s*-->`, "g");
-    if (markerRe.test(out)) {
-      out = out.replace(markerRe, partialMap[name]);
-    }
+    out = out.replace(markerRe, partialMap[name]);
   }
 
   return out;
@@ -83,19 +81,65 @@ async function loadPartialMapFromMarkers(markers) {
   return partialMap;
 }
 
+/*
+  Recursively walk directory
+*/
+async function walk(dir) {
+  const out = [];
+  const entries = await readdir(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...await walk(fullPath));
+    } else {
+      out.push(fullPath);
+    }
+  }
+
+  return out;
+}
+
+/*
+  Inject partials into a single HTML file
+*/
+async function injectPartialsIntoHtmlFile(filePath) {
+  const html = await readFile(filePath, "utf8");
+  const markers = extractPartialNames(html);
+  if (!markers.length) return;
+
+  const partialMap = await loadPartialMapFromMarkers(markers);
+  const built = injectNamedPartials(html, partialMap);
+
+  if (built !== html) {
+    await writeFile(filePath, built, "utf8");
+  }
+}
+
+/*
+  Inject partials into ALL HTML files inside dist/
+*/
+async function injectPartialsIntoDistHtml() {
+  const files = (await walk(DIST))
+    .filter((p) => p.toLowerCase().endsWith(".html"))
+    .sort();
+
+  for (const file of files) {
+    await injectPartialsIntoHtmlFile(file);
+  }
+}
+
 async function buildRootHtmlFiles() {
-  const rootFiles = (await readdir(__dirname)).filter((f) => f.endsWith(".html")).sort();
+  const rootFiles = (await readdir(__dirname))
+    .filter((f) => f.endsWith(".html"))
+    .sort();
 
   for (const file of rootFiles) {
     const src = path.join(__dirname, file);
     const dst = path.join(DIST, file);
 
     const html = await readFile(src, "utf8");
-    const markers = extractPartialNames(html);
-    const partialMap = markers.length ? await loadPartialMapFromMarkers(markers) : {};
-
-    const built = injectNamedPartials(html, partialMap);
-    await writeFile(dst, built, "utf8");
+    await writeFile(dst, html, "utf8");
   }
 }
 
@@ -109,7 +153,7 @@ async function main() {
     throw new Error("Missing /partials directory at repo root.");
   }
 
-  // Build all root HTML files (index.html, contact.html, etc.)
+  // Copy root HTML files (without injecting yet)
   await buildRootHtmlFiles();
 
   // Copy folders (if they exist)
@@ -130,9 +174,14 @@ async function main() {
     await cp(src, dst);
   }
 
-  // Optional: log partials present
+  // Inject partials into ALL dist HTML files
+  await injectPartialsIntoDistHtml();
+
+  // Optional logging
   try {
-    const partialFiles = (await readdir(PARTIALS_DIR)).filter((f) => f.endsWith(".html")).sort();
+    const partialFiles = (await readdir(PARTIALS_DIR))
+      .filter((f) => f.endsWith(".html"))
+      .sort();
     console.log("Partials available:", partialFiles.join(", "));
   } catch {
     // ignore
