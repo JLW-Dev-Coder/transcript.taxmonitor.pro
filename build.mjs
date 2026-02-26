@@ -1,19 +1,16 @@
 // build.mjs (repo-root)
-// Purpose: build dist/ for Cloudflare Pages by injecting /partials/*.html into /index.html
+// Purpose: build dist/ for Cloudflare Pages by injecting /partials/*.html into root HTML pages
 // and copying static folders into dist/ so non-index routes work.
 
-import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { cp, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const ROOT = __dirname;
-const DIST = path.join(ROOT, "dist");
-
-const INPUT_HTML = path.join(ROOT, "index.html");
-const PARTIALS_DIR = path.join(ROOT, "partials");
+const DIST = path.join(__dirname, "dist");
+const PARTIALS_DIR = path.join(__dirname, "partials");
 
 // Copy these folders into dist/ (alphabetical)
 const COPY_DIRS = [
@@ -27,7 +24,6 @@ const COPY_DIRS = [
 ].sort();
 
 // Copy these root files into dist/ (alphabetical)
-// Keep _redirects empty if that's what it is. We still copy it if present.
 const COPY_FILES = ["_redirects"].sort();
 
 async function exists(p) {
@@ -65,37 +61,18 @@ function injectNamedPartials(html, partialMap) {
 
   for (const name of Object.keys(partialMap).sort()) {
     const markerRe = new RegExp(`<!--\\s*PARTIAL:${name}\\s*-->`, "g");
-    if (!markerRe.test(out)) {
-      throw new Error(`Missing marker in index.html: <!-- PARTIAL:${name} -->`);
+    if (markerRe.test(out)) {
+      out = out.replace(markerRe, partialMap[name]);
     }
-    out = out.replace(markerRe, partialMap[name]);
   }
 
   return out;
 }
 
-async function main() {
-  // Clean dist
-  await rm(DIST, { force: true, recursive: true });
-  await mkdir(DIST, { recursive: true });
-
-  // Validate inputs
-  if (!(await existsReadable(INPUT_HTML))) {
-    throw new Error("Missing index.html at repo root.");
-  }
-  if (!(await exists(PARTIALS_DIR))) {
-    throw new Error("Missing /partials directory at repo root.");
-  }
-
-  // Read index.html
-  const html = await readFile(INPUT_HTML, "utf8");
-
-  // Discover which partials are needed from markers inside index.html
-  const partialNames = extractPartialNames(html);
-
-  // Validate partial files exist and read them
+async function loadPartialMapFromMarkers(markers) {
   const partialMap = {};
-  for (const name of partialNames) {
+
+  for (const name of markers) {
     const p = path.join(PARTIALS_DIR, `${name}.html`);
     if (!(await existsReadable(p))) {
       throw new Error(`Missing partial file for marker "${name}": ${p}`);
@@ -103,33 +80,57 @@ async function main() {
     partialMap[name] = await readFile(p, "utf8");
   }
 
-  // Inject
-  const built = injectNamedPartials(html, partialMap);
+  return partialMap;
+}
 
-  // Write built HTML
-  await writeFile(path.join(DIST, "index.html"), built, "utf8");
+async function buildRootHtmlFiles() {
+  const rootFiles = (await readdir(__dirname)).filter((f) => f.endsWith(".html")).sort();
+
+  for (const file of rootFiles) {
+    const src = path.join(__dirname, file);
+    const dst = path.join(DIST, file);
+
+    const html = await readFile(src, "utf8");
+    const markers = extractPartialNames(html);
+    const partialMap = markers.length ? await loadPartialMapFromMarkers(markers) : {};
+
+    const built = injectNamedPartials(html, partialMap);
+    await writeFile(dst, built, "utf8");
+  }
+}
+
+async function main() {
+  // Clean dist
+  await rm(DIST, { force: true, recursive: true });
+  await mkdir(DIST, { recursive: true });
+
+  // Validate partials dir
+  if (!(await exists(PARTIALS_DIR))) {
+    throw new Error("Missing /partials directory at repo root.");
+  }
+
+  // Build all root HTML files (index.html, contact.html, etc.)
+  await buildRootHtmlFiles();
 
   // Copy folders (if they exist)
   for (const dir of COPY_DIRS) {
-    const src = path.join(ROOT, dir);
+    const src = path.join(__dirname, dir);
     const dst = path.join(DIST, dir);
 
     if (!(await exists(src))) continue;
-
     await cp(src, dst, { recursive: true });
   }
 
   // Copy root files (if they exist)
   for (const file of COPY_FILES) {
-    const src = path.join(ROOT, file);
+    const src = path.join(__dirname, file);
     const dst = path.join(DIST, file);
 
     if (!(await exists(src))) continue;
-
     await cp(src, dst);
   }
 
-  // Optional: sanity log for partials present (doesn't affect build)
+  // Optional: log partials present
   try {
     const partialFiles = (await readdir(PARTIALS_DIR)).filter((f) => f.endsWith(".html")).sort();
     console.log("Partials available:", partialFiles.join(", "));
