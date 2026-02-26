@@ -549,6 +549,21 @@
       tokenValid: false,
     };
 
+    // Surface any runtime errors in the UI so we stop guessing.
+    function showFatal(err) {
+      const msg = String((err && err.message) ? err.message : err);
+      try { setTokenStatus('Runtime error: ' + msg, 'error'); } catch {}
+    }
+
+    window.addEventListener('error', (e) => {
+      // e.error is often the real Error object
+      showFatal(e && (e.error || e.message || e));
+    });
+
+    window.addEventListener('unhandledrejection', (e) => {
+      showFatal(e && (e.reason || e));
+    });
+
     function setParserAvailable(val) {
       const el = document.getElementById('parser-token-available');
       if (!el) return;
@@ -879,8 +894,9 @@
     copyJsonBtn.addEventListener('click', () => copyToClipboard(jsonOutput.textContent || ''));
     copyRawBtn.addEventListener('click', () => copyToClipboard(rawOutput.textContent || ''));
 
-    parserTokenBtn.addEventListener('click', () => {
-      const token = String(parserTokenInput.value || '').trim();
+    function verifyToken() {
+      const token = String(parserTokenInput && parserTokenInput.value ? parserTokenInput.value : '').trim();
+
       if (!token) {
         state.tokenValid = false;
         setParserAvailable('-');
@@ -900,7 +916,27 @@
       setParserAvailable(150);
       setTokenStatus('✓ Token verified (local check). Upload a PDF to extract text.', 'ok');
       updateControls();
-    });
+    }
+
+    // Verify via click
+    if (parserTokenBtn) {
+      parserTokenBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        verifyToken();
+      });
+    } else {
+      showFatal('Verify Token button not found (id="parser-save-token").');
+    }
+
+    // Verify via Enter key
+    if (parserTokenInput) {
+      parserTokenInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          verifyToken();
+        }
+      });
+    }
 
     pdfDropZone.addEventListener('click', () => pdfUpload.click());
 
@@ -1013,4 +1049,43 @@
         '.footer{margin-top:40px;padding-top:16px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;gap:16px;font-size:11px;color:#9ca3af}' +
         '@media(max-width:640px){.content{padding:28px}.grid{grid-template-columns:1fr}}' +
         '</style></head><body>' +
-        '<di
+        '<div class="page"><div class="content">' +
+        '<div class="header"><div>' +
+        '<h1 class="h1">Transcript Summary</h1>' +
+        '<div class="kicker">Transcript type: ' + String(meta.transcriptType || 'unknown') + '</div>' +
+        '</div><div>' + logoHtml + '</div></div>' +
+        '<div style="margin-bottom:34px;">' +
+        '<div class="title">Key information</div>' +
+        '<div class="grid">' +
+        '<div class="block"><div class="label">Tax period</div><div class="value">' + String(meta.taxPeriod || '-') + '</div></div>' +
+        '<div class="block"><div class="label">TIN</div><div class="value">' + String(meta.tinMasked || '-') + '</div></div>' +
+        '<div class="block"><div class="label">Codes found</div><div class="value">' + String((state.structured.codesFound || []).length) + '</div></div>' +
+        '<div class="block"><div class="label">Rows detected</div><div class="value">' + String((state.structured.transactions || []).length) + '</div></div>' +
+        '</div></div>' +
+        '<div style="margin-bottom:34px;">' +
+        '<div class="title">Sample codes</div>' +
+        '<div class="codes">' + codesHtml + '</div>' +
+        '</div>' +
+        '<div class="footer"><div>Generated locally in-browser</div><div>Transcript.Tax Monitor Pro</div></div>' +
+        '</div></div></body></html>';
+    });
+
+    miniReportClose.addEventListener('click', () => closeOverlay());
+    miniReportOverlay.addEventListener('click', (e) => { if (e.target === miniReportOverlay) closeOverlay(); });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !miniReportOverlay.classList.contains('hidden')) closeOverlay();
+    });
+
+    // Init
+    try {
+      updateControls();
+      // Prove JS is running and wiring succeeded.
+      setTokenStatus('Ready. Enter a token and click Verify Token.', '');
+      runSelfTests();
+    } catch (e) {
+      showFatal(e);
+    }
+  </script>
+</body>
+</html>
