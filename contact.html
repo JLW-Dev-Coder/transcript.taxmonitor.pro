@@ -1,18 +1,14 @@
 <!-- contact.html -->
 <!doctype html>
 <html lang="en" class="h-full">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact Support — Transcript.Tax Monitor Pro</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
-  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
-  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script>
     tailwind.config = {
@@ -25,205 +21,614 @@
       }
     };
   </script>
-
   <script src="/_sdk/element_sdk.js"></script>
-
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
   <style>
-    body { box-sizing: border-box; }
+    html, body { box-sizing: border-box; height: 100%; }
     * { font-family: "DM Sans", system-ui, sans-serif; }
-
-    .purple-glow {
-      background: radial-gradient(ellipse 700px 420px at 50% -140px, rgba(168, 85, 247, 0.16), transparent 60%);
+    
+    .noise {
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' seed='2'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
     }
 
-    .grid-overlay {
-      background-image:
-        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-      background-size: 80px 80px;
+    .gradient-hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      position: relative;
+      overflow: hidden;
     }
 
-    .glass-card {
-      background: rgba(30, 35, 45, 0.6);
+    .gradient-hero::before {
+      content: '';
+      position: absolute;
+      top: -40%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .gradient-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -20%;
+      left: -5%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow:
-        0 0 60px rgba(168, 85, 247, 0.05),
-        0 25px 50px -12px rgba(0, 0, 0, 0.4);
     }
 
-    .badge-gradient {
-      background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    .glass-secondary {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(168, 85, 247, 0.15);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
 
-    .section-divider {
-      border-color: rgba(255, 255, 255, 0.06);
+    .card-elevated {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(168, 85, 247, 0.1);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    @keyframes tmFadeUp {
-      0% { opacity: 0; transform: translateY(14px); }
-      100% { opacity: 1; transform: translateY(0); }
+    .card-elevated:hover {
+      border-color: rgba(168, 85, 247, 0.25);
+      box-shadow: 0 16px 48px rgba(168, 85, 247, 0.12);
+      transform: translateY(-4px);
     }
 
-    .tm-anim { opacity: 0; transform: translateY(14px); }
-    .tm-loaded .tm-anim { animation: tmFadeUp 700ms ease forwards; }
-    .tm-loaded .tm-anim.delay-1 { animation-delay: 80ms; }
-    .tm-loaded .tm-anim.delay-2 { animation-delay: 160ms; }
-    .tm-loaded .tm-anim.delay-3 { animation-delay: 240ms; }
+    .input-refined {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(168, 85, 247, 0.15);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    select.input-refined {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23d8b4fe' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      background-size: 18px;
+      padding-right: 44px;
+      cursor: pointer;
+      transition: none;
+    }
+
+    select.input-refined:hover {
+      border-color: rgba(168, 85, 247, 0.4);
+    }
+
+    select.input-refined:focus {
+      border-color: rgba(168, 85, 247, 0.6);
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+    }
+
+    select.input-refined option {
+      background: #1a1a2e;
+      color: #d1d5db;
+    }
+
+    select.input-refined option:hover {
+      background: #16213e;
+      color: #f3f4f6;
+    }
+
+    select.input-refined option:checked {
+      background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+      color: white;
+    }
+
+    .input-refined::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .input-refined:focus {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(168, 85, 247, 0.5);
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
+      outline: none;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .button-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
+    }
+
+    .button-primary:active {
+      transform: translateY(0);
+    }
+
+    .button-secondary {
+      background: transparent;
+      border: 1.5px solid rgba(168, 85, 247, 0.3);
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .button-secondary:hover {
+      border-color: rgba(168, 85, 247, 0.6);
+      background: rgba(168, 85, 247, 0.08);
+      transform: translateY(-2px);
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: white;
+    }
+
+    .status-box {
+      border-radius: 12px;
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      background: rgba(168, 85, 247, 0.08);
+      padding: 14px 16px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    .status-success {
+      border-color: rgba(34, 197, 94, 0.3);
+      background: rgba(34, 197, 94, 0.1);
+      color: rgb(134, 239, 172);
+    }
+
+    .status-error {
+      border-color: rgba(239, 68, 68, 0.3);
+      background: rgba(239, 68, 68, 0.1);
+      color: rgb(252, 165, 165);
+    }
+
+    .status-info {
+      border-color: rgba(168, 85, 247, 0.3);
+      background: rgba(168, 85, 247, 0.1);
+      color: rgb(217, 191, 255);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .animate-in {
+      animation: slideUp 0.6s ease-out forwards;
+    }
+
+    .animate-fade {
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .delay-100 { animation-delay: 100ms; }
+    .delay-200 { animation-delay: 200ms; }
+    .delay-300 { animation-delay: 300ms; }
 
     @media (prefers-reduced-motion: reduce) {
-      .tm-anim { opacity: 1 !important; transform: none !important; }
-      .tm-loaded .tm-anim { animation: none !important; }
+      .animate-in, .animate-fade { animation: none; opacity: 1; transform: none; }
     }
 
-    .cal-embed {
-      width: 100%;
-      min-height: 860px;
-      border: 0;
-      border-radius: 16px;
-      background: rgba(2, 6, 23, 0.4);
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      z-index: 40;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-content {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 20px;
+      pointer-events: none;
+    }
+
+    .modal-content.active {
+      pointer-events: auto;
+    }
+
+    .modal-box {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+      max-width: 90%;
+      max-height: 90%;
+      overflow: auto;
+      transform: scale(0.95);
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+
+    .modal-box.active {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(168, 85, 247, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .modal-close:hover {
+      background: rgba(168, 85, 247, 0.15);
+      border-color: rgba(168, 85, 247, 0.3);
+    }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.1));
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #d8b4fe;
+    }
+
+    .form-section {
+      padding-bottom: 32px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .form-section:last-child {
+      border-bottom: none;
+    }
+
+    .form-section-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 8px;
+    }
+
+    .form-section-subtitle {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 16px;
+    }
+
+    /* FAQ (styled details/summary) */
+    .faq-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(168, 85, 247, 0.12);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .faq-card[open] {
+      border-color: rgba(168, 85, 247, 0.25);
+      box-shadow: 0 10px 40px rgba(168, 85, 247, 0.10);
+    }
+
+    .faq-summary {
+      list-style: none;
+    }
+
+    .faq-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .faq-chevron {
+      transition: transform 0.2s ease;
+    }
+
+    details[open] .faq-chevron {
+      transform: rotate(180deg);
     }
   </style>
+ </head>
+ <body class="min-h-screen noise bg-slate-950 text-slate-300">
+  <div id="app" class="min-h-screen flex flex-col w-full">
+   <div class="gradient-hero min-h-screen flex flex-col relative">
+    <main class="flex-1 relative z-10 w-full">
+     <!-- Hero Header -->
+     <section class="max-w-7xl mx-auto px-6 py-20 relative z-10">
+      <div class="animate-in">
+       <div class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold mb-6 bg-purple-500/10 border border-purple-500/30 text-purple-200"><span class="w-2 h-2 rounded-full bg-purple-400"></span>Support
+       </div>
+       <h1 class="text-5xl md:text-6xl font-bold tracking-tight text-white mt-2 leading-tight mb-4">We're Here to Help</h1>
+       <p class="text-lg text-white/70 max-w-2xl leading-relaxed">Choose your preferred way to reach us. Whether you need immediate assistance or have a detailed question, we'll get you sorted quickly.</p>
+      </div>
+     </section><!-- Support Options Grid -->
+     <section class="max-w-7xl mx-auto px-6 pb-20 relative z-10">
+      <div class="grid gap-6 md:grid-cols-3 max-w-7xl mx-auto">
+       <!-- Schedule Call Card -->
+       <div class="card-elevated rounded-2xl p-8 animate-in delay-100 flex flex-col h-full">
+        <div class="feature-icon mb-6">
+         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+         </svg>
+        </div>
+        <h2 class="text-lg font-bold text-white mb-2">Schedule a Call</h2>
+        <p class="text-white/70 text-sm leading-relaxed mb-6 flex-1">Pick a time that works for you. Live support typically resolves issues in minutes, not days.</p><button id="schedule-call-btn" class="button-primary rounded-lg px-4 py-2.5 text-sm font-semibold w-full">Book Your Time Slot</button>
+       </div><!-- Message Form Card -->
+       <div class="card-elevated rounded-2xl p-8 animate-in delay-200 flex flex-col h-full">
+        <div class="feature-icon mb-6">
+         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+         </svg>
+        </div>
+        <h2 class="text-lg font-bold text-white mb-2">Create a Ticket</h2>
+        <p class="text-white/70 text-sm leading-relaxed mb-6 flex-1">For detailed questions or non-urgent issues. We respond within 24 hours with a tracking ID.</p><a href="#support-form-section" class="button-secondary rounded-lg px-4 py-2.5 text-sm font-semibold w-full text-center block">Go to Form</a>
+       </div><!-- FAQ Card -->
+       <div class="card-elevated rounded-2xl p-8 animate-in delay-300 flex flex-col h-full">
+        <div class="feature-icon mb-6">
+         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+         </svg>
+        </div>
+        <h2 class="text-lg font-bold text-white mb-2">Browse FAQ</h2>
+        <p class="text-white/70 text-sm leading-relaxed mb-6 flex-1">Answers to common questions about parsing, billing, reports, and your account.</p><a href="/#faq" class="button-secondary rounded-lg px-4 py-2.5 text-sm font-semibold w-full text-center">View FAQ</a>
+       </div>
+      </div>
+     </section><!-- Support Form Section -->
+     <section id="support-form-section" class="max-w-7xl mx-auto px-6 pb-20 relative z-10">
+      <div class="animate-in max-w-3xl mx-auto">
+       <!-- Form Header -->
+       <div class="mb-12">
+        <h2 class="section-title mb-3">Create a Support Ticket</h2>
+        <p class="text-white/70">We'll respond within 24 hours with your Support ID and next steps.</p>
+       </div><!-- Quick Lookup -->
+       <div class="mb-10 p-6 rounded-xl bg-purple-500/5 border border-purple-500/15">
+        <p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-4">Already have a support ID?</p>
+        <div class="flex flex-col sm:flex-row gap-3">
+         <input id="support-id-lookup" type="text" placeholder="Enter your Support ID" class="input-refined flex-1 rounded-lg px-4 py-2.5 text-sm" autocomplete="off">
+         <button id="support-id-lookup-btn" type="button" class="button-secondary rounded-lg px-6 py-2.5 text-sm font-semibold text-center whitespace-nowrap">Check Status</button>
+        </div>
+        <div id="support-lookup-status" class="hidden status-box status-info mt-4" aria-live="polite"></div>
+       </div>
+      </div>
 
-  <style>@view-transition { navigation: auto; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-</head>
-
-<body class="h-full bg-slate-950 text-slate-300 overflow-auto">
-  <div id="app" class="min-h-screen flex flex-col grid-overlay">
-    <div class="purple-glow min-h-screen flex flex-col">
-
-      <!-- PARTIAL:header -->
-
-      <main class="flex-1">
-        <section class="max-w-7xl mx-auto px-6 pt-12 pb-8">
-          <div class="tm-anim">
-            <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-              <div>
-                <div class="inline-flex items-center gap-2 rounded-full border border-slate-800/60 bg-slate-950/50 px-4 py-2 text-xs text-slate-300">
-                  <span class="badge-gradient h-2.5 w-2.5 rounded-full"></span>
-                  Support
-                </div>
-                <h1 class="mt-4 text-3xl md:text-4xl font-bold tracking-tight text-white">Contact Support</h1>
-                <p class="mt-3 max-w-2xl text-slate-400">
-                  Book a support call, browse the FAQ, or send a message. You’ll receive a Support ID by email.
-                </p>
-              </div>
-
-              <div class="flex items-center gap-3">
-                <a href="/#faq" class="inline-flex items-center justify-center rounded-2xl border border-slate-800/60 bg-slate-950/60 px-5 py-3 text-sm text-slate-200 hover:text-white hover:scale-[1.02] transition">
-                  View FAQ
-                </a>
-                <a href="/legal/terms.html" class="inline-flex items-center justify-center rounded-2xl border border-slate-800/60 bg-slate-950/60 px-5 py-3 text-sm text-slate-200 hover:text-white hover:scale-[1.02] transition">
-                  Refund &amp; Credit Policy
-                </a>
-              </div>
-            </div>
+       
+       <!-- Main Form -->
+       <form id="support-form" class="space-y-0 max-w-3xl mx-auto" novalidate>
+        <input type="hidden" id="eventId" name="eventId">
+        <input type="hidden" id="sessionToken" name="sessionToken"> <input type="hidden" id="utm_source" name="utm_source"> <input type="hidden" id="utm_medium" name="utm_medium"> <input type="hidden" id="utm_campaign" name="utm_campaign"> <input type="hidden" id="utm_term" name="utm_term"> <input type="hidden" id="utm_content" name="utm_content"> <!-- Section 1: Your Info -->
+        <div class="form-section">
+         <h3 class="form-section-title">Your Information</h3>
+         <p class="form-section-subtitle">So we know who to follow up with</p>
+         <div class="grid gap-5 md:grid-cols-2">
+          <div>
+           <label class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2" for="name">Name *</label> <input id="name" name="name" required class="input-refined w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-white/30" placeholder="Your name">
           </div>
-        </section>
-
-        <section class="max-w-7xl mx-auto px-6 pb-14">
-          <div class="grid gap-8 lg:grid-cols-2">
-
-            <!-- Booking -->
-            <div class="glass-card rounded-2xl p-6 md:p-8 tm-anim delay-1">
-              <h2 class="text-white font-semibold text-lg">Book Transcript Support</h2>
-              <p class="mt-2 text-slate-400 text-sm">
-                Pick a time that works. Most issues are solved faster live than through 18 back-and-forth emails.
-              </p>
-              <div class="mt-6">
-                <iframe
-                  class="cal-embed"
-                  src="https://cal.com/tax-monitor-pro/tax-monitor-transcript-support"
-                  title="Cal.com — Tax Monitor Transcript Support"
-                  loading="lazy"
-                  referrerpolicy="no-referrer-when-downgrade"
-                ></iframe>
-              </div>
-            </div>
-
-            <!-- Message Form -->
-            <div class="glass-card rounded-2xl p-6 md:p-8 tm-anim delay-2">
-              <h2 class="text-white font-semibold text-lg">Send a Message</h2>
-              <p class="mt-2 text-slate-400 text-sm">
-                Use this for non-urgent questions, billing/credit issues, or transcript parsing questions.
-              </p>
-
-              <div class="mt-6 rounded-2xl border border-slate-800/60 bg-slate-950/40 p-5">
-                <div class="flex flex-col gap-2 text-sm text-slate-400">
-                  <div class="flex items-center justify-between gap-4">
-                    <span>Support ID</span>
-                    <span id="support-id" class="font-mono text-slate-300">(generated on submit)</span>
-                  </div>
-                  <div class="flex items-center justify-between gap-4">
-                    <span>ClickUp Ticket</span>
-                    <span id="clickup-id" class="font-mono text-slate-300">(assigned after processing)</span>
-                  </div>
-                </div>
-              </div>
-
-              <form id="support-form" class="mt-6 space-y-4" novalidate>
-                <input type="hidden" id="eventId" name="eventId" />
-                <input type="hidden" id="utm_source" name="utm_source" />
-                <input type="hidden" id="utm_medium" name="utm_medium" />
-                <input type="hidden" id="utm_campaign" name="utm_campaign" />
-                <input type="hidden" id="utm_term" name="utm_term" />
-                <input type="hidden" id="utm_content" name="utm_content" />
-
-                <div class="grid gap-4 md:grid-cols-2">
-                  <div>
-                    <label class="text-sm text-slate-300" for="name">Name</label>
-                    <input id="name" name="name" required class="mt-2 w-full rounded-2xl border border-slate-800/60 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50" placeholder="Jane Taxpro" />
-                  </div>
-                  <div>
-                    <label class="text-sm text-slate-300" for="email">Email</label>
-                    <input id="email" name="email" type="email" required class="mt-2 w-full rounded-2xl border border-slate-800/60 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50" placeholder="jane@firm.com" />
-                  </div>
-                </div>
-
-                <div>
-                  <label class="text-sm text-slate-300" for="subject">Subject</label>
-                  <input id="subject" name="subject" required class="mt-2 w-full rounded-2xl border border-slate-800/60 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50" placeholder="Parsing issue, credit issue, report question..." />
-                </div>
-
-                <div>
-                  <label class="text-sm text-slate-300" for="tokenId">Token ID (optional)</label>
-                  <input id="tokenId" name="tokenId" class="mt-2 w-full rounded-2xl border border-slate-800/60 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50" placeholder="Paste your Token ID if you have one" />
-                  <p class="mt-2 text-xs text-slate-500">Including a Token ID helps us find your account faster for credit issues.</p>
-                </div>
-
-                <div>
-                  <label class="text-sm text-slate-300" for="message">Message</label>
-                  <textarea id="message" name="message" required rows="6" class="mt-2 w-full rounded-2xl border border-slate-800/60 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50" placeholder="Tell us what happened, what you expected, and (if relevant) the reportId or upload time."></textarea>
-                </div>
-
-                <div class="flex flex-col gap-3 pt-2">
-                  <button id="submit-btn" type="submit" class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 px-5 py-3 text-sm font-semibold text-slate-950 hover:opacity-95 hover:scale-[1.01] transition">
-                    Send message
-                  </button>
-                  <p class="text-xs text-slate-500">
-                    By submitting, you agree to our <a class="text-purple-300 hover:text-purple-200" href="/legal/terms.html">Terms</a> and <a class="text-purple-300 hover:text-purple-200" href="/legal/privacy.html">Privacy Policy</a>.
-                  </p>
-                </div>
-
-                <div id="form-status" class="hidden rounded-2xl border border-slate-800/60 bg-slate-950/40 p-4 text-sm"></div>
-              </form>
-            </div>
-
+          <div>
+           <label class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2" for="email">Email *</label> <input id="email" name="email" type="email" required class="input-refined w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-white/30" placeholder="your@email.com">
           </div>
-        </section>
-      </main>
+         </div>
+        </div><!-- Section 2: Issue Details -->
+        <div class="form-section">
+         <h3 class="form-section-title">What's the Issue?</h3>
+         <p class="form-section-subtitle">Help us route your request to the right team</p>
+         <div class="grid gap-5 md:grid-cols-2 mb-5">
+          <div>
+           <label class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2" for="category">Category *</label> <select id="category" name="category" required class="input-refined w-full rounded-lg px-4 py-2.5 text-sm"> <option value="">Select a category</option> <option value="Access / Portal">Access / Portal</option>
+            <option value="Account / Reports / Monitoring">Account / Reports / Monitoring</option>
+            <option value="Billing / Credits">Billing / Credits</option>
+            <option value="General">General</option>
+            <option value="Other">Other</option>
+            <option value="Parsing">Parsing</option> </select>
+          </div>
+          <div>
+           <label class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2" for="issueType">Issue Type *</label> <select id="issueType" name="issueType" required class="input-refined w-full rounded-lg px-4 py-2.5 text-sm"> <option value="">Select an issue type</option> <option value="Account">Account</option>
+            <option value="Billing">Billing</option>
+            <option value="Credits">Credits</option>
+            <option value="Other">Other</option>
+            <option value="Parsing">Parsing</option>
+            <option value="Report">Report</option>
+            <option value="Token">Token</option> </select>
+          </div>
+         </div>
+         <div class="grid gap-5 md:grid-cols-2">
+          <div>
+           <label class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2" for="urgency">Urgency Level *</label> <select id="urgency" name="urgency" required class="input-refined w-full rounded-lg px-4 py-2.5 text-sm"> <option value="">Select urgency</option> <option value="Normal">Normal</option>
+            <option value="Time-sensitive (deadline)">Time-sensitive (deadline)</option>
+            <option value="Urgent (service blocked)">Urgent (service blocked)</option> </select>
+          </div>
+          <div>
+           <label class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2" for="priority">Priority *</label> <select id="priority" name="priority" required class="input-refined w-full rounded-lg px-4 py-2.5 text-sm"> <option value="">Select priority</option> <option value="Critical">Critical</option>
+            <option value="High">High</option>
+            <option value="Low">Low</option>
+            <option value="Normal">Normal</option> </select>
+          </div>
+         </div>
+        </div><!-- Section 3: Describe the Problem -->
+        <div class="form-section">
+         <h3 class="form-section-title">Describe Your Problem</h3>
+         <p class="form-section-subtitle">Give us enough detail to solve it quickly</p>
+         <div class="space-y-5">
+          <div>
+           <label class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2" for="subject">Subject *</label> <input id="subject" name="subject" required class="input-refined w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-white/30" placeholder="e.g., I can't download my report">
+          </div>
+          <div>
+           <label class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2" for="message">Message *</label> <textarea id="message" name="message" required rows="5" class="input-refined w-full rounded-lg px-4 py-2.5 text-sm resize-none placeholder:text-white/30" placeholder="Tell us what happened, what you expected, and any error messages you saw"></textarea>
+           <p class="mt-2 text-xs text-white/50">💡 Include exact error messages, steps to reproduce, and what you expected vs. what happened</p>
+          </div>
+         </div>
+        </div><!-- Section 4: Account Details (Optional) -->
+        <div class="form-section">
+         <h3 class="form-section-title">Account Information</h3>
+         <p class="form-section-subtitle">Optional but helps us find you faster</p>
+         <div class="grid gap-5 md:grid-cols-2">
+          <div>
+           <label class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2" for="tokenId">Token ID</label> <input id="tokenId" name="tokenId" class="input-refined w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-white/30" placeholder="Your account token">
+          </div>
+          <div>
+           <label class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2" for="relatedOrderId">Related ID</label> <input id="relatedOrderId" name="relatedOrderId" class="input-refined w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-white/30" placeholder="Stripe ID, reference number, etc.">
+          </div>
+         </div>
+        </div><!-- Submit Button -->
+        <div class="pt-8 space-y-4">
+         <button id="submit-btn" type="submit" class="button-primary w-full rounded-lg px-5 py-3.5 text-base font-semibold">Submit Support Ticket</button>
+         <p class="text-xs text-white/50 text-center">By submitting, you agree to our <a class="text-purple-300 hover:text-purple-200 transition" href="/legal/terms.html">Terms</a> and <a class="text-purple-300 hover:text-purple-200 transition" href="/legal/privacy.html">Privacy Policy</a></p>
+        </div><!-- Status Messages -->
+        <div id="form-status" class="hidden status-box mt-4" aria-live="polite"></div><!-- Success Confirmation -->
+        <div id="support-id-display" class="hidden mt-6 p-6 rounded-xl bg-green-500/10 border border-green-500/30">
+         <p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-2">Your Support ID</p>
+         <div class="text-3xl font-bold text-white font-mono mb-3" id="support-id"></div>
+         <p class="text-sm text-white/70">We've sent a confirmation email with next steps. Keep this ID handy for reference.</p>
+        </div>
+       </form><!-- Helpful Info -->
+       <!-- FAQ Section -->
+       <div id="faq" class="mt-16 pt-12 border-t border-white/10 max-w-3xl mx-auto">
+        <div class="mb-8">
+         <h2 class="section-title mb-3">FAQ</h2>
+         <p class="text-white/70">Quick answers to the most common questions.</p>
+        </div>
 
-      <!-- PARTIAL:footer -->
+        <div class="space-y-4">
+         <details class="faq-card rounded-xl p-5">
+          <summary class="faq-summary flex items-center justify-between gap-4 cursor-pointer">
+           <span class="text-sm font-semibold text-white">Do I need to upload my transcript to get help?</span>
+           <svg class="faq-chevron w-5 h-5 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+          </summary>
+          <p class="mt-3 text-sm text-white/70">No. For support, describe what happened and include any error messages. If you choose to use the parser, it runs locally in your browser.</p>
+         </details>
 
+         <details class="faq-card rounded-xl p-5">
+          <summary class="faq-summary flex items-center justify-between gap-4 cursor-pointer">
+           <span class="text-sm font-semibold text-white">Where do I find my Support ID?</span>
+           <svg class="faq-chevron w-5 h-5 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+          </summary>
+          <p class="mt-3 text-sm text-white/70">After you submit a ticket, we show your Support ID on this page and email it to you. Use the lookup box above to check status later.</p>
+         </details>
+
+         <details class="faq-card rounded-xl p-5">
+          <summary class="faq-summary flex items-center justify-between gap-4 cursor-pointer">
+           <span class="text-sm font-semibold text-white">What is your response time?</span>
+           <svg class="faq-chevron w-5 h-5 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+          </summary>
+          <p class="mt-3 text-sm text-white/70">Tickets: within 24 hours. Calls: fastest option for time-sensitive issues.</p>
+         </details>
+
+         <details class="faq-card rounded-xl p-5">
+          <summary class="faq-summary flex items-center justify-between gap-4 cursor-pointer">
+           <span class="text-sm font-semibold text-white">What information should I include in my ticket?</span>
+           <svg class="faq-chevron w-5 h-5 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+          </summary>
+          <p class="mt-3 text-sm text-white/70">Exact error message, steps to reproduce, and your Token ID (if you have one). No passwords, full SSNs, or payment card details.</p>
+         </details>
+        </div>
+       </div>
+
+       <div class="mt-16 pt-12 border-t border-white/10 max-w-3xl mx-auto">
+        <div class="grid gap-5 md:grid-cols-3">
+         <div class="card-elevated rounded-xl p-5">
+          <div class="text-xs font-semibold text-white/90 mb-3 uppercase tracking-wide">
+           ✓ Do Include
+          </div>
+          <ul class="space-y-2 text-xs text-white/70">
+           <li>Exact error message</li>
+           <li>Steps to reproduce</li>
+           <li>Your Token ID</li>
+           <li>Browser/device info</li>
+          </ul>
+         </div>
+         <div class="card-elevated rounded-xl p-5">
+          <div class="text-xs font-semibold text-white/90 mb-3 uppercase tracking-wide">
+           🚫 Don't Include
+          </div>
+          <ul class="space-y-2 text-xs text-white/70">
+           <li>Full SSNs</li>
+           <li>Full bank numbers</li>
+           <li>Passwords</li>
+           <li>Credit card info</li>
+          </ul>
+         </div>
+         <div class="card-elevated rounded-xl p-5">
+          <div class="text-xs font-semibold text-white/90 mb-3 uppercase tracking-wide">
+           📧 Direct Email
+          </div>
+          <p class="text-xs text-white/70 mb-2"><a class="text-purple-300 hover:text-purple-200 transition font-semibold" href="mailto:support@taxmonitor.pro">support@taxmonitor.pro</a></p>
+          <p class="text-xs text-white/50">Response time: Within 24 hours</p>
+         </div>
+        </div>
+       </div>
+      </div>
+     </section>
+    </main><!-- Modal for Cal.com -->
+    <div class="modal-backdrop" id="cal-modal-backdrop"></div>
+    <div class="modal-content" id="cal-modal-content">
+     <div class="modal-box relative w-full"><button class="modal-close" id="cal-modal-close" aria-label="Close modal">×</button>
+      <div class="p-8">
+       <h3 class="text-2xl font-bold text-white mb-2">Book a Support Call</h3>
+       <p class="text-white/60 text-sm mb-8">Select a time that works best for you. We'll send you a calendar invite and Zoom link.</p>
+       <div id="cal-container"></div>
+      </div>
+     </div>
     </div>
+   </div>
   </div>
-
   <script>
     (function () {
-      var API_ENDPOINT = 'https://api.taxmonitor.pro/forms/support/message';
+      const API_ENDPOINT = 'https://api.taxmonitor.pro/forms/support/message';
 
+      // ===== UTILITY FUNCTIONS =====
       function getParam(name) {
         try {
           return new URLSearchParams(window.location.search).get(name) || '';
@@ -240,9 +645,8 @@
       function setStatus(kind, text) {
         var el = document.getElementById('form-status');
         if (!el) return;
-
         el.classList.remove('hidden');
-        el.classList.remove('text-emerald-200', 'text-amber-200', 'text-rose-200');
+        el.classList.remove('status-success', 'status-error', 'status-info');
         el.classList.add(kind);
         el.textContent = text;
       }
@@ -250,118 +654,323 @@
       function disable(btn) {
         if (!btn) return;
         btn.disabled = true;
-        btn.classList.add('opacity-60', 'cursor-not-allowed');
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
       }
 
       function enable(btn) {
         if (!btn) return;
         btn.disabled = false;
-        btn.classList.remove('opacity-60', 'cursor-not-allowed');
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
       }
 
-      // Entrance animation
-      requestAnimationFrame(function () {
-        document.documentElement.classList.add('tm-loaded');
-      });
+      // ===== MODAL FUNCTIONS =====
+      function initCalModal() {
+        const backdrop = document.getElementById('cal-modal-backdrop');
+        const content = document.getElementById('cal-modal-content');
+        const closeBtn = document.getElementById('cal-modal-close');
+        const scheduleBtn = document.getElementById('schedule-call-btn');
 
-      // Seed eventId
-      var eventIdEl = document.getElementById('eventId');
-      if (eventIdEl) eventIdEl.value = newEventId();
+        function openModal() {
+          backdrop.classList.add('active');
+          content.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        }
 
-      // Seed UTM fields
-      ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(function (k) {
-        var el = document.getElementById(k);
-        if (el) el.value = getParam(k);
-      });
+        function closeModal() {
+          backdrop.classList.remove('active');
+          content.classList.remove('active');
+          document.body.style.overflow = '';
+        }
 
-      // Seed tokenId (optional)
-      var tokenParam = getParam('tokenId') || '';
-      var tokenInput = document.getElementById('tokenId');
-      if (tokenInput && tokenParam) tokenInput.value = tokenParam;
-
-      // Form submit
-      var form = document.getElementById('support-form');
-      var btn = document.getElementById('submit-btn');
-
-      if (form) {
-        form.addEventListener('submit', async function (e) {
-          e.preventDefault();
-
-          var payload = {
-            email: (document.getElementById('email') || {}).value || '',
-            eventId: (document.getElementById('eventId') || {}).value || '',
-            message: (document.getElementById('message') || {}).value || '',
-            name: (document.getElementById('name') || {}).value || '',
-            subject: (document.getElementById('subject') || {}).value || ''
-          };
-
-          var tokenId = (document.getElementById('tokenId') || {}).value || '';
-          if (tokenId) payload.tokenId = tokenId;
-
-          ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(function (k) {
-            var v = (document.getElementById(k) || {}).value || '';
-            if (v) payload[k] = v;
+        if (scheduleBtn) {
+          scheduleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal();
           });
+        }
 
-          // Basic required validation
-          var missing = [];
-          if (!payload.email) missing.push('email');
-          if (!payload.eventId) missing.push('eventId');
-          if (!payload.message) missing.push('message');
-          if (!payload.name) missing.push('name');
-          if (!payload.subject) missing.push('subject');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeModal();
+          });
+        }
 
-          if (missing.length) {
-            setStatus('text-amber-200', 'Missing required fields: ' + missing.sort().join(', '));
-            return;
-          }
+        if (backdrop) {
+          backdrop.addEventListener('click', (e) => {
+            if (e.target === backdrop) closeModal();
+          });
+        }
 
-          disable(btn);
-          setStatus('text-slate-300', 'Sending…');
-
-          try {
-            var res = await fetch(API_ENDPOINT, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(payload)
-            });
-
-            var json = null;
-            try { json = await res.json(); } catch (_) { json = null; }
-
-            if (!res.ok) {
-              var msg = (json && (json.error || json.message)) ? String(json.error || json.message) : ('Request failed (' + res.status + ')');
-              setStatus('text-rose-200', msg);
-              enable(btn);
-              return;
-            }
-
-            var supportId = json && (json.supportId || json.support_id) ? String(json.supportId || json.support_id) : '';
-            var clickupTaskId = json && (json.clickupTaskId || json.clickup_task_id) ? String(json.clickupTaskId || json.clickup_task_id) : '';
-
-            if (supportId) {
-              var sid = document.getElementById('support-id');
-              if (sid) sid.textContent = supportId;
-            }
-
-            if (clickupTaskId) {
-              var cid = document.getElementById('clickup-id');
-              if (cid) cid.textContent = clickupTaskId;
-            }
-
-            setStatus('text-emerald-200', 'Message received. Check your email for your Support ID.');
-            enable(btn);
-
-            // Rotate eventId so resubmits are unique
-            if (eventIdEl) eventIdEl.value = newEventId();
-
-          } catch (err) {
-            setStatus('text-rose-200', 'Network error. Please try again.');
-            enable(btn);
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && content.classList.contains('active')) {
+            closeModal();
           }
         });
       }
+
+      function initCalEmbed() {
+        if (typeof window.Cal !== 'function') return;
+
+        const container = document.getElementById('cal-container');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        window.Cal('init', { origin: 'https://app.cal.com' });
+        window.Cal('ui', {
+          cssVarsPerTheme: {
+            light: { 'cal-brand': '#a855f7' },
+            dark: { 'cal-brand': '#a855f7' }
+          },
+          hideEventTypeDetails: false,
+          layout: 'month_view'
+        });
+        window.Cal('inline', {
+          elementOrSelector: container,
+          calLink: 'tax-monitor-pro/tax-monitor-transcript-support'
+        });
+      }
+
+      // ===== LOOKUP FUNCTIONS =====
+      async function lookupSupportId() {
+        var input = document.getElementById('support-id-lookup');
+        var btn = document.getElementById('support-id-lookup-btn');
+        var box = document.getElementById('support-lookup-status');
+
+        function show(kind, text) {
+          if (!box) return;
+          box.classList.remove('hidden');
+          box.classList.remove('status-success', 'status-error', 'status-info');
+          box.classList.add(kind);
+          box.textContent = text;
+        }
+
+        var supportId = (input || {}).value ? String(input.value).trim() : '';
+        if (!supportId) {
+          show('status-error', 'Enter a Support ID to check status.');
+          return;
+        }
+
+        disable(btn);
+        show('status-info', 'Checking status...');
+
+        // Support status is a read model (no receipts, no mutations).
+        var url = 'https://api.taxmonitor.pro/support/status?supportId=' + encodeURIComponent(supportId);
+
+        try {
+          var res = await fetch(url, { method: 'GET' });
+          var json = null;
+          try { json = await res.json(); } catch (_) { json = null; }
+
+          if (!res.ok) {
+            var msg = (json && (json.error || json.message)) ? String(json.error || json.message) : ('Request failed (' + res.status + ')');
+            show('status-error', msg);
+            enable(btn);
+            return;
+          }
+
+          var status = json && json.status ? String(json.status) : '';
+          var updatedAt = json && (json.updatedAt || json.updated_at) ? String(json.updatedAt || json.updated_at) : '';
+          var latestUpdate = json && (json.latestUpdate || json.latest_update) ? String(json.latestUpdate || json.latest_update) : '';
+
+          var parts = [];
+          if (latestUpdate) parts.push(latestUpdate);
+          if (status) parts.push('Status: ' + status);
+          if (updatedAt) parts.push('Updated: ' + updatedAt);
+
+          if (parts.length) {
+            show('status-success', parts.join(' • '));
+          } else {
+            show('status-info', 'Your request is being processed. Please check back later for more details.');
+          }
+          enable(btn);
+        } catch (err) {
+          show('status-error', 'Network error. Please try again.');
+          enable(btn);
+        }
+      }
+
+      function initLookupHandler() {
+        var btn = document.getElementById('support-id-lookup-btn');
+        var input = document.getElementById('support-id-lookup');
+
+        if (btn) {
+          btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            lookupSupportId();
+          });
+        }
+
+        if (input) {
+          input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              lookupSupportId();
+            }
+          });
+        }
+      }
+
+      // ===== FORM FUNCTIONS =====
+      function seedFormFields() {
+        var eventIdEl = document.getElementById('eventId');
+        if (eventIdEl) eventIdEl.value = newEventId();
+
+        var sessionTokenEl = document.getElementById('sessionToken');
+        if (sessionTokenEl) sessionTokenEl.value = getParam('sessionToken');
+
+        ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(function (k) {
+          var el = document.getElementById(k);
+          if (el) el.value = getParam(k);
+        });
+
+        var tokenParam = getParam('tokenId') || '';
+        var tokenInput = document.getElementById('tokenId');
+        if (tokenInput && tokenParam) tokenInput.value = tokenParam;
+      }
+
+      function initFormHandler() {
+        var form = document.getElementById('support-form');
+        var btn = document.getElementById('submit-btn');
+
+        if (form) {
+          form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            var payload = {
+              category: (document.getElementById('category') || {}).value || '',
+              email: (document.getElementById('email') || {}).value || '',
+              eventId: (document.getElementById('eventId') || {}).value || '',
+              issueType: (document.getElementById('issueType') || {}).value || '',
+              message: (document.getElementById('message') || {}).value || '',
+              name: (document.getElementById('name') || {}).value || '',
+              priority: (document.getElementById('priority') || {}).value || '',
+              subject: (document.getElementById('subject') || {}).value || '',
+              urgency: (document.getElementById('urgency') || {}).value || ''
+            };
+
+            var sessionToken = (document.getElementById('sessionToken') || {}).value || '';
+            if (sessionToken) payload.sessionToken = sessionToken;
+
+            var tokenId = (document.getElementById('tokenId') || {}).value || '';
+            if (tokenId) payload.tokenId = tokenId;
+
+            var relatedOrderId = (document.getElementById('relatedOrderId') || {}).value || '';
+            if (relatedOrderId) payload.relatedOrderId = relatedOrderId;
+
+            ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(function (k) {
+              var v = (document.getElementById(k) || {}).value || '';
+              if (v) payload[k] = v;
+            });
+
+            // Validation
+            var missing = [];
+            if (!payload.category) missing.push('category');
+            if (!payload.email) missing.push('email');
+            if (!payload.eventId) missing.push('eventId');
+            if (!payload.issueType) missing.push('issueType');
+            if (!payload.message) missing.push('message');
+            if (!payload.name) missing.push('name');
+            if (!payload.priority) missing.push('priority');
+            if (!payload.subject) missing.push('subject');
+            if (!payload.urgency) missing.push('urgency');
+
+            if (missing.length) {
+              setStatus('status-error', 'Please fill in all required fields.');
+              return;
+            }
+
+            disable(btn);
+            setStatus('status-info', 'Submitting your ticket...');
+
+            try {
+              var res = await fetch(API_ENDPOINT, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              });
+
+              var json = null;
+              try { json = await res.json(); } catch (_) { json = null; }
+
+              if (!res.ok) {
+                var msg = (json && (json.error || json.message)) ? String(json.error || json.message) : ('Request failed (' + res.status + ')');
+                setStatus('status-error', msg);
+                enable(btn);
+                return;
+              }
+
+              var supportId = json && (json.supportId || json.support_id) ? String(json.supportId || json.support_id) : '';
+
+              if (supportId) {
+                var sid = document.getElementById('support-id');
+                if (sid) {
+                  sid.textContent = supportId;
+                  document.getElementById('support-id-display').classList.remove('hidden');
+                  document.getElementById('form-status').classList.add('hidden');
+                }
+              }
+
+              form.style.display = 'none';
+              enable(btn);
+
+              var eventIdEl = document.getElementById('eventId');
+              if (eventIdEl) eventIdEl.value = newEventId();
+
+            } catch (err) {
+              setStatus('status-error', 'Network error. Please try again.');
+              enable(btn);
+            }
+          });
+        }
+      }
+
+      // ===== INITIALIZATION =====
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () {
+          seedFormFields();
+          initFormHandler();
+          initLookupHandler();
+          initCalModal();
+          setTimeout(initCalEmbed, 500);
+        });
+      } else {
+        seedFormFields();
+        initFormHandler();
+        initLookupHandler();
+        initCalModal();
+        setTimeout(initCalEmbed, 500);
+      }
     })();
+  </script><!-- Cal.com Embed Script -->
+  <script type="text/javascript">
+    (function (C, A, L) {
+      let p = function (a, ar) { a.q.push(ar); };
+      let d = C.document;
+      C.Cal = C.Cal || function () {
+        let cal = C.Cal;
+        let ar = arguments;
+        if (!cal.loaded) {
+          cal.ns = {};
+          cal.q = cal.q || [];
+          d.head.appendChild(d.createElement("script")).src = A;
+          cal.loaded = true;
+        }
+        if (ar[0] === L) {
+          const api = function () { p(api, arguments); };
+          const namespace = ar[1];
+          api.q = api.q || [];
+          if (typeof namespace === "string") {
+            cal.ns[namespace] = cal.ns[namespace] || api;
+            p(cal.ns[namespace], ar);
+            p(cal, ["initNamespace", namespace]);
+          } else p(cal, ar);
+          return;
+        }
+        p(cal, ar);
+      };
+    })(window, "https://app.cal.com/embed/embed.js", "init");
   </script>
-</body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d41db74e7f79a46',t:'MTc3MjEzNDIyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
