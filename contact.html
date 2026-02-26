@@ -1,0 +1,367 @@
+<!-- contact.html -->
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Support — Transcript.Tax Monitor Pro</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['DM Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial']
+          }
+        }
+      }
+    };
+  </script>
+
+  <script src="/_sdk/element_sdk.js"></script>
+
+  <style>
+    body { box-sizing: border-box; }
+    * { font-family: "DM Sans", system-ui, sans-serif; }
+
+    .purple-glow {
+      background: radial-gradient(ellipse 700px 420px at 50% -140px, rgba(168, 85, 247, 0.16), transparent 60%);
+    }
+
+    .grid-overlay {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 80px 80px;
+    }
+
+    .glass-card {
+      background: rgba(30, 35, 45, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 0 60px rgba(168, 85, 247, 0.05),
+        0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    }
+
+    .badge-gradient {
+      background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+    }
+
+    .section-divider {
+      border-color: rgba(255, 255, 255, 0.06);
+    }
+
+    @keyframes tmFadeUp {
+      0% { opacity: 0; transform: translateY(14px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .tm-anim { opacity: 0; transform: translateY(14px); }
+    .tm-loaded .tm-anim { animation: tmFadeUp 700ms ease forwards; }
+    .tm-loaded .tm-anim.delay-1 { animation-delay: 80ms; }
+    .tm-loaded .tm-anim.delay-2 { animation-delay: 160ms; }
+    .tm-loaded .tm-anim.delay-3 { animation-delay: 240ms; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .tm-anim { opacity: 1 !important; transform: none !important; }
+      .tm-loaded .tm-anim { animation: none !important; }
+    }
+
+    .cal-embed {
+      width: 100%;
+      min-height: 860px;
+      border: 0;
+      border-radius: 16px;
+      background: rgba(2, 6, 23, 0.4);
+    }
+  </style>
+
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+</head>
+
+<body class="h-full bg-slate-950 text-slate-300 overflow-auto">
+  <div id="app" class="min-h-screen flex flex-col grid-overlay">
+    <div class="purple-glow min-h-screen flex flex-col">
+
+      <!-- PARTIAL:header -->
+
+      <main class="flex-1">
+        <section class="max-w-7xl mx-auto px-6 pt-12 pb-8">
+          <div class="tm-anim">
+            <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+              <div>
+                <div class="inline-flex items-center gap-2 rounded-full border border-slate-800/60 bg-slate-950/50 px-4 py-2 text-xs text-slate-300">
+                  <span class="badge-gradient h-2.5 w-2.5 rounded-full"></span>
+                  Support
+                </div>
+                <h1 class="mt-4 text-3xl md:text-4xl font-bold tracking-tight text-white">Contact Support</h1>
+                <p class="mt-3 max-w-2xl text-slate-400">
+                  Book a support call, browse the FAQ, or send a message. You’ll receive a Support ID by email.
+                </p>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <a href="/#faq" class="inline-flex items-center justify-center rounded-2xl border border-slate-800/60 bg-slate-950/60 px-5 py-3 text-sm text-slate-200 hover:text-white hover:scale-[1.02] transition">
+                  View FAQ
+                </a>
+                <a href="/legal/terms.html" class="inline-flex items-center justify-center rounded-2xl border border-slate-800/60 bg-slate-950/60 px-5 py-3 text-sm text-slate-200 hover:text-white hover:scale-[1.02] transition">
+                  Refund &amp; Credit Policy
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="max-w-7xl mx-auto px-6 pb-14">
+          <div class="grid gap-8 lg:grid-cols-2">
+
+            <!-- Booking -->
+            <div class="glass-card rounded-2xl p-6 md:p-8 tm-anim delay-1">
+              <h2 class="text-white font-semibold text-lg">Book Transcript Support</h2>
+              <p class="mt-2 text-slate-400 text-sm">
+                Pick a time that works. Most issues are solved faster live than through 18 back-and-forth emails.
+              </p>
+              <div class="mt-6">
+                <iframe
+                  class="cal-embed"
+                  src="https://cal.com/tax-monitor-pro/tax-monitor-transcript-support"
+                  title="Cal.com — Tax Monitor Transcript Support"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </div>
+            </div>
+
+            <!-- Message Form -->
+            <div class="glass-card rounded-2xl p-6 md:p-8 tm-anim delay-2">
+              <h2 class="text-white font-semibold text-lg">Send a Message</h2>
+              <p class="mt-2 text-slate-400 text-sm">
+                Use this for non-urgent questions, billing/credit issues, or transcript parsing questions.
+              </p>
+
+              <div class="mt-6 rounded-2xl border border-slate-800/60 bg-slate-950/40 p-5">
+                <div class="flex flex-col gap-2 text-sm text-slate-400">
+                  <div class="flex items-center justify-between gap-4">
+                    <span>Support ID</span>
+                    <span id="support-id" class="font-mono text-slate-300">(generated on submit)</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-4">
+                    <span>ClickUp Ticket</span>
+                    <span id="clickup-id" class="font-mono text-slate-300">(assigned after processing)</span>
+                  </div>
+                </div>
+              </div>
+
+              <form id="support-form" class="mt-6 space-y-4" novalidate>
+                <input type="hidden" id="eventId" name="eventId" />
+                <input type="hidden" id="utm_source" name="utm_source" />
+                <input type="hidden" id="utm_medium" name="utm_medium" />
+                <input type="hidden" id="utm_campaign" name="utm_campaign" />
+                <input type="hidden" id="utm_term" name="utm_term" />
+                <input type="hidden" id="utm_content" name="utm_content" />
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <label class="text-sm text-slate-300" for="name">Name</label>
+                    <input id="name" name="name" required class="mt-2 w-full rounded-2xl border border-slate-800/60 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50" placeholder="Jane Taxpro" />
+                  </div>
+                  <div>
+                    <label class="text-sm text-slate-300" for="email">Email</label>
+                    <input id="email" name="email" type="email" required class="mt-2 w-full rounded-2xl border border-slate-800/60 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50" placeholder="jane@firm.com" />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-sm text-slate-300" for="subject">Subject</label>
+                  <input id="subject" name="subject" required class="mt-2 w-full rounded-2xl border border-slate-800/60 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50" placeholder="Parsing issue, credit issue, report question..." />
+                </div>
+
+                <div>
+                  <label class="text-sm text-slate-300" for="tokenId">Token ID (optional)</label>
+                  <input id="tokenId" name="tokenId" class="mt-2 w-full rounded-2xl border border-slate-800/60 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50" placeholder="Paste your Token ID if you have one" />
+                  <p class="mt-2 text-xs text-slate-500">Including a Token ID helps us find your account faster for credit issues.</p>
+                </div>
+
+                <div>
+                  <label class="text-sm text-slate-300" for="message">Message</label>
+                  <textarea id="message" name="message" required rows="6" class="mt-2 w-full rounded-2xl border border-slate-800/60 bg-slate-950/60 px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50" placeholder="Tell us what happened, what you expected, and (if relevant) the reportId or upload time."></textarea>
+                </div>
+
+                <div class="flex flex-col gap-3 pt-2">
+                  <button id="submit-btn" type="submit" class="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-purple-500 to-purple-600 px-5 py-3 text-sm font-semibold text-slate-950 hover:opacity-95 hover:scale-[1.01] transition">
+                    Send message
+                  </button>
+                  <p class="text-xs text-slate-500">
+                    By submitting, you agree to our <a class="text-purple-300 hover:text-purple-200" href="/legal/terms.html">Terms</a> and <a class="text-purple-300 hover:text-purple-200" href="/legal/privacy.html">Privacy Policy</a>.
+                  </p>
+                </div>
+
+                <div id="form-status" class="hidden rounded-2xl border border-slate-800/60 bg-slate-950/40 p-4 text-sm"></div>
+              </form>
+            </div>
+
+          </div>
+        </section>
+      </main>
+
+      <!-- PARTIAL:footer -->
+
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var API_ENDPOINT = 'https://api.taxmonitor.pro/forms/support/message';
+
+      function getParam(name) {
+        try {
+          return new URLSearchParams(window.location.search).get(name) || '';
+        } catch (_) {
+          return '';
+        }
+      }
+
+      function newEventId() {
+        if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+        return 'evt_' + String(Date.now()) + '_' + Math.random().toString(16).slice(2);
+      }
+
+      function setStatus(kind, text) {
+        var el = document.getElementById('form-status');
+        if (!el) return;
+
+        el.classList.remove('hidden');
+        el.classList.remove('text-emerald-200', 'text-amber-200', 'text-rose-200');
+        el.classList.add(kind);
+        el.textContent = text;
+      }
+
+      function disable(btn) {
+        if (!btn) return;
+        btn.disabled = true;
+        btn.classList.add('opacity-60', 'cursor-not-allowed');
+      }
+
+      function enable(btn) {
+        if (!btn) return;
+        btn.disabled = false;
+        btn.classList.remove('opacity-60', 'cursor-not-allowed');
+      }
+
+      // Entrance animation
+      requestAnimationFrame(function () {
+        document.documentElement.classList.add('tm-loaded');
+      });
+
+      // Seed eventId
+      var eventIdEl = document.getElementById('eventId');
+      if (eventIdEl) eventIdEl.value = newEventId();
+
+      // Seed UTM fields
+      ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(function (k) {
+        var el = document.getElementById(k);
+        if (el) el.value = getParam(k);
+      });
+
+      // Seed tokenId (optional)
+      var tokenParam = getParam('tokenId') || '';
+      var tokenInput = document.getElementById('tokenId');
+      if (tokenInput && tokenParam) tokenInput.value = tokenParam;
+
+      // Form submit
+      var form = document.getElementById('support-form');
+      var btn = document.getElementById('submit-btn');
+
+      if (form) {
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+
+          var payload = {
+            email: (document.getElementById('email') || {}).value || '',
+            eventId: (document.getElementById('eventId') || {}).value || '',
+            message: (document.getElementById('message') || {}).value || '',
+            name: (document.getElementById('name') || {}).value || '',
+            subject: (document.getElementById('subject') || {}).value || ''
+          };
+
+          var tokenId = (document.getElementById('tokenId') || {}).value || '';
+          if (tokenId) payload.tokenId = tokenId;
+
+          ['utm_source','utm_medium','utm_campaign','utm_term','utm_content'].forEach(function (k) {
+            var v = (document.getElementById(k) || {}).value || '';
+            if (v) payload[k] = v;
+          });
+
+          // Basic required validation
+          var missing = [];
+          if (!payload.email) missing.push('email');
+          if (!payload.eventId) missing.push('eventId');
+          if (!payload.message) missing.push('message');
+          if (!payload.name) missing.push('name');
+          if (!payload.subject) missing.push('subject');
+
+          if (missing.length) {
+            setStatus('text-amber-200', 'Missing required fields: ' + missing.sort().join(', '));
+            return;
+          }
+
+          disable(btn);
+          setStatus('text-slate-300', 'Sending…');
+
+          try {
+            var res = await fetch(API_ENDPOINT, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+
+            var json = null;
+            try { json = await res.json(); } catch (_) { json = null; }
+
+            if (!res.ok) {
+              var msg = (json && (json.error || json.message)) ? String(json.error || json.message) : ('Request failed (' + res.status + ')');
+              setStatus('text-rose-200', msg);
+              enable(btn);
+              return;
+            }
+
+            var supportId = json && (json.supportId || json.support_id) ? String(json.supportId || json.support_id) : '';
+            var clickupTaskId = json && (json.clickupTaskId || json.clickup_task_id) ? String(json.clickupTaskId || json.clickup_task_id) : '';
+
+            if (supportId) {
+              var sid = document.getElementById('support-id');
+              if (sid) sid.textContent = supportId;
+            }
+
+            if (clickupTaskId) {
+              var cid = document.getElementById('clickup-id');
+              if (cid) cid.textContent = clickupTaskId;
+            }
+
+            setStatus('text-emerald-200', 'Message received. Check your email for your Support ID.');
+            enable(btn);
+
+            // Rotate eventId so resubmits are unique
+            if (eventIdEl) eventIdEl.value = newEventId();
+
+          } catch (err) {
+            setStatus('text-rose-200', 'Network error. Please try again.');
+            enable(btn);
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
