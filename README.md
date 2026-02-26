@@ -369,6 +369,7 @@ All tasks link to the account via the **Account ID** custom field ([https://api.
 ### Support fields (latest Cal booking event)
 
 * Support Event ID — `8e8b453e-01f3-40fe-8156-2e9d9633ebd6`
+* Support Latest Update — `03ebc8ba-714e-4f7c-9748-eb1b62e657f7`
 
 ## Projection Rules
 
@@ -522,6 +523,125 @@ Rules:
   "supportId": "SUP-2026-0001"
 }
 ```
+
+---
+
+# Support Status Read Model
+
+## Endpoint
+
+```
+GET /app/support/status?supportId=SUP-...
+```
+
+## Response (minimal)
+
+* `latestUpdate`
+* `status`
+* `updatedAt`
+
+Rules:
+
+* Reads canonical `support/{supportId}.json` from R2
+* No ClickUp API calls
+* No receipt append
+* No canonical mutation
+* Pure read model only
+
+UI must always read R2. Never ClickUp.
+
+---
+
+# Support Status Webhook Ingestion
+
+## Flow (Authoritative Path)
+
+1. Human updates Support task in ClickUp (status + Latest Update field)
+2. ClickUp webhook fires → Worker
+3. Worker appends receipt → `receipts/clickup/{eventId}.json`
+4. Worker upserts canonical → `support/{supportId}.json`
+
+Canonical fields mirrored into R2:
+
+* `latestUpdate`
+* `status`
+* `updatedAt`
+
+Supported statuses (alphabetical):
+
+* BLOCKED
+* CLIENT FEEDBACK
+* CLOSED
+* COMPLETE
+* IN PROGRESS
+* IN REVIEW
+* OPEN / NEW
+* RESOLVED
+* WAITING ON CLIENT
+
+Rules:
+
+* Worker never reads ClickUp to determine canonical truth.
+* R2 is updated only via verified webhook ingestion.
+* Page reads R2 only.
+
+---
+
+# Support Webhook Health Watchdog
+
+## R2 Meta Key
+
+Path:
+
+```
+support/_meta/clickup_webhook.json
+```
+
+Shape (minimal):
+
+* `lastError`
+* `lastErrorAt`
+* `lastEventAt`
+* `lastEventId`
+* `openAlertTaskId`
+
+This key is updated whenever a ClickUp webhook is successfully processed.
+
+---
+
+## Daily Cron (UTC)
+
+If `now - lastEventAt` exceeds threshold (e.g. 24h):
+
+* Create one ClickUp alert task (dedupe via `openAlertTaskId`)
+* Assign to `10505295`
+* List: `901710818377`
+* Status: `open / new`
+
+Alert task name format (exact):
+
+```
+Transcript Tax Monitor Pro Support Ticket - Webhook Health Review Needed - Errored At MM-DD-YYYY HH:SS:MS
+```
+
+If webhook processing throws:
+
+* Update `lastError`
+* Update `lastErrorAt`
+* Create or refresh the same alert task (dedupe rule applies)
+
+---
+
+# Wrangler Cron Configuration
+
+Cloudflare cron runs in UTC.
+
+```toml
+[triggers]
+crons = ["0 16 * * *"]
+```
+
+Move hour if operationally preferred.
 
 ---
 
