@@ -1,9 +1,9 @@
 <!-- resources/transcript-orders.html-->
 <!doctype html>
-<html lang="en">
- <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en" class="h-full">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Transcript Download Walkthrough (5 Steps)</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -12,6 +12,30 @@
 
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
   <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+
+  <!-- Tailwind (CDN). Yes, we are keeping it. -->
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    // IMPORTANT: tailwind must exist before assigning tailwind.config.
+    // This order prevents: ReferenceError: tailwind is not defined
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['DM Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial']
+          },
+          colors: {
+            'brand-lavender': '#E9D5FF',
+            'brand-purple': '#5B21B6'
+          }
+        }
+      }
+    };
+  </script>
+
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+
   <style>
     :root{
       --bg:#0f172a;
@@ -26,9 +50,9 @@
     }
 
     *{ box-sizing:border-box; }
+
     body{
       margin:0;
-      font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color:var(--ink);
       background:
         radial-gradient(1200px 600px at 20% -10%, rgba(11,99,206,.18), transparent 60%),
@@ -47,6 +71,11 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
+    }
+
+    /* Font weight override ONLY inside walkthrough player */
+    .player, .player *{
+      font-weight:400 !important;
     }
 
     .player-top{
@@ -76,12 +105,15 @@
       transition: all 140ms;
       backdrop-filter: blur(10px);
     }
+
+    /* Use this ONLY when you want a specific button to be regular-weight */
+    .tm-btn-regular{ font-weight:500 !important; }
+
     .btn:hover:not(:disabled){ border-color: rgba(168, 85, 247, .45); background: rgba(168, 85, 247, .10); }
     .btn:active:not(:disabled){ transform: scale(0.96); }
     .btn:disabled{ opacity: 0.5; cursor: not-allowed; }
     .btn.primary{ background: var(--primary); border-color: transparent; color:#fff; }
     .btn.primary:hover:not(:disabled){ background: #7c3aed; }
-    .btn.primary:active:not(:disabled){ transform: scale(0.96); }
 
     .stage{
       position:relative;
@@ -150,7 +182,6 @@
     .barDots i{ width:9px; height:9px; border-radius:999px; background: rgba(11,99,206,.20); display:block; }
 
     .content{ padding: 18px 18px 20px; height: calc(100% - 54px); overflow:hidden; }
-
     .grid2{ display:grid; grid-template-columns: 1.2fr .8fr; gap: 16px; height:100%; }
 
     .card{
@@ -192,14 +223,8 @@
       transition: all 140ms;
     }
 
-    .cta:hover{
-      background: rgba(11,99,206,.15);
-      border-color: rgba(11,99,206,.25);
-    }
-
-    .cta:active{
-      transform: scale(0.96);
-    }
+    .cta:hover{ background: rgba(11,99,206,.15); border-color: rgba(11,99,206,.25); }
+    .cta:active{ transform: scale(0.96); }
 
     .rows{ display:flex; flex-direction:column; gap:10px; }
 
@@ -262,14 +287,9 @@
 
     .menuOpen div strong{ display:block; font-size:12px; margin-bottom:6px; }
     .menuOpen div span{ display:block; color: var(--muted); font-weight:800; font-size:11px; line-height:1.25; }
-
     .menuOpen div.primary{ border-color: rgba(11,99,206,.30); box-shadow: 0 0 0 4px rgba(11,99,206,.10); }
 
-    .txGrid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
+    .txGrid{ display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
     .txCard{
       border: 1px solid rgba(215,226,255,.9);
@@ -295,6 +315,7 @@
     }
 
     .txLinks{ display:flex; gap:8px; }
+
     .txLinks a{
       text-decoration:none;
       font-size:11px;
@@ -309,44 +330,24 @@
       display: inline-block;
     }
 
-    .txLinks a:hover{
-      background: rgba(11,99,206,.20);
-      border-color: rgba(11,99,206,.35);
+    .txLinks a:hover{ background: rgba(11,99,206,.20); border-color: rgba(11,99,206,.35); }
+    .txLinks a:active{ transform: scale(0.95); }
+
+    /* Purple glow animation for guided highlights */
+    @keyframes purplePulse {
+      0% { box-shadow: 0 0 0 0 rgba(168,85,247,.6); }
+      70% { box-shadow: 0 0 0 12px rgba(168,85,247,0); }
+      100% { box-shadow: 0 0 0 0 rgba(168,85,247,0); }
     }
 
-    .txLinks a:active{
-      transform: scale(0.95);
+    .purple-glow{
+      position: relative;
+      z-index: 2;
+      animation: purplePulse 1.8s ease-out infinite;
+      border-color: rgba(168,85,247,.8) !important;
     }
 
-    /* Animated cursor overlay */
-    .overlay{ position:absolute; inset:0; pointer-events:none; }
-
-    .cursor{
-      position:absolute;
-      width:26px;
-      height:26px;
-      transform: translate(-4px, -4px);
-      opacity:0;
-      transition: opacity 200ms ease;
-    }
-
-    .cursor svg{
-      width:100%;
-      height:100%;
-      filter: drop-shadow(0 6px 12px rgba(0,0,0,.35));
-    }
-
-    @keyframes clickPulse{
-      0%{ transform: translate(-4px,-4px) scale(1); }
-      40%{ transform: translate(-4px,-4px) scale(.9); }
-      70%{ transform: translate(-4px,-4px) scale(1.05); }
-      100%{ transform: translate(-4px,-4px) scale(1); }
-    }
-
-    .cursor.play{
-      opacity:1;
-      animation: clickPulse 900ms ease-in-out;
-    }
+    
 
     /* Timeline */
     .caption{
@@ -411,28 +412,8 @@
 
     .dot span{ font-size:12px; font-weight:900; color: rgba(255,255,255,.88); line-height:1.1; }
 
-    .dot:hover{
-      border-color: rgba(168, 85, 247, .35);
-      background: rgba(168, 85, 247, .10);
-    }
-
-    .dot:active{
-      transform: scale(0.96);
-    }
-
-    .dot b{
-      width:26px;
-      height:26px;
-      border-radius:999px;
-      display:grid;
-      place-items:center;
-      background: rgba(168, 85, 247, .18);
-      color: rgba(255,255,255,.92);
-      font-size:12px;
-    }
-
-    .dot span{ font-size:12px; font-weight:900; color: rgba(255,255,255,.88); line-height:1.1; }
-
+    .dot:hover{ border-color: rgba(168, 85, 247, .35); background: rgba(168, 85, 247, .10); }
+    .dot:active{ transform: scale(0.96); }
     .dot.active{ border-color: rgba(168, 85, 247, .55); box-shadow: 0 0 0 5px rgba(168, 85, 247, .18); }
 
     .note{
@@ -455,373 +436,368 @@
 
     @media (prefers-reduced-motion: reduce){
       .screen{ transition:none !important; transform:none !important; }
-      .spot.play{ animation:none !important; opacity:1 !important; border-color: rgba(11,99,206,.75) !important; box-shadow: 0 0 0 8px rgba(11,99,206,.14) !important; }
       .bar{ transition:none !important; }
     }
 
-    /* Header & Footer handled via Tailwind classes (matches magnets/guide.html). */
-  </style>
-  <style>body { box-sizing: border-box; }</style>
-  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
-  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
- </head>
- <body>
-  <header class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
-   <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+      </style>
+</head>
+
+<body class="h-full noise font-sans">
+  <header class="tm-no-print sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
     <a href="https://transcript.taxmonitor.pro/" class="flex items-center gap-3 text-white">
-     <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-slate-950 font-extrabold">TM</span>
-     <div class="leading-tight">
-      <div class="text-sm font-semibold">Transcript.Tax Monitor Pro</div>
-      <div class="text-[11px] text-white/60">5-Step Transcript Ordering Walkthrough</div>
-     </div>
+      <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-slate-950 font-extrabold">TM</span>
+      <div class="leading-tight">
+        <div class="text-sm font-semibold">Transcript.Tax Monitor Pro</div>
+        <div class="text-[11px] text-white/60">5-Step Transcript Ordering Walkthrough</div>
+      </div>
     </a>
 
     <div class="flex items-center gap-2">
-     <a href="/" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/60 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition">
-      <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-       <path d="M15 18l-6-6 6-6" />
-      </svg>
-      Back
-     </a>
+      <a
+        href="/"
+        class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/60 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition"
+      >
+        <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+        Back
+      </a>
     </div>
-   </div>
-  </header>
+  </div>
+</header>
+
   <main class="wrap">
-   <h1>5-step walkthrough: Sign in and download transcripts</h1>
-   <p class="sub">Follow this simple 5-step walkthrough to sign in and download your IRS transcripts. The screens shown are instructional mockups to help you confidently navigate your IRS.gov account.</p>
-   <section class="player" aria-label="Walkthrough player">
-    <div class="player-top">
-     <div>
-      <div class="crumbs" id="crumbs">
-       Step 1 of 5
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:24px; flex-wrap:wrap; margin-bottom:18px;">
+      <div style="max-width:720px;">
+        <h1 style="margin:0 0 10px;">5-step walkthrough: Sign in and download transcripts</h1>
+        <p class="sub" style="margin:0;">Follow this simple 5-step walkthrough to sign in and download your IRS transcripts. The screens shown are instructional mockups to help you confidently navigate your IRS.gov account.</p>
       </div>
-      <div class="step-title" id="stepTitle">
-       Loading…
+
+      <div style="display:flex; align-items:flex-start;">
+        <a href="https://www.irs.gov/" target="_blank" rel="noopener" class="btn primary tm-btn-regular" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px; white-space:nowrap;">
+          Go to IRS.gov
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17L17 7" />
+            <path d="M7 7h10v10" />
+          </svg>
+        </a>
       </div>
-     </div>
-     <div class="controls">
-      <button class="btn" type="button" id="btnPrev">Prev</button> <button class="btn primary" type="button" id="btnPlay">Play</button> <button class="btn" type="button" id="btnNext">Next</button> <button class="btn" type="button" id="btnReplay">Replay</button>
-     </div>
     </div>
-    <div class="stage" aria-label="Walkthrough stage">
-     <!-- Step 1: ID.me-like sign-in (generic) -->
-     <section class="screen" id="s0" aria-label="Step 1 mock">
-      <div class="frame">
-       <div class="barTop">
-        <div class="brand"><span class="logo" aria-hidden="true"></span>Identity Provider
+
+    <section class="player" aria-label="Walkthrough player">
+      <div class="player-top">
+        <div>
+          <div class="crumbs" id="crumbs">Step 1 of 5</div>
+          <div class="step-title" id="stepTitle">Loading…</div>
         </div>
-        <div class="barDots" aria-hidden="true"><i></i><i></i><i></i>
+        <div class="controls">
+          <button class="btn" type="button" id="btnPrev">Prev</button>
+          <button class="btn primary" type="button" id="btnPlay">Play</button>
+          <button class="btn" type="button" id="btnNext">Next</button>
+          <button class="btn" type="button" id="btnReplay">Replay</button>
         </div>
-       </div>
-       <div class="content" style="display:grid; place-items:center;">
-        <div class="card" style="width:min(430px, 100%);">
-         <h3 style="margin:0 0 8px; font-size:16px;">Sign in</h3>
-         <div class="muted" style="margin-bottom:12px;">
-          Authenticate with your identity provider to continue.
-         </div>
-         <div class="rows">
-          <div class="row"><span>Email</span><small>example@domain.com</small>
-          </div>
-          <div class="row"><span>Password</span><small>••••••••</small>
-          </div>
-         </div>
-         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-          <span class="pill">Remember me</span> <span class="cta">Continue</span>
-         </div>
-        </div>
-       </div>
       </div>
-     </section><!-- Step 2: Dashboard (generic) -->
-     <section class="screen" id="s1" aria-label="Step 2 mock">
-      <div class="frame">
-       <div class="navSim" aria-hidden="true">
-        <span>Account Home</span> <span>Account Balance</span> <span>Payments</span> <span class="active">Records and Status</span> <span>Notices</span> <span>Forms</span> <span>Authorizations</span>
-       </div>
-       <div class="content">
-        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:12px;">
-         <div>
-          <div class="muted" style="margin-bottom:6px;">
-           Account Home
-          </div>
-          <div style="font-size:20px; font-weight:1000; letter-spacing:-.01em;">
-           Welcome, Taxpayer
-          </div>
-         </div><span class="pill">Profile</span>
-        </div>
-        <div class="card" style="margin-bottom:14px;">
-         <h3 style="margin:0 0 6px;">Unexpected outreach?</h3>
-         <div class="muted">
-          If something feels off, pause and verify through official channels.
-         </div>
-        </div>
-        <div class="grid2">
-         <div class="rows">
-          <div class="card">
-           <h3>Account Status</h3>
-           <div class="muted">
-            Your most recent return status and processing updates.
-           </div>
-           <div style="margin-top:10px;" class="row"><span>Return status</span><small>Not processed</small>
-           </div>
-          </div>
-          <div class="card">
-           <h3>Payments</h3>
-           <div class="muted">
-            Make a payment or review activity.
-           </div>
-           <div style="margin-top:10px;" class="cta">
-            Make a payment
-           </div>
-          </div>
-         </div>
-         <div class="rows">
-          <div class="card">
-           <h3>Notifications</h3>
-           <div class="muted">
-            Important updates you may need to review.
-           </div>
-           <div style="margin-top:10px;" class="row"><span>Confirm mailing address</span><small>1 unread</small>
-           </div>
-          </div>
-          <div class="card">
-           <h3>Records and Status</h3>
-           <div class="muted">
-            Tax records, transcripts, refund status, and more.
-           </div>
-           <div style="margin-top:10px;" class="rows">
-            <div class="row"><span>Tax Records</span><small>View filings</small>
+
+      <div class="stage" aria-label="Walkthrough stage">
+        <!-- Step 1: ID.me-like sign-in (generic) -->
+        <section class="screen" id="s0" aria-label="Step 1 mock">
+          <div class="frame">
+            <div class="barTop">
+              <div class="brand"><span class="logo" aria-hidden="true"></span>Identity Provider</div>
+              <div class="barDots" aria-hidden="true"><i></i><i></i><i></i></div>
             </div>
-            <div class="row"><span>Transcripts</span><small>Download</small>
+            <div class="content" style="display:grid; place-items:center;">
+              <div class="card" style="width:min(430px, 100%);">
+                <h3 style="margin:0 0 8px; font-size:16px;">Sign in</h3>
+                <div class="muted" style="margin-bottom:12px;">Authenticate with your identity provider to continue.</div>
+                <div class="rows">
+                  <div class="row"><span>Email</span><small>example@domain.com</small></div>
+                  <div class="row"><span>Password</span><small>••••••••</small></div>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
+                  <span class="pill">Remember me</span>
+                  <span class="cta">Continue</span>
+                </div>
+              </div>
             </div>
-           </div>
           </div>
-         </div>
+        </section>
+
+        <!-- Step 2: Dashboard (generic) -->
+        <section class="screen" id="s1" aria-label="Step 2 mock">
+          <div class="frame">
+            <div class="navSim" aria-hidden="true">
+              <span>Account Home</span>
+              <span>Account Balance</span>
+              <span>Payments</span>
+              <span class="active">Records and Status</span>
+              <span>Notices</span>
+              <span>Forms</span>
+              <span>Authorizations</span>
+            </div>
+            <div class="content">
+              <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:12px;">
+                <div>
+                  <div class="muted" style="margin-bottom:6px;">Account Home</div>
+                  <div style="font-size:20px; font-weight:1000; letter-spacing:-.01em;">Welcome, Taxpayer</div>
+                </div>
+                <span class="pill">Profile</span>
+              </div>
+              <div class="card" style="margin-bottom:14px;">
+                <h3 style="margin:0 0 6px;">Unexpected outreach?</h3>
+                <div class="muted">If something feels off, pause and verify through official channels.</div>
+              </div>
+              <div class="grid2">
+                <div class="rows">
+                  <div class="card">
+                    <h3>Account Status</h3>
+                    <div class="muted">Your most recent return status and processing updates.</div>
+                    <div style="margin-top:10px;" class="row"><span>Return status</span><small>Not processed</small></div>
+                  </div>
+                  <div class="card">
+                    <h3>Payments</h3>
+                    <div class="muted">Make a payment or review activity.</div>
+                    <div style="margin-top:10px;" class="cta">Make a payment</div>
+                  </div>
+                </div>
+                <div class="rows">
+                  <div class="card">
+                    <h3>Notifications</h3>
+                    <div class="muted">Important updates you may need to review.</div>
+                    <div style="margin-top:10px;" class="row"><span>Confirm mailing address</span><small>1 unread</small></div>
+                  </div>
+                  <div class="card">
+                    <h3>Records and Status</h3>
+                    <div class="muted">Tax records, transcripts, refund status, and more.</div>
+                    <div style="margin-top:10px;" class="rows">
+                      <div class="row"><span>Tax Records</span><small>View filings</small></div>
+                      <div class="row"><span>Transcripts</span><small>Download</small></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 3: Records and Status menu open (generic) -->
+        <section class="screen" id="s2" aria-label="Step 3 mock">
+          <div class="frame">
+            <div class="navSim" aria-hidden="true">
+              <span>Account Home</span>
+              <span>Account Balance</span>
+              <span>Payments</span>
+              <span class="active">Records and Status</span>
+              <span>Notices</span>
+              <span>Forms</span>
+              <span>Authorizations</span>
+            </div>
+            <div class="menuOpen" aria-label="Records and Status menu">
+              <div><strong>Information Return Documents</strong><span>View available documents</span></div>
+              <div class="primary"><strong>Tax Records</strong><span>View key tax info</span></div>
+              <div><strong>Audit Status</strong><span>Review audits</span></div>
+              <div><strong>Refund Status</strong><span>View status</span></div>
+              <div><strong>Amended Return Status</strong><span>View status</span></div>
+              <div><strong>Transcripts</strong><span>Download transcripts</span></div>
+            </div>
+            <div class="content">
+              <div class="card">
+                <h3>Records and Status</h3>
+                <div class="muted">Use this menu to get to Tax Records, then View transcripts.</div>
+              </div>
+              <div class="card" style="margin-top:12px;">
+                <div class="muted">This is a UI storyboard, not a functional portal.</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 4: Tax Records with View transcripts button (generic) -->
+        <section class="screen" id="s3" aria-label="Step 4 mock">
+          <div class="frame">
+            <div class="navSim" aria-hidden="true">
+              <span>Account Home</span>
+              <span>Account Balance</span>
+              <span>Payments</span>
+              <span class="active">Records and Status</span>
+              <span>Notices</span>
+              <span>Forms</span>
+              <span>Authorizations</span>
+            </div>
+            <div class="content">
+              <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:12px;">
+                <div>
+                  <div class="muted" style="margin-bottom:6px;">Account Home / Tax Records</div>
+                  <div style="font-size:20px; font-weight:1000; letter-spacing:-.01em;">Tax Records</div>
+                </div>
+                <span class="pill">Select tax year</span>
+              </div>
+              <div class="grid2">
+                <div class="rows">
+                  <div class="card">
+                    <h3>Return summary</h3>
+                    <div class="rows" style="margin-top:10px;">
+                      <div class="row"><span>Tax year</span><small>2024</small></div>
+                      <div class="row"><span>Form filed</span><small>1040</small></div>
+                      <div class="row"><span>Filing status</span><small>Single</small></div>
+                      <div class="row"><span>Adjusted gross income</span><small>$0.00</small></div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <h3>Clean vehicle credit information</h3>
+                    <div class="muted">Expand the year to view credit details.</div>
+                  </div>
+                </div>
+                <div class="rows">
+                  <div class="card" id="viewTxCard">
+                    <h3>Transcripts</h3>
+                    <div class="muted">View the most recent account, return, wage &amp; income, and record of account transcripts.</div>
+                    <div style="margin-top:12px;" class="cta" id="viewTxBtn">View transcripts</div>
+                  </div>
+                  <div class="card">
+                    <h3>Tax compliance report</h3>
+                    <div class="muted">A report that summarizes compliance status.</div>
+                    <div style="margin-top:12px;" class="cta">Get report (PDF)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Step 5: Transcripts page (generic) -->
+        <section class="screen" id="s4" aria-label="Step 5 mock">
+          <div class="frame">
+            <div class="navSim" aria-hidden="true">
+              <span>Account Home</span>
+              <span>Account Balance</span>
+              <span>Payments</span>
+              <span class="active">Records and Status</span>
+              <span>Notices</span>
+              <span>Forms</span>
+              <span>Authorizations</span>
+            </div>
+            <div class="content">
+              <div style="margin-bottom:12px;">
+                <div class="muted" style="margin-bottom:6px;">Account Home / Tax Records / Transcripts</div>
+                <div style="font-size:20px; font-weight:1000; letter-spacing:-.01em;">Transcripts</div>
+              </div>
+
+              <div class="card" style="margin-bottom:14px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                  <div>
+                    <h3 style="margin:0 0 6px;">Customer File Number</h3>
+                    <div class="muted">Optional label for your records.</div>
+                  </div>
+                  <span class="pill">Collapsed</span>
+                </div>
+              </div>
+
+              <div class="txGrid" aria-label="Transcript types">
+                <div class="txCard" id="txAccount">
+                  <h4>Account transcripts</h4>
+                  <div class="muted">Payments, penalties, adjustments, and account activity.</div>
+                  <div class="txList">
+                    <div class="txItem"><span>2024</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span></div>
+                    <div class="txItem"><span>2023</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span></div>
+                    <div class="txItem"><span>2022</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span></div>
+                  </div>
+                </div>
+
+                <div class="txCard" id="txReturn">
+                  <h4>Return transcripts</h4>
+                  <div class="muted">Most line items from your original return.</div>
+                  <div class="txList">
+                    <div class="txItem"><span>2024</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span></div>
+                    <div class="txItem"><span>2023</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span></div>
+                    <div class="txItem"><span>2022</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span></div>
+                  </div>
+                </div>
+
+                <div class="txCard" id="txWage">
+                  <h4>Wage &amp; income transcripts</h4>
+                  <div class="muted">W-2, 1099, and other information returns.</div>
+                  <div class="txList">
+                    <div class="txItem"><span>2025</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span></div>
+                    <div class="txItem"><span>2024</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span></div>
+                    <div class="txItem"><span>2023</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span></div>
+                  </div>
+                </div>
+
+                <div class="txCard" id="txRecord">
+                  <h4>Record of account transcripts</h4>
+                  <div class="muted">Combines return and account details.</div>
+                  <div class="txList">
+                    <div class="txItem"><span>2024</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span></div>
+                    <div class="txItem"><span>2023</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         </div>
-       </div>
       </div>
-     </section><!-- Step 3: Records and Status menu open (generic) -->
-     <section class="screen" id="s2" aria-label="Step 3 mock">
-      <div class="frame">
-       <div class="navSim" aria-hidden="true">
-        <span>Account Home</span> <span>Account Balance</span> <span>Payments</span> <span class="active">Records and Status</span> <span>Notices</span> <span>Forms</span> <span>Authorizations</span>
-       </div>
-       <div class="menuOpen" aria-label="Records and Status menu">
-        <div><strong>Information Return Documents</strong><span>View available documents</span>
-        </div>
-        <div class="primary"><strong>Tax Records</strong><span>View key tax info</span>
-        </div>
-        <div><strong>Audit Status</strong><span>Review audits</span>
-        </div>
-        <div><strong>Refund Status</strong><span>View status</span>
-        </div>
-        <div><strong>Amended Return Status</strong><span>View status</span>
-        </div>
-        <div><strong>Transcripts</strong><span>Download transcripts</span>
-        </div>
-       </div>
-       <div class="content">
-        <div class="card">
-         <h3>Records and Status</h3>
-         <div class="muted">
-          Use this menu to get to Tax Records, then View transcripts.
-         </div>
-        </div>
-        <div class="card" style="margin-top:12px;">
-         <div class="muted">
-          This is a UI storyboard, not a functional portal.
-         </div>
-        </div>
-       </div>
+
+      <div class="caption">
+        <div class="timeline" aria-hidden="true"><div class="bar" id="bar"></div></div>
+        <strong id="capStrong">…</strong>
+        <span id="capSpan">…</span>
       </div>
-     </section><!-- Step 4: Tax Records with View transcripts button (generic) -->
-     <section class="screen" id="s3" aria-label="Step 4 mock">
-      <div class="frame">
-       <div class="navSim" aria-hidden="true">
-        <span>Account Home</span> <span>Account Balance</span> <span>Payments</span> <span class="active">Records and Status</span> <span>Notices</span> <span>Forms</span> <span>Authorizations</span>
-       </div>
-       <div class="content">
-        <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:12px;">
-         <div>
-          <div class="muted" style="margin-bottom:6px;">
-           Account Home / Tax Records
-          </div>
-          <div style="font-size:20px; font-weight:1000; letter-spacing:-.01em;">
-           Tax Records
-          </div>
-         </div><span class="pill">Select tax year</span>
-        </div>
-        <div class="grid2">
-         <div class="rows">
-          <div class="card">
-           <h3>Return summary</h3>
-           <div class="rows" style="margin-top:10px;">
-            <div class="row"><span>Tax year</span><small>2024</small>
-            </div>
-            <div class="row"><span>Form filed</span><small>1040</small>
-            </div>
-            <div class="row"><span>Filing status</span><small>Single</small>
-            </div>
-            <div class="row"><span>Adjusted gross income</span><small>$0.00</small>
-            </div>
-           </div>
-          </div>
-          <div class="card">
-           <h3>Clean vehicle credit information</h3>
-           <div class="muted">
-            Expand the year to view credit details.
-           </div>
-          </div>
-         </div>
-         <div class="rows">
-          <div class="card" id="viewTxCard">
-           <h3>Transcripts</h3>
-           <div class="muted">
-            View the most recent account, return, wage &amp; income, and record of account transcripts.
-           </div>
-           <div style="margin-top:12px;" class="cta" id="viewTxBtn">
-            View transcripts
-           </div>
-          </div>
-          <div class="card">
-           <h3>Tax compliance report</h3>
-           <div class="muted">
-            A report that summarizes compliance status.
-           </div>
-           <div style="margin-top:12px;" class="cta">
-            Get report (PDF)
-           </div>
-          </div>
-         </div>
-        </div>
-       </div>
+
+      <div class="steps" aria-label="Step selectors">
+        <div class="dot" data-step="0"><b>1</b><span>Sign in</span></div>
+        <div class="dot" data-step="1"><b>2</b><span>Dashboard</span></div>
+        <div class="dot" data-step="2"><b>3</b><span>Records menu</span></div>
+        <div class="dot" data-step="3"><b>4</b><span>View transcripts</span></div>
+        <div class="dot" data-step="4"><b>5</b><span>Download EN/ES</span></div>
       </div>
-     </section><!-- Step 5: Transcripts page (generic) -->
-     <section class="screen" id="s4" aria-label="Step 5 mock">
-      <div class="frame">
-       <div class="navSim" aria-hidden="true">
-        <span>Account Home</span> <span>Account Balance</span> <span>Payments</span> <span class="active">Records and Status</span> <span>Notices</span> <span>Forms</span> <span>Authorizations</span>
-       </div>
-       <div class="content">
-        <div style="margin-bottom:12px;">
-         <div class="muted" style="margin-bottom:6px;">
-          Account Home / Tax Records / Transcripts
-         </div>
-         <div style="font-size:20px; font-weight:1000; letter-spacing:-.01em;">
-          Transcripts
-         </div>
-        </div>
-        <div class="card" style="margin-bottom:14px;">
-         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-          <div>
-           <h3 style="margin:0 0 6px;">Customer File Number</h3>
-           <div class="muted">
-            Optional label for your records.
-           </div>
-          </div><span class="pill">Collapsed</span>
-         </div>
-        </div>
-        <div class="txGrid" aria-label="Transcript types">
-         <div class="txCard" id="txAccount">
-          <h4>Account transcripts</h4>
-          <div class="muted">
-           Payments, penalties, adjustments, and account activity.
-          </div>
-          <div class="txList">
-           <div class="txItem"><span>2024</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span>
-           </div>
-           <div class="txItem"><span>2023</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span>
-           </div>
-           <div class="txItem"><span>2022</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span>
-           </div>
-          </div>
-         </div>
-         <div class="txCard" id="txReturn">
-          <h4>Return transcripts</h4>
-          <div class="muted">
-           Most line items from your original return.
-          </div>
-          <div class="txList">
-           <div class="txItem"><span>2024</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span>
-           </div>
-           <div class="txItem"><span>2023</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span>
-           </div>
-           <div class="txItem"><span>2022</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span>
-           </div>
-          </div>
-         </div>
-         <div class="txCard" id="txWage">
-          <h4>Wage &amp; income transcripts</h4>
-          <div class="muted">
-           W-2, 1099, and other information returns.
-          </div>
-          <div class="txList">
-           <div class="txItem"><span>2025</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span>
-           </div>
-           <div class="txItem"><span>2024</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span>
-           </div>
-           <div class="txItem"><span>2023</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span>
-           </div>
-          </div>
-         </div>
-         <div class="txCard" id="txRecord">
-          <h4>Record of account transcripts</h4>
-          <div class="muted">
-           Combines return and account details.
-          </div>
-          <div class="txList">
-           <div class="txItem"><span>2024</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span>
-           </div>
-           <div class="txItem"><span>2023</span><span class="txLinks"><a href="#">EN</a><a href="#">ES</a></span>
-           </div>
-          </div>
-         </div>
-        </div>
-       </div>
-      </div>
-     </section>
-     <div class="overlay">
-      <div class="cursor" id="cursor" aria-hidden="true">
-       <svg viewbox="0 0 24 24" fill="#ffffff">
-        <path d="M3 2 L21 12 L13 13 L15 21 L11 22 L9 14 L3 18 Z" stroke="#0b1b3a" stroke-width="1.5" />
-       </svg>
-      </div>
-     </div>
+    </section>
+
+    <div class="note">
+      <strong>Important:</strong> This page is an instructional demonstration designed to help you understand the transcript ordering process. The screens shown are simplified mockups for educational purposes and are not affiliated with or operated by the IRS.
     </div>
-    <div class="caption">
-     <div class="timeline" aria-hidden="true">
-      <div class="bar" id="bar"></div>
-     </div><strong id="capStrong">…</strong> <span id="capSpan">…</span>
-    </div>
-    <div class="steps" aria-label="Step selectors">
-     <div class="dot" data-step="0"><b>1</b><span>Sign in</span>
-     </div>
-     <div class="dot" data-step="1"><b>2</b><span>Dashboard</span>
-     </div>
-     <div class="dot" data-step="2"><b>3</b><span>Records menu</span>
-     </div>
-     <div class="dot" data-step="3"><b>4</b><span>View transcripts</span>
-     </div>
-     <div class="dot" data-step="4"><b>5</b><span>Download EN/ES</span>
-     </div>
-    </div>
-   </section>
-   <div class="note">
-    <strong>Important:</strong> This page is an instructional demonstration designed to help you understand the transcript ordering process. The screens shown are simplified mockups for educational purposes and are not affiliated with or operated by the IRS.
-   </div>
   </main>
-  <footer class="px-6 py-3 mt-1 border-t border-slate-800/60 bg-slate-950/80 backdrop-blur">
-   <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+
+  <footer class="tm-no-print px-6 py-3 mt-1 border-t border-slate-800/60 bg-slate-950/80 backdrop-blur">
+  <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
     <p class="text-slate-500 text-sm">© <span id="footer-year"></span> Transcript.Tax Monitor Pro. All rights reserved.</p>
     <div class="flex items-center gap-6">
-     <a href="/legal/privacy.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Privacy Policy</a>
-     <a href="/legal/terms.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Terms of Service</a>
+      <a href="/legal/privacy.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Privacy Policy</a>
+      <a href="/legal/terms.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Terms of Service</a>
     </div>
-   </div>
-  </footer>
+  </div>
+</footer>
+
   <script>
     (function(){
       document.getElementById('footer-year').textContent = String(new Date().getFullYear());
+
+      const url = new URL(window.location.href);
+      const runTestsFlag = String(url.searchParams.get('runTests') || '').trim().toLowerCase();
+
+      function assert(name, condition){
+        if (!condition){
+          console.error('test_failed', name);
+          throw new Error('test_failed:' + name);
+        }
+      }
+
+      function runTests(){
+        // Tailwind CDN should be loaded once.
+        const twScripts = document.querySelectorAll('script[src*="cdn.tailwindcss.com"]');
+        assert('tailwind_script_single', twScripts.length === 1);
+
+        // Tailwind global should exist (after CDN load).
+        assert('tailwind_global_exists', typeof window.tailwind !== 'undefined');
+
+        // Basic UI elements should exist.
+        assert('player_exists', !!document.querySelector('.player'));
+        assert('screens_count', document.querySelectorAll('.screen').length === 5);
+      }
+
       const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       const STEP_MS = 2800;
@@ -871,7 +847,7 @@
       const capStrong = document.getElementById('capStrong');
       const capSpan = document.getElementById('capSpan');
       const bar = document.getElementById('bar');
-      const cursor = document.getElementById('cursor');
+      
       const dots = Array.from(document.querySelectorAll('.dot'));
 
       const btnPlay = document.getElementById('btnPlay');
@@ -890,21 +866,8 @@
         if (d) d.classList.add('active');
       }
 
-      function moveCursor(s){
-        const stage = document.querySelector('.stage');
-        const rect = stage.getBoundingClientRect();
-        const x = rect.width * (s.x + s.w/2) / 100;
-        const y = rect.height * (s.y + s.h/2) / 100;
-        cursor.style.left = x + 'px';
-        cursor.style.top = y + 'px';
-      }
-
-      function clickAnim(){
-        cursor.classList.remove('play');
-        void cursor.offsetWidth;
-        cursor.classList.add('play');
-      }
-
+      
+      
       function show(i){
         idx = (i + steps.length) % steps.length;
 
@@ -917,9 +880,32 @@
         capStrong.textContent = s.title;
         capSpan.textContent = s.desc;
 
-        moveCursor(s.spot);
         setActiveDot(idx);
-        clickAnim();
+
+        // Remove previous glow states
+        document.querySelectorAll('.purple-glow').forEach(el => el.classList.remove('purple-glow'));
+
+        // Apply glow per step
+        if (idx === 0){
+          const continueBtn = screens[0].querySelector('.cta');
+          if (continueBtn) continueBtn.classList.add('purple-glow');
+        }
+        if (idx === 1){
+          const tab = screens[1].querySelector('.navSim span.active');
+          if (tab) tab.classList.add('purple-glow');
+        }
+        if (idx === 2){
+          const taxRecordsCard = screens[2].querySelector('.menuOpen .primary');
+          if (taxRecordsCard) taxRecordsCard.classList.add('purple-glow');
+        }
+        if (idx === 3){
+          const viewBtn = document.getElementById('viewTxBtn');
+          if (viewBtn) viewBtn.classList.add('purple-glow');
+        }
+        if (idx === 4){
+          const firstEN = document.querySelector('#txAccount .txLinks a');
+          if (firstEN) firstEN.classList.add('purple-glow');
+        }
 
         t0 = performance.now();
         bar.style.width = '0%';
@@ -973,22 +959,20 @@
         });
       });
 
-      // Add click handlers to transcript download links
-      document.querySelectorAll('.txLinks a').forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          const year = link.closest('.txItem').querySelector('span').textContent;
-          const lang = link.textContent;
-          alert(`Transcript download initiated:\n${year} (${lang})`);
-        });
-      });
-
-      // Add click handlers to CTA buttons
       document.querySelectorAll('.cta').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.preventDefault();
-          const text = btn.textContent;
+          const text = String(btn.textContent || '').trim();
           alert(`Action: ${text}`);
+        });
+      });
+
+      document.querySelectorAll('.txLinks a').forEach(link => {
+        link.addEventListener('click', (e) => {
+          e.preventDefault();
+          const year = link.closest('.txItem')?.querySelector('span')?.textContent || 'Year';
+          const lang = String(link.textContent || '').trim();
+          alert(`Transcript download initiated:\n${year} (${lang})`);
         });
       });
 
@@ -1000,7 +984,9 @@
         btnPlay.disabled = true;
         btnPlay.textContent = 'Motion off';
       }
+
+      if (runTestsFlag === '1' || runTestsFlag === 'true') runTests();
     })();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d3b7f4af1909a46',t:'MTc3MjA2NzUzOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
