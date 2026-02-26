@@ -31,6 +31,7 @@ const COPY_DIRS = [
   "assets",
   "legal",
   "magnets",
+  "resources",
   "scripts",
   "styles",
 ].sort();
