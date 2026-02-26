@@ -754,10 +754,13 @@
 
     function detectTranscriptType(rawText) {
       const t = String(rawText || '').toLowerCase();
+
+      // Common IRS transcript headers
       if (t.includes('record of account')) return 'record_of_account';
       if (t.includes('account transcript')) return 'account';
       if (t.includes('return transcript')) return 'return';
       if (t.includes('wage') && t.includes('income')) return 'wage_income';
+
       return 'unknown';
     }
 
@@ -770,13 +773,26 @@
     function findAfterLabel(rawText, label) {
       const lines = String(rawText || '').split(NL);
       const needle = String(label || '').toLowerCase();
+
       for (const line of lines) {
         const l = String(line).toLowerCase();
         const idx = l.indexOf(needle);
         if (idx === -1) continue;
+
         const after = String(line).slice(idx + needle.length).trim();
         if (!after) continue;
+
         return stripLeadingPunct(after);
+      }
+
+      return '';
+    }
+
+    function findAfterAnyLabel(rawText, labels) {
+      const list = Array.isArray(labels) ? labels : [labels];
+      for (const label of list) {
+        const v = findAfterLabel(rawText, label);
+        if (v) return v;
       }
       return '';
     }
@@ -786,65 +802,90 @@
     }
 
     function looksLikeDate10(s) {
+      // Supports MM/DD/YYYY and MM-DD-YYYY
       if (!s || s.length !== 10) return false;
-      return isDigit(s[0]) && isDigit(s[1]) && s[2] === '/' && isDigit(s[3]) && isDigit(s[4]) && s[5] === '/' &&
+      const sep = s[2];
+      if (!(sep === '/' || sep === '-')) return false;
+      if (s[5] !== sep) return false;
+
+      return isDigit(s[0]) && isDigit(s[1]) &&
+        isDigit(s[3]) && isDigit(s[4]) &&
         isDigit(s[6]) && isDigit(s[7]) && isDigit(s[8]) && isDigit(s[9]);
+    }
+
+    function extractFirstDate(rawLine) {
+      const line = String(rawLine || '');
+      for (let i = 0; i < line.length - 9; i++) {
+        const candidate = line.slice(i, i + 10);
+        if (looksLikeDate10(candidate)) return candidate;
+      }
+      return '';
     }
 
     function parseTransactions(rawText) {
       const lines = String(rawText || '').split(NL).map((l) => String(l).trim()).filter(Boolean);
       const out = [];
 
+      const seen = new Set();
+
+      const isDigits = (s, n) => {
+        if (!s || s.length !== n) return false;
+        for (let i = 0; i < s.length; i++) if (!isDigit(s[i])) return false;
+        return true;
+      };
+
       for (const line of lines) {
-        let code = '';
+        if (seen.has(line)) continue;
+        seen.add(line);
 
-        const upper = line.toUpperCase();
-        const tcIdx = upper.indexOf('TC ');
-        if (tcIdx !== -1) {
-          const chunk = line.slice(tcIdx + 3).trim();
-          code = chunk.slice(0, 3);
-        } else {
-          for (let i = 0; i < line.length - 2; i++) {
-            const a = line[i], b = line[i + 1], c = line[i + 2];
-            if (isDigit(a) && isDigit(b) && isDigit(c)) { code = a + b + c; break; }
-          }
-        }
-
-        if (!code || code.length !== 3) continue;
+        // Expect a 3-digit code at the start of the line (ex: "150 Tax return filed ...")
+        if (line.length < 4) continue;
+        const code = line.slice(0, 3);
         if (!isDigit(code[0]) || !isDigit(code[1]) || !isDigit(code[2])) continue;
+        if (line[3] !== ' ') continue;
 
-        let date = '';
-        for (let i = 0; i < line.length - 9; i++) {
-          const s = line.slice(i, i + 10);
-          if (looksLikeDate10(s)) { date = s; break; }
+        const rest = line.slice(4).trim();
+        const tokens = rest.split(' ').filter(Boolean);
+
+        // Date
+        const date = extractFirstDate(rest);
+
+        // Cycle (best-effort)
+        let cycle = '';
+        for (const tok of tokens) {
+          if (isDigits(tok, 8)) { cycle = tok; break; }
         }
 
+        // Amount (best-effort): last token containing any digit
         let amount = '';
-        const tokens = line.split(' ').filter(Boolean);
         for (let i = tokens.length - 1; i >= 0; i--) {
           const tok = tokens[i];
-          let hasNumber = false;
+          let hasDigit = false;
           for (let j = 0; j < tok.length; j++) {
-            if (isDigit(tok[j])) { hasNumber = true; break; }
+            if (isDigit(tok[j])) { hasDigit = true; break; }
           }
-          if (hasNumber) { amount = tok; break; }
+          if (hasDigit) { amount = tok; break; }
         }
 
-        out.push({ amount, code, date, line });
+        out.push({ amount, code, cycle, date, description: rest, line });
       }
 
-      const seen = new Set();
-      return out.filter((t) => {
-        if (seen.has(t.line)) return false;
-        seen.add(t.line);
-        return true;
-      });
+      return out;
     }
 
     function buildStructured(rawText) {
       const transcriptType = detectTranscriptType(rawText);
-      const taxPeriod = findAfterLabel(rawText, 'Tax Period');
-      const tinMasked = findAfterLabel(rawText, 'SSN');
+
+      // Header fields (variant labels across IRS formats)
+      const formNumber = findAfterAnyLabel(rawText, ['Form Number:', 'Form number:', 'Form Number']);
+      const requestDate = findAfterAnyLabel(rawText, ['Request Date:', 'Request date:', 'Request Date']);
+      const responseDate = findAfterAnyLabel(rawText, ['Response Date:', 'Response date:', 'Response Date']);
+      const trackingNumber = findAfterAnyLabel(rawText, ['Tracking Number:', 'Tracking number:', 'Tracking Number']);
+
+      const taxPeriodEnding = findAfterAnyLabel(rawText, ['Report for Tax Period Ending:', 'Tax Period Ending:', 'Tax period ending:', 'Tax Period:']);
+      const tinMasked = findAfterAnyLabel(rawText, ['Taxpayer Identification Number:', 'Taxpayer identification number:', 'TIN:', 'SSN:', 'SSN']);
+      const accountBalance = findAfterAnyLabel(rawText, ['Account balance:', 'Account Balance:']);
+
       const transactions = parseTransactions(rawText);
 
       const codesSet = new Set();
@@ -853,7 +894,18 @@
 
       return {
         codesFound,
-        meta: { taxPeriod, tinMasked, transcriptType },
+        header: {
+          formNumber,
+          requestDate,
+          responseDate,
+          trackingNumber,
+        },
+        meta: {
+          accountBalance,
+          taxPeriodEnding,
+          tinMasked,
+          transcriptType,
+        },
         transactions,
         version: 'parse_lab_v2_first_pass',
       };
@@ -888,10 +940,13 @@
       if (params.get('selftest') !== '1') return;
 
       const tests = [
-        { name: 'detectTranscriptType.account', fn: () => detectTranscriptType('ACCOUNT TRANSCRIPT') === 'account' },
+        { name: 'detectTranscriptType.account', fn: () => detectTranscriptType('FORM 1040 ACCOUNT TRANSCRIPT') === 'account' },
         { name: 'detectTranscriptType.return', fn: () => detectTranscriptType('RETURN TRANSCRIPT') === 'return' },
-        { name: 'looksLikeDate10.good', fn: () => looksLikeDate10('12/31/2025') === true },
+        { name: 'extractFirstDate.dash', fn: () => extractFirstDate('Processing date: 06-16-2025') === '06-16-2025' },
+        { name: 'extractFirstDate.slash', fn: () => extractFirstDate('As of: 06/30/2025') === '06/30/2025' },
         { name: 'looksLikeDate10.bad', fn: () => looksLikeDate10('2025-12-31') === false },
+        { name: 'looksLikeDate10.goodDash', fn: () => looksLikeDate10('12-31-2025') === true },
+        { name: 'looksLikeDate10.goodSlash', fn: () => looksLikeDate10('12/31/2025') === true },
       ];
 
       const failures = [];
