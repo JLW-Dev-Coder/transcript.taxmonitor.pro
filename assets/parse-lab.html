@@ -363,7 +363,7 @@
             <div>
               <label for="parser-token-id" class="block text-sm font-medium text-slate-300 mb-2">Token ID</label>
               <input id="parser-token-id" type="text" placeholder="Paste your token ID here" class="input-field w-full rounded-lg px-4 py-3" autocomplete="off" />
-              <p class="text-xs text-slate-400 mt-2">Your token is never stored or transmitted. It only validates locally.</p>
+              <p class="text-xs text-slate-400 mt-2">We use your token to check your remaining credits and (when you choose) consume a credit. We do not store your token.</p>
             </div>
 
             <div class="flex items-center justify-between gap-4">
@@ -418,7 +418,7 @@
             <button id="parse-structured-btn" type="button" class="btn-primary flex-1 opacity-50 cursor-not-allowed" disabled>
               <span>Parse Structured JSON</span>
             </button>
-            <a id="preview-report-btn" href="#" class="btn-secondary flex-1 text-center opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true">Preview Report</a>
+            <a id="preview-report-btn" href="#" class="btn-secondary flex-1 text-center opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true">Preview Report &amp; Use Token</a>
           </div>
 
           <div class="mt-4 rounded-xl border border-slate-700/40 bg-slate-950/30 overflow-hidden">
@@ -544,12 +544,73 @@
 
     const NL = String.fromCharCode(10);
 
+    const API_BASE = 'https://api.transcript.taxmonitor.pro';
+
+    function isUuidLike(v) {
+      const s = String(v || '').trim().toLowerCase();
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(s);
+    }
+
+    function isTokenIdFormat(v) {
+      const s = String(v || '').trim();
+      return /^[A-Za-z0-9_-]{8,128}$/.test(s);
+    }
+
+    async function fetchJson(url, opts) {
+      const res = await fetch(url, opts);
+      const txt = await res.text().catch(() => '');
+      let json = null;
+      try { json = txt ? JSON.parse(txt) : null; } catch { json = null; }
+      return { json, ok: res.ok, res, text: txt };
+    }
+
+    async function fetchTokenBalance(tokenId) {
+      const q = new URLSearchParams({ tokenId: String(tokenId || '').trim() });
+      const url = API_BASE + '/transcript/tokens?' + q.toString();
+      const out = await fetchJson(url, { method: 'GET', mode: 'cors', credentials: 'omit' });
+      if (!out.ok) {
+        const msg = out.json && out.json.error ? String(out.json.error) : (out.text || out.res.statusText);
+        throw new Error('Token lookup failed (' + String(out.res.status) + '): ' + msg);
+      }
+      const remaining = out.json && typeof out.json.remaining === 'number' ? out.json.remaining : null;
+      if (remaining === null) throw new Error('Token lookup returned no remaining balance.');
+      return remaining;
+    }
+
+    async function consumeToken(tokenId, requestId) {
+      const url = API_BASE + '/transcript/consume';
+      const body = {
+        amount: 1,
+        requestId,
+        tokenId,
+      };
+
+      const out = await fetchJson(url, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'omit',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (!out.ok) {
+        const msg = out.json && out.json.error ? String(out.json.error) : (out.text || out.res.statusText);
+        throw new Error('Token consume failed (' + String(out.res.status) + '): ' + msg);
+      }
+
+      return out.json || {};
+    }
+
     const state = {
       brandLogoDataUrl: '',
+      eventId: '',
       lastReportLink: '',
       pdfFile: null,
       rawText: '',
+      reportId: '',
       structured: null,
+      tokenAvailable: null,
+      tokenConsumed: false,
       tokenId: '',
       tokenValid: false,
     };
@@ -615,15 +676,19 @@
       const hasPdf = !!state.pdfFile;
       const canExtract = state.tokenValid && hasPdf;
       const canParse = state.tokenValid && hasPdf && !!state.rawText;
-      const canEmail = state.tokenValid && !!state.structured;
+      const canPreviewUse = state.tokenValid && !!state.structured && !state.tokenConsumed;
+      const canEmail = state.tokenValid && !!state.structured && state.tokenConsumed;
 
       setButtonEnabled(extractRawBtn, canExtract);
       setButtonEnabled(parseStructuredBtn, canParse);
       setButtonEnabled(reportEmailBtn, canEmail);
-      setPreviewEnabled(!!state.structured);
+      setPreviewEnabled(canPreviewUse);
 
       if (reportEmailStatus && !canEmail) {
-        setText(reportEmailStatus, state.tokenValid ? 'Parse JSON to enable emailing.' : 'Verify Token ID to enable emailing.');
+        if (!state.tokenValid) setText(reportEmailStatus, 'Verify Token ID to enable emailing.');
+        else if (!state.structured) setText(reportEmailStatus, 'Parse JSON to enable emailing.');
+        else if (!state.tokenConsumed) setText(reportEmailStatus, 'Click “Preview Report & Use Token” to enable emailing.');
+        else setText(reportEmailStatus, 'Not ready.');
       }
     }
 
@@ -769,6 +834,16 @@
       return String(v || '').trim().toLowerCase();
     }
 
+    function escapeHtml(v) {
+      const s = String(v ?? '');
+      return s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
     async function emailReportLink() {
       if (!state.tokenValid || !state.tokenId) {
         setReportEmailStatus('Verify Token ID first.', 'error');
@@ -792,17 +867,20 @@
         const reportUrl = await buildEncryptedReportLink(state.structured);
         state.lastReportLink = reportUrl;
 
+        if (!state.eventId) state.eventId = crypto.randomUUID();
+        if (!state.reportId) state.reportId = crypto.randomUUID();
+
         const body = {
           email,
-          eventId: crypto.randomUUID(),
-          reportId: crypto.randomUUID(),
+          eventId: state.eventId,
+          reportId: state.reportId,
           reportUrl,
           tokenId: state.tokenId,
         };
 
         setReportEmailStatus('Sending email...', '');
 
-        const res = await fetch('https://api.transcript.taxmonitor.pro/forms/transcript/report-email', {
+        const res = await fetch(API_BASE + '/forms/transcript/report-email', {
           method: 'POST',
           mode: 'cors',
           credentials: 'omit',
@@ -1066,242 +1144,127 @@
 
     function closeOverlay() {
       miniReportOverlay.classList.add('hidden');
-      miniReportIframe.srcdoc = '';
-      document.body.style.overflow = '';
-    }
+      miniReportIframe.srcdoc = (() => {
+        const safe = escapeHtml;
 
-    function runSelfTests() {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('selftest') !== '1') return;
+        const safeMeta = {
+          accountBalance: safe(meta.accountBalance || '-'),
+          taxPeriodEnding: safe(meta.taxPeriodEnding || '-'),
+          tinMasked: safe(meta.tinMasked || '-'),
+          transcriptType: safe(meta.transcriptType || 'unknown'),
+        };
 
-      const tests = [
-        { name: 'amountRe.dollar', fn: () => String('X $0.00').match(/(-?\$?\d{1,3}(?:,\d{3})*(?:\.\d{2})|-?\$?\d+(?:\.\d{2}))/g)[0] === '$0.00' },
-        { name: 'amountRe.negative', fn: () => String('X -$1,234.56').match(/(-?\$?\d{1,3}(?:,\d{3})*(?:\.\d{2})|-?\$?\d+(?:\.\d{2}))/g)[0] === '-$1,234.56' },
-        { name: 'detectTranscriptType.account', fn: () => detectTranscriptType('FORM 1040 ACCOUNT TRANSCRIPT') === 'account' },
-        { name: 'detectTranscriptType.return', fn: () => detectTranscriptType('RETURN TRANSCRIPT') === 'return' },
-        { name: 'extractFirstDate.dash', fn: () => extractFirstDate('Processing date: 06-16-2025') === '06-16-2025' },
-        { name: 'extractFirstDate.slash', fn: () => extractFirstDate('As of: 06/30/2025') === '06/30/2025' },
-        { name: 'looksLikeDate10.bad', fn: () => looksLikeDate10('2025-12-31') === false },
-        { name: 'looksLikeDate10.goodDash', fn: () => looksLikeDate10('12-31-2025') === true },
-        { name: 'looksLikeDate10.goodSlash', fn: () => looksLikeDate10('12/31/2025') === true },
-        { name: 'b64url.roundtrip', fn: () => {
-          const bytes = new Uint8Array([0, 1, 2, 3, 250, 251, 252, 253, 254, 255]);
-          const enc = toB64Url(bytes);
-          const dec = fromB64Url(enc);
-          return dec.length === bytes.length && dec.every((b, i) => b === bytes[i]);
-        }},
-      ];
+        const rowCount = (state.structured.transactions || []).length;
+        const uniqueCodes = (state.structured.codesFound || []).length;
 
-      const failures = [];
-      for (const t of tests) {
-        try {
-          if (!t.fn()) failures.push(t.name);
-        } catch {
-          failures.push(t.name);
-        }
-      }
+        const transactions = (state.structured.transactions || []).slice(0, 18);
+        const txRows = transactions.map((t) => {
+          const code = safe(t && t.code ? t.code : '');
+          const desc = safe(t && t.description ? t.description : '');
+          const date = safe(t && t.date ? t.date : '');
+          const amt = safe(t && t.amount ? t.amount : '');
+          return (
+            '<tr>' +
+            '<td class="td mono">' + code + '</td>' +
+            '<td class="td">' + desc + '</td>' +
+            '<td class="td mono">' + date + '</td>' +
+            '<td class="td mono right">' + amt + '</td>' +
+            '</tr>'
+          );
+        }).join('');
 
-      if (failures.length) {
-        console.error('Self-tests failed:', failures);
-        setTokenStatus('Self-tests failed: ' + failures.join(', '), 'error');
-      } else {
-        console.log('Self-tests passed:', tests.map((t) => t.name));
-        setTokenStatus('Self-tests passed (' + String(tests.length) + ')', 'ok');
-      }
-    }
+        const codesAll = (state.structured.codesFound || []).slice(0, 80);
+        const codesHtmlFull = codesAll.map((c) => '<span class="code">' + safe(c) + '</span>').join('');
 
-    // Events
-    brandLogoInput.addEventListener('change', (e) => {
-      const f = e.target && e.target.files && e.target.files[0];
-      brandLogoName.textContent = f ? f.name : 'No file selected';
-      state.brandLogoDataUrl = '';
-      if (!f) return;
+        const logoBlock = state.brandLogoDataUrl
+          ? '<img src="' + state.brandLogoDataUrl + '" alt="Firm logo" style="max-width:160px;height:auto;" />'
+          : '<div style="font-weight:800;letter-spacing:-.5px;">Your Firm</div>';
 
-      const reader = new FileReader();
-      reader.onload = () => { state.brandLogoDataUrl = String(reader.result || ''); };
-      reader.readAsDataURL(f);
-    });
+        const subtitle = 'Type: ' + safeMeta.transcriptType + ' • Period ending: ' + safeMeta.taxPeriodEnding;
 
-    copyJsonBtn.addEventListener('click', () => copyToClipboard(jsonOutput.textContent || ''));
-    copyRawBtn.addEventListener('click', () => copyToClipboard(rawOutput.textContent || ''));
+        return (
+          '<!doctype html><html><head><meta charset="utf-8" />' +
+          '<meta name="viewport" content="width=device-width, initial-scale=1" />' +
+          '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">' +
+          '<style>' +
+          ':root{--ink:#0b0a14;--muted:#6b7280;--line:#e5e7eb;--p:#7c3aed;--bg:#f3f4f6}' +
+          'body{margin:0;background:var(--bg);font-family:DM Sans,system-ui,sans-serif;color:var(--ink)}' +
+          '.page{max-width:8.5in;margin:24px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 12px 28px rgba(0,0,0,.12)}' +
+          '.content{padding:52px}' +
+          '.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:26px;padding-bottom:18px;border-bottom:2px solid var(--ink)}' +
+          '.h1{font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1.1;margin:0}' +
+          '.kicker{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-top:8px}' +
+          '.sub{font-size:13px;color:var(--muted);margin-top:10px}' +
+          '.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0 26px}' +
+          '.stat{border:1px solid var(--line);border-radius:14px;padding:14px;background:linear-gradient(135deg,#fafafa 0%,#f3f4f6 100%)}' +
+          '.statN{font-size:20px;font-weight:900;min-height:26px}' +
+          '.statL{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-top:6px}' +
+          '.section{margin:0 0 26px}' +
+          '.title{font-size:13px;font-weight:900;text-transform:uppercase;letter-spacing:.6px;margin:0 0 12px;padding-left:10px;border-left:4px solid var(--p)}' +
+          '.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}' +
+          '.block{background:#f9fafb;padding:14px;border-radius:12px;border-left:3px solid var(--p)}' +
+          '.label{font-size:11px;font-weight:900;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}' +
+          '.value{font-size:15px;font-weight:800}' +
+          '.codes{display:flex;flex-wrap:wrap;gap:8px}' +
+          '.code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-size:12px;background:#111827;color:#a78bfa;padding:6px 8px;border-radius:999px}' +
+          '.table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:14px;overflow:hidden}' +
+          '.th{background:#111827;color:#e5e7eb;font-size:11px;letter-spacing:.6px;text-transform:uppercase;font-weight:900;padding:10px 12px;text-align:left}' +
+          '.td{border-top:1px solid var(--line);padding:10px 12px;font-size:12px;vertical-align:top}' +
+          '.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace}' +
+          '.right{text-align:right}' +
+          '.note{background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.18);border-left:4px solid var(--p);padding:14px;border-radius:12px;color:#374151;font-size:13px;line-height:1.7}' +
+          '.footer{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;font-size:11px;color:#9ca3af}' +
+          '@media(max-width:640px){.content{padding:28px}.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr}}' +
+          '@media print{body{background:#fff}.page{box-shadow:none;margin:0;border-radius:0}}' +
+          '</style></head><body>' +
+          '<div class="page"><div class="content">' +
+          '<div class="header">' +
+          '<div>' +
+          '<h1 class="h1">Transcript Report</h1>' +
+          '<div class="kicker">Generated locally (no uploads)</div>' +
+          '<div class="sub">' + safe(subtitle) + '</div>' +
+          '</div>' +
+          '<div>' + logoBlock + '</div>' +
+          '</div>' +
 
-    function verifyToken() {
-      const token = String(parserTokenInput && parserTokenInput.value ? parserTokenInput.value : '').trim();
+          '<div class="stats">' +
+          '<div class="stat"><div class="statN">' + safeMeta.accountBalance + '</div><div class="statL">Account balance</div></div>' +
+          '<div class="stat"><div class="statN">' + String(rowCount) + '</div><div class="statL">Rows detected</div></div>' +
+          '<div class="stat"><div class="statN">' + String(uniqueCodes) + '</div><div class="statL">Unique codes</div></div>' +
+          '</div>' +
 
-      if (!token) {
-        state.tokenId = '';
-        state.tokenValid = false;
-        setParserAvailable('-');
-        setTokenStatus('Please enter a token ID.', 'error');
-        updateControls();
-        return;
-      }
+          '<div class="section">' +
+          '<div class="title">Taxpayer details</div>' +
+          '<div class="grid">' +
+          '<div class="block"><div class="label">TIN (masked)</div><div class="value">' + safeMeta.tinMasked + '</div></div>' +
+          '<div class="block"><div class="label">Tax period ending</div><div class="value">' + safeMeta.taxPeriodEnding + '</div></div>' +
+          '</div>' +
+          '</div>' +
 
-      state.tokenId = token;
-      state.tokenValid = token.length >= 8;
-      if (!state.tokenValid) {
-        setParserAvailable('-');
-        setTokenStatus('Token looks invalid (must be at least 8 characters).', 'error');
-        updateControls();
-        return;
-      }
+          '<div class="section">' +
+          '<div class="title">Codes found</div>' +
+          '<div class="codes">' + (codesHtmlFull || '<span style="color:var(--muted);font-size:13px;">(none detected)</span>') + '</div>' +
+          '</div>' +
 
-      setParserAvailable(150);
-      setTokenStatus('✓ Token verified (local check). Upload a PDF to extract text.', 'ok');
-      if (reportEmailStatus) setText(reportEmailStatus, 'Ready after you parse JSON.');
-      updateControls();
-    }
+          '<div class="section">' +
+          '<div class="title">Transactions (first ' + String(transactions.length) + ')</div>' +
+          '<table class="table">' +
+          '<thead><tr>' +
+          '<th class="th">Code</th>' +
+          '<th class="th">Description</th>' +
+          '<th class="th">Date</th>' +
+          '<th class="th right">Amount</th>' +
+          '</tr></thead>' +
+          '<tbody>' + (txRows || '<tr><td class="td" colspan="4" style="color:var(--muted);">(no rows parsed)</td></tr>') + '</tbody>' +
+          '</table>' +
+          '</div>' +
 
-    if (parserTokenBtn) {
-      parserTokenBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        verifyToken();
-      });
-    } else {
-      showFatal('Verify Token button not found (id="parser-save-token").');
-    }
+          '<div class="note">Tip: This report is generated in your browser. The email link contains encrypted report data in the URL fragment, and nothing is uploaded.</div>' +
 
-    if (parserTokenInput) {
-      parserTokenInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          verifyToken();
-        }
-      });
-    }
-
-    pdfDropZone.addEventListener('click', () => pdfUpload.click());
-
-    pdfDropZone.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      pdfDropZone.classList.add('active');
-    });
-
-    pdfDropZone.addEventListener('dragleave', () => {
-      pdfDropZone.classList.remove('active');
-    });
-
-    pdfDropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      pdfDropZone.classList.remove('active');
-
-      const files = e.dataTransfer && e.dataTransfer.files;
-      if (!files || !files.length) return;
-
-      const f = files[0];
-      if (f.type !== 'application/pdf') {
-        setTokenStatus('That file is not a PDF.', 'error');
-        return;
-      }
-
-      pdfUpload.files = files;
-      handlePdfSelected(f);
-    });
-
-    pdfUpload.addEventListener('change', (e) => {
-      const f = e.target && e.target.files && e.target.files[0];
-      if (!f) return;
-      handlePdfSelected(f);
-    });
-
-    extractRawBtn.addEventListener('click', async () => {
-      if (!state.tokenValid || !state.pdfFile) return;
-
-      setButtonEnabled(extractRawBtn, false);
-      setText(rawOutput, 'Extracting text...');
-
-      try {
-        const text = await extractTextFromPDF(state.pdfFile);
-        state.rawText = text;
-        setText(rawOutput, text || '(no text extracted)');
-        setTokenStatus('Raw text extracted. Now parse structured JSON.', 'ok');
-      } catch (e) {
-        state.rawText = '';
-        setText(rawOutput, '(extraction failed)');
-        setTokenStatus(String(e && e.message ? e.message : e), 'error');
-      } finally {
-        updateControls();
-      }
-    });
-
-    parseStructuredBtn.addEventListener('click', () => {
-      if (!state.tokenValid || !state.pdfFile || !state.rawText) return;
-
-      setButtonEnabled(parseStructuredBtn, false);
-      setText(jsonOutput, 'Parsing...');
-
-      try {
-        const structured = buildStructured(state.rawText);
-        state.structured = structured;
-        setText(jsonOutput, JSON.stringify(structured, null, 2));
-        setTokenStatus('Parsed ' + structured.codesFound.length + ' unique codes.', 'ok');
-        setReportEmailStatus('Ready to email a secure link.', 'ok');
-      } catch (e) {
-        state.structured = null;
-        setText(jsonOutput, '(parse failed)');
-        setTokenStatus(String(e && e.message ? e.message : e), 'error');
-        setReportEmailStatus('Not ready.', '');
-      } finally {
-        updateControls();
-      }
-    });
-
-    previewReportBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (!state.structured) return;
-
-      miniReportOverlay.classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-
-      const meta = state.structured.meta || {};
-      const codes = (state.structured.codesFound || []).slice(0, 24);
-
-      const logoHtml = state.brandLogoDataUrl
-        ? '<img src="' + state.brandLogoDataUrl + '" alt="Firm logo" style="max-width:140px;height:auto;" />'
-        : '<div style="font-weight:800;letter-spacing:-.5px;">Your Firm</div>';
-
-      const codesHtml = codes.map((c) => '<span class="code">' + String(c) + '</span>').join('');
-
-      miniReportIframe.srcdoc =
-        '<!doctype html><html><head><meta charset="utf-8" />' +
-        '<meta name="viewport" content="width=device-width, initial-scale=1" />' +
-        '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">' +
-        '<style>' +
-        'body{margin:0;background:#f3f4f6;font-family:DM Sans,system-ui,sans-serif}' +
-        '.page{max-width:8.5in;margin:24px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.10)}' +
-        '.content{padding:52px;color:#0b0a14}' +
-        '.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:40px;padding-bottom:18px;border-bottom:2px solid #0b0a14}' +
-        '.h1{font-size:30px;font-weight:800;letter-spacing:-.5px;line-height:1.1;margin:0}' +
-        '.kicker{font-size:12px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-top:6px}' +
-        '.title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:14px;padding-left:10px;border-left:4px solid #7c3aed}' +
-        '.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}' +
-        '.block{background:#f9fafb;padding:14px;border-radius:10px;border-left:3px solid #7c3aed}' +
-        '.label{font-size:11px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}' +
-        '.value{font-size:16px;font-weight:700}' +
-        '.codes{display:flex;flex-wrap:wrap;gap:8px}' +
-        '.code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-size:12px;background:#111827;color:#a78bfa;padding:6px 8px;border-radius:8px}' +
-        '.footer{margin-top:40px;padding-top:16px;border-top:1px solid #e5e7eb;display:flex;justify-content:space-between;gap:16px;font-size:11px;color:#9ca3af}' +
-        '@media(max-width:640px){.content{padding:28px}.grid{grid-template-columns:1fr}}' +
-        '</style></head><body>' +
-        '<div class="page"><div class="content">' +
-        '<div class="header"><div>' +
-        '<h1 class="h1">Transcript Summary</h1>' +
-        '<div class="kicker">Transcript type: ' + String(meta.transcriptType || 'unknown') + '</div>' +
-        '</div><div>' + logoHtml + '</div></div>' +
-        '<div style="margin-bottom:34px;">' +
-        '<div class="title">Key information</div>' +
-        '<div class="grid">' +
-        '<div class="block"><div class="label">Tax period</div><div class="value">' + String(meta.taxPeriodEnding || '-') + '</div></div>' +
-        '<div class="block"><div class="label">TIN</div><div class="value">' + String(meta.tinMasked || '-') + '</div></div>' +
-        '<div class="block"><div class="label">Account balance</div><div class="value">' + String(meta.accountBalance || '-') + '</div></div>' +
-        '<div class="block"><div class="label">Rows detected</div><div class="value">' + String((state.structured.transactions || []).length) + '</div></div>' +
-        '</div></div>' +
-        '<div style="margin-bottom:34px;">' +
-        '<div class="title">Sample codes</div>' +
-        '<div class="codes">' + codesHtml + '</div>' +
-        '</div>' +
-        '<div class="footer"><div>Generated locally in-browser</div><div>Transcript.Tax Monitor Pro</div></div>' +
-        '</div></div></body></html>';
+          '<div class="footer"><div>Transcript.Tax Monitor Pro</div><div>Generated ' + safe(new Date().toLocaleString()) + '</div></div>' +
+          '</div></div></body></html>'
+        );
+      })();
     });
 
     miniReportClose.addEventListener('click', () => closeOverlay());
