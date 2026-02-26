@@ -601,37 +601,61 @@
       ensurePdfJs();
       if (!file) throw new Error('No PDF selected.');
 
+      // Some environments (notably file://) dislike workers and cross-origin fetches.
+      // We try multiple load strategies in a sane order.
       const buf = await file.arrayBuffer();
+      const objectUrl = URL.createObjectURL(file);
+
       const attempts = [
-        { data: buf },
-        { data: buf, disableWorker: true },
+        // Most reliable in normal hosted environments
+        { url: objectUrl, stopAtErrors: false },
+        // Same, but without worker
+        { url: objectUrl, stopAtErrors: false, disableWorker: true },
+        // Data buffer fallback
+        { data: buf, stopAtErrors: false },
+        // Data buffer without worker
+        { data: buf, stopAtErrors: false, disableWorker: true },
       ];
 
       let lastErr = null;
 
-      for (const opts of attempts) {
-        try {
-          const loadingTask = pdfjsLib.getDocument(opts);
-          const pdf = await loadingTask.promise;
+      try {
+        for (const opts of attempts) {
+          try {
+            const loadingTask = pdfjsLib.getDocument(opts);
+            const pdf = await loadingTask.promise;
 
-          let out = '';
-          for (let p = 1; p <= pdf.numPages; p++) {
-            const page = await pdf.getPage(p);
-            const content = await page.getTextContent();
-            const parts = [];
-            for (const it of content.items) {
-              if (it && it.str) parts.push(String(it.str));
+            let out = '';
+            for (let p = 1; p <= pdf.numPages; p++) {
+              const page = await pdf.getPage(p);
+              const content = await page.getTextContent({ disableCombineTextItems: false });
+              const parts = [];
+
+              for (const it of content.items || []) {
+                if (it && typeof it.str === 'string' && it.str.trim()) parts.push(it.str);
+              }
+
+              out += parts.join(' ') + NL;
             }
-            out += parts.join(' ') + NL;
-          }
 
-          return out.trim();
-        } catch (e) {
-          lastErr = e;
+            const text = out.trim();
+            if (!text) {
+              // Common when the PDF is essentially a scanned image.
+              throw new Error('No selectable text found. This PDF may be a scanned image (OCR not supported in this tool).');
+            }
+
+            return text;
+          } catch (e) {
+            lastErr = e;
+          }
         }
+      } finally {
+        URL.revokeObjectURL(objectUrl);
       }
 
-      throw lastErr || new Error('PDF extraction failed.');
+      const name = lastErr && lastErr.name ? String(lastErr.name) : 'Error';
+      const msg = lastErr && lastErr.message ? String(lastErr.message) : String(lastErr || 'PDF extraction failed.');
+      throw new Error(name + ': ' + msg);
     }
 
     function detectTranscriptType(rawText) {
