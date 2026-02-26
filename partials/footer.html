@@ -1,61 +1,233 @@
-<!-- partials/footer.html -->
-<footer class="border-t border-slate-800/60 bg-slate-950">
-  <div class="mx-auto max-w-7xl px-6 py-12">
-    <div class="grid gap-10 md:grid-cols-3 md:items-start">
+<!-- partials/header.html -->
+<header class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
+  <div class="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-4">
 
-      <!-- Brand -->
-      <div class="flex flex-col gap-4">
-        <a href="/index.html" class="flex items-center gap-3">
-          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 text-slate-950 font-bold">
-            TM
-          </span>
-          <div class="flex flex-col leading-tight">
-            <span class="font-semibold tracking-tight text-white">Transcript.Tax Monitor Pro</span>
-            <span class="text-xs text-slate-400">Transcript automation</span>
+    <!-- Logo -->
+    <a href="/index.html" class="flex items-center gap-3">
+      <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 text-slate-950 font-bold">
+        TM
+      </span>
+      <div class="flex flex-col leading-tight">
+        <span class="font-semibold tracking-tight text-white">Transcript.Tax Monitor Pro</span>
+        <span class="text-xs text-slate-400">Transcript automation</span>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <div class="hidden items-center gap-10 md:flex">
+
+      <nav class="flex items-center gap-8">
+        <a href="#features" class="text-sm text-slate-300 hover:text-white transition">Features</a>
+        <a href="#use-cases" class="text-sm text-slate-300 hover:text-white transition">Use Cases</a>
+        <a href="#how-it-works" class="text-sm text-slate-300 hover:text-white transition">How It Works</a>
+        <a href="#pricing" class="text-sm text-slate-300 hover:text-white transition">Pricing</a>
+
+        <!-- Resources Dropdown -->
+        <div class="relative">
+          <button
+            id="resources-toggle"
+            type="button"
+            class="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white transition"
+            aria-expanded="false"
+          >
+            Resources
+            <svg class="h-4 w-4 opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <div
+            id="resources-menu"
+            class="hidden absolute left-0 mt-3 w-72 rounded-xl border border-slate-800 bg-slate-950 shadow-xl"
+          >
+            <div class="p-2">
+              <!-- Alphabetical -->
+              <a
+                href="/resources/transcript-types.html"
+                class="block rounded-lg px-3 py-2 text-sm text-slate-200 hover:bg-slate-900 transition"
+              >
+                Accepted Transcript Types
+              </a>
+              <a
+                href="https://transcript.taxmonitor.pro/magnets/lead-magnet.html"
+                class="block rounded-lg px-3 py-2 text-sm text-slate-200 hover:bg-slate-900 transition"
+              >
+                IRS Transcript Code Guide
+              </a>
+              <a
+                href="/resources/transcript-orders.html"
+                class="block rounded-lg px-3 py-2 text-sm text-slate-200 hover:bg-slate-900 transition"
+              >
+                Transcript Order Walkthrough
+              </a>
+              <a
+                href="https://taxmonitor.pro"
+                class="block rounded-lg px-3 py-2 text-sm text-slate-200 hover:bg-slate-900 transition"
+              >
+                Tax Monitor Pro
+              </a>
+            </div>
           </div>
-        </a>
-        <p class="text-sm text-slate-400">
-          IRS transcript automation that turns raw codes into clear, client-ready insights.
-        </p>
-      </div>
-
-      <!-- Links + Resources (match header) -->
-      <div class="flex flex-col gap-4">
-        <h3 class="text-sm font-semibold text-white">Links</h3>
-        <nav class="grid gap-2 text-sm">
-          <a href="#features" class="text-slate-300 hover:text-white transition">Features</a>
-          <a href="#how-it-works" class="text-slate-300 hover:text-white transition">How It Works</a>
-          <a href="#pricing" class="text-slate-300 hover:text-white transition">Pricing</a>
-          <a href="#use-cases" class="text-slate-300 hover:text-white transition">Use Cases</a>
-        </nav>
-
-        <div class="mt-2 h-px w-full bg-slate-800/80"></div>
-
-        <h3 class="text-sm font-semibold text-white">Resources</h3>
-        <nav class="grid gap-2 text-sm">
-          <a href="/resources/transcript-types.html" class="text-slate-300 hover:text-white transition">Accepted Transcript Types</a>
-          <a href="https://taxmonitor.pro" class="text-slate-300 hover:text-white transition">Tax Monitor Pro</a>
-          <a href="/resources/transcript-orders.html" class="text-slate-300 hover:text-white transition">Transcript Order Walkthrough</a>
-        </nav>
-      </div>
-
-      <!-- Legal -->
-      <div class="flex flex-col gap-4">
-        <h3 class="text-sm font-semibold text-white">Legal</h3>
-        <div class="grid gap-2 text-sm">
-          <a href="/legal/privacy.html" class="text-slate-300 hover:text-white transition">Privacy</a>
-          <a href="/legal/terms.html" class="text-slate-300 hover:text-white transition">Terms</a>
         </div>
-        <p class="text-sm text-slate-500">© <span id="footer-year"></span> Transcript.Tax Monitor Pro</p>
+      </nav>
+
+      <div class="h-6 w-px bg-slate-700"></div>
+
+      <div class="flex items-center">
+        <a
+          href="https://transcript.taxmonitor.pro/magnets/lead-magnet.html"
+          class="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2 text-sm font-semibold text-white hover:from-purple-400 hover:to-purple-500 transition"
+        >
+          Get Free Guide →
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Mobile Toggle -->
+    <button
+      id="menu-toggle"
+      class="md:hidden inline-flex items-center justify-center rounded-lg p-2 text-slate-300 hover:text-white"
+      aria-expanded="false"
+      type="button"
+    >
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+
+  </div>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden border-t border-slate-800 bg-slate-950 md:hidden">
+    <div class="flex flex-col gap-4 px-6 py-6 text-sm">
+
+      <a href="#features" class="text-slate-300 hover:text-white transition">Features</a>
+      <a href="#use-cases" class="text-slate-300 hover:text-white transition">Use Cases</a>
+      <a href="#how-it-works" class="text-slate-300 hover:text-white transition">How It Works</a>
+      <a href="#pricing" class="text-slate-300 hover:text-white transition">Pricing</a>
+
+      <!-- Mobile Resources -->
+      <button
+        id="mobile-resources-toggle"
+        class="flex items-center justify-between rounded-lg border border-slate-800 px-4 py-3 text-left text-slate-200 hover:bg-slate-900 transition"
+        aria-expanded="false"
+        type="button"
+      >
+        <span>Resources</span>
+        <svg class="h-4 w-4 opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <div id="mobile-resources-menu" class="hidden pl-2 flex flex-col gap-2">
+        <!-- Alphabetical -->
+        <a
+          href="/resources/transcript-types.html"
+          class="rounded-lg px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-900 transition"
+        >
+          Accepted Transcript Types
+        </a>
+        <a
+          href="https://transcript.taxmonitor.pro/magnets/lead-magnet.html"
+          class="rounded-lg px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-900 transition"
+        >
+          IRS Transcript Code Guide
+        </a>
+        <a
+          href="/resources/transcript-orders.html"
+          class="rounded-lg px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-900 transition"
+        >
+          Transcript Download Walkthrough
+        </a>
+        <a
+          href="https://taxmonitor.pro"
+          class="rounded-lg px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-900 transition"
+        >
+          Tax Monitor Pro
+        </a>
+      </div>
+
+      <div class="border-t border-slate-800 pt-4 mt-2">
+        <a
+          href="https://transcript.taxmonitor.pro/magnets/lead-magnet.html"
+          class="inline-flex w-full items-center justify-center rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-3 font-semibold text-white hover:from-purple-400 hover:to-purple-500 transition"
+        >
+          Get Free Guide →
+        </a>
       </div>
 
     </div>
   </div>
-</footer>
 
-<script>
-  (function () {
-    var el = document.getElementById('footer-year');
-    if (el) el.textContent = String(new Date().getFullYear());
-  })();
-</script>
+  <script>
+    (function () {
+      var toggle = document.getElementById('menu-toggle');
+      var mobileMenu = document.getElementById('mobile-menu');
+
+      var resourcesToggle = document.getElementById('resources-toggle');
+      var resourcesMenu = document.getElementById('resources-menu');
+
+      var mobileResourcesToggle = document.getElementById('mobile-resources-toggle');
+      var mobileResourcesMenu = document.getElementById('mobile-resources-menu');
+
+      toggle && toggle.addEventListener('click', function () {
+        var isHidden = mobileMenu.classList.toggle('hidden');
+        toggle.setAttribute('aria-expanded', String(!isHidden));
+      });
+
+      resourcesToggle && resourcesToggle.addEventListener('click', function (e) {
+        e.preventDefault();
+        var isHidden = resourcesMenu.classList.toggle('hidden');
+        resourcesToggle.setAttribute('aria-expanded', String(!isHidden));
+      });
+
+      mobileResourcesToggle && mobileResourcesToggle.addEventListener('click', function () {
+        var isHidden = mobileResourcesMenu.classList.toggle('hidden');
+        mobileResourcesToggle.setAttribute('aria-expanded', String(!isHidden));
+      });
+
+      document.addEventListener('click', function (e) {
+        if (!resourcesMenu || !resourcesToggle) return;
+        var clickedInside = resourcesMenu.contains(e.target) || resourcesToggle.contains(e.target);
+
+        if (!clickedInside) {
+          resourcesMenu.classList.add('hidden');
+          resourcesToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        resourcesMenu && resourcesMenu.classList.add('hidden');
+        resourcesToggle && resourcesToggle.setAttribute('aria-expanded', 'false');
+        mobileResourcesMenu && mobileResourcesMenu.classList.add('hidden');
+        mobileResourcesToggle && mobileResourcesToggle.setAttribute('aria-expanded', 'false');
+        mobileMenu && mobileMenu.classList.add('hidden');
+        toggle && toggle.setAttribute('aria-expanded', 'false');
+      });
+
+      // Favicons must live in <head>. This partial is injected into <body>, so we patch them in.
+      var head = document.head;
+      if (!head) return;
+
+      var icons = [
+        { rel: 'icon', href: '/assets/favicon.ico', type: 'image/x-icon' },
+        { rel: 'icon', href: '/assets/logo.svg', type: 'image/svg+xml' }
+      ].sort(function (a, b) { return String(a.href).localeCompare(String(b.href)); });
+
+      function hasIcon(href) {
+        return !!head.querySelector('link[rel~="icon"][href="' + href + '"]');
+      }
+
+      icons.forEach(function (i) {
+        if (hasIcon(i.href)) return;
+        var link = document.createElement('link');
+        link.rel = i.rel;
+        link.href = i.href;
+        link.type = i.type;
+        head.appendChild(link);
+      });
+    })();
+  </script>
+</header>
