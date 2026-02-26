@@ -252,4 +252,26 @@ body {
   justify-content: center;
   color: white;
   font-size: 0.75rem;
+
+}
+
+/* SEO content helpers (shared) */
+.tm-card {
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.tm-soft {
+  background: rgba(2, 6, 23, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.tm-kbd {
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.65);
+}
+
+.tm-prose a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
