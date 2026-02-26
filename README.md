@@ -138,27 +138,31 @@ Rules:
 
 # Event Trigger System
 
+Transcript.Tax Monitor Pro does not use login sessions, in-app messaging, or client-side activity beacons. The system only reacts to real mutation sources.
+
 ## Final Trigger Set (Alphabetical)
 
 * Appt
 * Email
 * Form
-* Login
-* Message
 * Payment
 * Task
-* Visit
 
 ## Trigger Sources
 
-Appt → Cal webhook
-Email → Google Workspace (post-canonical only)
-Form → Portal + staff submissions
-Login → Auth endpoints
-Message → In-app + logged outbound
-Payment → Stripe webhook
-Task → ClickUp webhook
-Visit → Client-side beacon (logged, not client-visible)
+Appt → Cal webhook (support bookings)
+Email → Google Workspace outbound (sent only after canonical update)
+Form → Public site POST endpoints (token consume, transcript parse, report email)
+Payment → Stripe webhooks (credit purchases)
+Task → ClickUp webhook (projection-side updates when required)
+
+All triggers must result in one of the following:
+
+* Receipt append
+* Canonical R2 mutation
+* ClickUp projection
+
+If none of the above occur, it is not a trigger in this system.
 
 ---
 
@@ -292,27 +296,26 @@ Read models are documented here, not registered as mutation contracts.
 
 # Contracts (Mutation Ingress Only)
 
-Registry file:
+This repo does not maintain a separate contract registry file.
 
-```
-app/contracts/contract-registry.json
-```
+Mutation contracts are defined implicitly by Worker handlers. A contract exists whenever:
 
-Contracts exist only when:
+* An endpoint receives a POST
+* The Worker appends a receipt
+* The Worker mutates canonical R2 state
+* The Worker performs credit consumption
+* The Worker projects to ClickUp
 
-* Endpoint receives POST
-* Worker appends receipt
-* Worker mutates canonical R2
-* Worker updates lifecycle state
-* Worker triggers ClickUp projection
+There is no standalone `contract-registry.json` in this system.
 
-Validation rules:
+Validation rules (enforced in Worker code):
 
-* enumStrict = true
-* normalizeCheckboxToBoolean = true
-* rejectUnknownValues = true
-* No hardcoded dropdown enums in HTML
-* No business logic inferred from UI
+* All mutation requests must include `eventId`
+* Unknown fields must be rejected
+* Credit consumption must be idempotent by `requestId` (shared with `eventId`)
+* No business logic is trusted from UI state
+
+UI never defines valid data. The Worker enforces shape and state transitions.
 
 ---
 
@@ -1190,7 +1193,7 @@ This repo still needs (deployment/config):
 R2 is authority.
 Worker enforces contracts.
 ClickUp is projection.
-Registry governs mutation ingress only.
+Worker code governs mutation ingress only.
 Read models are documented in README.
 
 Architecture is locked.
