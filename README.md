@@ -23,6 +23,7 @@
 * [Repository Structure (Exact Tree)](#repository-structure-exact-tree)
 * [Security & Legal Controls](#security--legal-controls)
 * [Stripe Payments (Payment Links + Confirmation Redirect)](#stripe-payments-payment-links--confirmation-redirect)
+* [Support Message Contract (v1)](#support-message-contract-v1)
 * [System Architecture](#system-architecture)
 * [What Transcript.Tax Monitor Pro Is](#what-transcripttax-monitor-pro-is)
 * [Worker Environment Variables](#worker-environment-variables)
@@ -476,6 +477,51 @@ Credits are granted by a Stripe webhook handler that:
 2. Appends receipt to R2 (`receipts/stripe/{eventId}.json`)
 3. Upserts canonical credit balance/state
 4. Optionally projects to ClickUp
+
+---
+
+# Support Message Contract (v1)
+
+Endpoint:
+
+```
+POST https://api.taxmonitor.pro/forms/support/message
+```
+
+## Required Fields
+
+* eventId
+* name
+* email
+* subject
+* message
+
+## Optional Fields
+
+* tokenId
+* utm_*
+
+## Processing Order
+
+1. Append receipt → `receipts/forms/{eventId}.json`
+2. Upsert `support/{supportId}.json`
+3. Project to ClickUp Support List
+4. Send transactional email (Google Workspace)
+
+Rules:
+
+* `eventId` is the idempotency key.
+* Receipt must be written before canonical mutation.
+* Email is sent only after canonical update.
+* ClickUp is projection only.
+
+## Response
+
+```json
+{
+  "supportId": "SUP-2026-0001"
+}
+```
 
 ---
 
