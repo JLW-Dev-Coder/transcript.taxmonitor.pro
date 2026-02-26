@@ -318,15 +318,12 @@
 <body>
   <div class="container-wrapper">
     <main class="max-w-6xl mx-auto px-6 py-12">
-      <!-- Hero Section -->
       <div class="text-center mb-12 fade-in">
         <h2 class="text-4xl md:text-5xl font-bold text-white mb-4">Parse Your Transcript in Seconds</h2>
         <p class="text-xl text-slate-300 max-w-2xl mx-auto">Upload an IRS transcript PDF. Get instant code extraction and a client-ready report. No uploads. No risk.</p>
       </div>
 
-      <!-- Parser Card -->
       <div class="glass rounded-2xl p-8 mb-12 fade-in">
-        <!-- Steps Indicator -->
         <div class="flex items-center justify-between mb-12 pb-8 border-b border-slate-700/50">
           <div class="flex items-center gap-3">
             <div class="step-number">1</div>
@@ -357,7 +354,6 @@
           </div>
         </div>
 
-        <!-- Step 1: Token Section -->
         <div class="mb-10 pb-10 border-b border-slate-700/30">
           <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-3">
             <span class="step-number text-sm">1</span> Enter Your API Token
@@ -382,13 +378,11 @@
           </div>
         </div>
 
-        <!-- Step 2: Upload Section -->
         <div class="mb-10 pb-10 border-b border-slate-700/30">
           <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-3">
             <span class="step-number text-sm">2</span> Upload Your Transcript
           </h3>
 
-          <!-- Firm Logo Optional -->
           <div class="mb-8">
             <label class="block text-sm font-medium text-slate-300 mb-3">Firm Logo (Optional)</label>
 
@@ -405,7 +399,6 @@
             <p class="text-xs text-slate-500 mt-3">Recommended: 600×600 PNG, SVG, or JPG</p>
           </div>
 
-          <!-- PDF Drop Zone -->
           <div class="drop-zone fade-in" id="pdf-drop-zone">
             <svg class="w-16 h-16 text-purple-400 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
@@ -417,7 +410,6 @@
           <input id="pdf-upload" type="file" accept="application/pdf" class="hidden" />
         </div>
 
-        <!-- Step 3: Parse Controls -->
         <div class="grid gap-4">
           <div class="flex flex-col md:flex-row gap-4">
             <button id="extract-raw-btn" type="button" class="btn-secondary flex-1 opacity-50 cursor-not-allowed" disabled>
@@ -448,7 +440,6 @@
           </div>
         </div>
 
-        <!-- Security Notice -->
         <div class="mt-8 p-4 rounded-lg bg-slate-800/30 border border-slate-700/30 flex items-start gap-3">
           <svg class="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
@@ -460,7 +451,6 @@
         </div>
       </div>
 
-      <!-- Info Cards -->
       <div class="grid md:grid-cols-3 gap-6 mb-12">
         <div class="glass rounded-xl p-6 border border-purple-500/20">
           <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-300 mb-3" aria-hidden="true">
@@ -498,11 +488,9 @@
         </div>
       </div>
 
-      <!-- Sample Report Container -->
       <div id="sample-report-container" class="hidden"></div>
     </main>
 
-    <!-- Modal for Full Report Preview -->
     <div id="mini-report-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-6">
       <div class="relative w-full max-w-5xl h-[85vh] bg-slate-950 rounded-2xl overflow-hidden border border-purple-500/20">
         <button id="mini-report-close" class="absolute top-4 right-4 z-10 bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Close</button>
@@ -512,7 +500,7 @@
   </div>
 
   <script>
-    // Parse Lab v2: in-browser PDF extraction + first-pass transcript parsing
+    // Parse Lab: in-browser PDF extraction + first-pass transcript parsing
 
     // DOM (alphabetical)
     const brandLogoInput = document.getElementById('brand-logo');
@@ -543,20 +531,27 @@
       tokenValid: false,
     };
 
-    // Surface any runtime errors in the UI so we stop guessing.
+    // Surface runtime errors in the UI
     function showFatal(err) {
       const msg = String((err && err.message) ? err.message : err);
       try { setTokenStatus('Runtime error: ' + msg, 'error'); } catch {}
     }
 
     window.addEventListener('error', (e) => {
-      // e.error is often the real Error object
       showFatal(e && (e.error || e.message || e));
     });
 
     window.addEventListener('unhandledrejection', (e) => {
       showFatal(e && (e.reason || e));
     });
+
+    function escapeRegexLiteral(s) {
+      return String(s || '').replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
+    }
+
+    function isDigit(ch) {
+      return ch >= '0' && ch <= '9';
+    }
 
     function setParserAvailable(val) {
       const el = document.getElementById('parser-token-available');
@@ -619,7 +614,6 @@
     }
 
     async function ensurePdfJs() {
-      // If pdfjsLib is already present, ensure workerSrc and move on.
       if (typeof window.pdfjsLib !== 'undefined') {
         if (!window.pdfjsLib.GlobalWorkerOptions || !window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
           window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/scripts/pdf.worker.min.mjs';
@@ -639,19 +633,13 @@
       });
 
       const loadModule = async (src) => {
-        // Dynamic import returns the module namespace.
         const mod = await import(src);
-        // PDF.js exposes itself as the default export in many builds, but to be safe, accept namespace.
-        // We'll set window.pdfjsLib to the namespace.
         window.pdfjsLib = mod && (mod.default || mod);
       };
 
-      // Local-first (ship these files).
-      // For pdfjs-dist@4.x, the distributed files are .mjs (ES modules). ([app.unpkg.com](https://app.unpkg.com/pdfjs-dist%404.10.38/files/build?utm_source=chatgpt.com))
       const candidates = [
         '/scripts/pdf.min.mjs',
         '/assets/pdf.min.mjs',
-        // Remote fallbacks (may be blocked by CSP/extensions/network)
         'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.min.mjs',
       ];
 
@@ -660,11 +648,8 @@
 
       for (const src of candidates) {
         try {
-          if (isModule(src)) {
-            await loadModule(src);
-          } else {
-            await loadClassicScript(src);
-          }
+          if (isModule(src)) await loadModule(src);
+          else await loadClassicScript(src);
 
           if (typeof window.pdfjsLib !== 'undefined') {
             loadedFrom = src;
@@ -689,7 +674,6 @@
         'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs',
       ];
 
-      // Prefer local worker when we loaded local.
       const preferLocal = loadedFrom.startsWith('/');
       const orderedWorkers = preferLocal
         ? workerCandidates
@@ -734,10 +718,7 @@
             }
 
             const text = out.trim();
-            if (!text) {
-              throw new Error('No selectable text found. This PDF may be a scanned image (OCR not supported in this tool).');
-            }
-
+            if (!text) throw new Error('No selectable text found. This PDF may be a scanned image (OCR not supported in this tool).');
             return text;
           } catch (e) {
             lastErr = e;
@@ -754,13 +735,10 @@
 
     function detectTranscriptType(rawText) {
       const t = String(rawText || '').toLowerCase();
-
-      // Common IRS transcript headers
       if (t.includes('record of account')) return 'record_of_account';
       if (t.includes('account transcript')) return 'account';
       if (t.includes('return transcript')) return 'return';
       if (t.includes('wage') && t.includes('income')) return 'wage_income';
-
       return 'unknown';
     }
 
@@ -770,39 +748,51 @@
       return out.trim();
     }
 
-    function findAfterLabel(rawText, label) {
-      const lines = String(rawText || '').split(NL);
-      const needle = String(label || '').toLowerCase();
-
-      for (const line of lines) {
-        const l = String(line).toLowerCase();
-        const idx = l.indexOf(needle);
-        if (idx === -1) continue;
-
-        const after = String(line).slice(idx + needle.length).trim();
-        if (!after) continue;
-
-        return stripLeadingPunct(after);
-      }
-
-      return '';
+    function firstRegexGroup(text, re) {
+      const m = String(text || '').match(re);
+      return (m && m[1]) ? String(m[1]).trim() : '';
     }
 
-    function findAfterAnyLabel(rawText, labels) {
-      const list = Array.isArray(labels) ? labels : [labels];
-      for (const label of list) {
-        const v = findAfterLabel(rawText, label);
-        if (v) return v;
-      }
-      return '';
-    }
+    function normalizeTextForParsing(rawText) {
+      const t = String(rawText || '').replace(/\s+/g, ' ').trim();
 
-    function isDigit(ch) {
-      return ch >= '0' && ch <= '9';
+      const labelStarts = [
+        'Account balance:',
+        'Accrued interest:',
+        'Accrued penalty:',
+        'As of:',
+        'Filing status:',
+        'Form Number:',
+        'Processing date:',
+        'Report for Tax Period Ending:',
+        'Request Date:',
+        'Response Date:',
+        'Return due date or return received date',
+        'Taxpayer Identification Number:',
+        'Tracking Number:',
+      ];
+
+      let out = t;
+      for (const lbl of labelStarts) {
+        const safe = escapeRegexLiteral(lbl);
+        out = out.replace(new RegExp('\\s(' + safe + ')', 'g'), NL + '$1');
+      }
+
+      out = out.replace(/(TRANSACTIONS\s+CODE\s+EXPLANATION\s+OF\s+TRANSACTION\s+CYCLE\s+DATE\s+AMOUNT)\s+/i, '$1' + NL);
+
+      const marker = out.match(/TRANSACTIONS\s+CODE\s+EXPLANATION\s+OF\s+TRANSACTION\s+CYCLE\s+DATE\s+AMOUNT/i);
+      if (marker) {
+        const idx = out.toLowerCase().indexOf(marker[0].toLowerCase());
+        const head = out.slice(0, idx);
+        let tail = out.slice(idx);
+        tail = tail.replace(/\s(\d{3})\s+([A-Za-z])/g, NL + '$1 $2');
+        out = head + tail;
+      }
+
+      return out;
     }
 
     function looksLikeDate10(s) {
-      // Supports MM/DD/YYYY and MM-DD-YYYY
       if (!s || s.length !== 10) return false;
       const sep = s[2];
       if (!(sep === '/' || sep === '-')) return false;
@@ -823,70 +813,75 @@
     }
 
     function parseTransactions(rawText) {
-      const lines = String(rawText || '').split(NL).map((l) => String(l).trim()).filter(Boolean);
-      const out = [];
+      const normalized = normalizeTextForParsing(rawText);
+      const lines = String(normalized || '').split(NL).map((l) => String(l).trim()).filter(Boolean);
 
+      const out = [];
       const seen = new Set();
 
-      const isDigits = (s, n) => {
-        if (!s || s.length !== n) return false;
-        for (let i = 0; i < s.length; i++) if (!isDigit(s[i])) return false;
-        return true;
-      };
+      let startIdx = 0;
+      for (let i = 0; i < lines.length; i++) {
+        if (String(lines[i]).toLowerCase().includes('transactions code explanation')) {
+          startIdx = i + 1;
+          break;
+        }
+      }
 
-      for (const line of lines) {
+      // NOTE: This regex MUST NOT double-escape ($ and \d). It is a regex literal.
+      // The previous build accidentally ended up with "\\$" which made "$" an anchor and "?" invalid.
+      const amountRe = /(-?\$?\d{1,3}(?:,\d{3})*(?:\.\d{2})|-?\$?\d+(?:\.\d{2}))/g;
+
+      for (let i = startIdx; i < lines.length; i++) {
+        const line = lines[i];
         if (seen.has(line)) continue;
         seen.add(line);
 
-        // Expect a 3-digit code at the start of the line (ex: "150 Tax return filed ...")
         if (line.length < 4) continue;
         const code = line.slice(0, 3);
         if (!isDigit(code[0]) || !isDigit(code[1]) || !isDigit(code[2])) continue;
         if (line[3] !== ' ') continue;
 
         const rest = line.slice(4).trim();
-        const tokens = rest.split(' ').filter(Boolean);
 
-        // Date
         const date = extractFirstDate(rest);
 
-        // Cycle (best-effort)
-        let cycle = '';
-        for (const tok of tokens) {
-          if (isDigits(tok, 8)) { cycle = tok; break; }
-        }
-
-        // Amount (best-effort): last token containing any digit
         let amount = '';
-        for (let i = tokens.length - 1; i >= 0; i--) {
-          const tok = tokens[i];
-          let hasDigit = false;
-          for (let j = 0; j < tok.length; j++) {
-            if (isDigit(tok[j])) { hasDigit = true; break; }
-          }
-          if (hasDigit) { amount = tok; break; }
-        }
+        const amts = rest.match(amountRe);
+        if (amts && amts.length) amount = amts[amts.length - 1];
 
-        out.push({ amount, code, cycle, date, description: rest, line });
+        let cycle = '';
+        const cycle8 = rest.match(/\b(\d{8})\b/);
+        if (cycle8 && cycle8[1]) cycle = cycle8[1];
+
+        let description = rest;
+        if (amount) description = description.replace(new RegExp('\\s+' + escapeRegexLiteral(amount) + '$'), '');
+        if (date) description = description.replace(new RegExp('\\s+' + escapeRegexLiteral(date) + '(\\s+|$)'), ' ').trim();
+        if (cycle) description = description.replace(new RegExp('\\s+' + escapeRegexLiteral(cycle) + '(\\s+|$)'), ' ').trim();
+
+        out.push({ amount, code, cycle, date, description: description.trim(), line });
       }
 
       return out;
     }
 
     function buildStructured(rawText) {
-      const transcriptType = detectTranscriptType(rawText);
+      const normalized = normalizeTextForParsing(rawText);
+      const transcriptType = detectTranscriptType(normalized);
 
-      // Header fields (variant labels across IRS formats)
-      const formNumber = findAfterAnyLabel(rawText, ['Form Number:', 'Form number:', 'Form Number']);
-      const requestDate = findAfterAnyLabel(rawText, ['Request Date:', 'Request date:', 'Request Date']);
-      const responseDate = findAfterAnyLabel(rawText, ['Response Date:', 'Response date:', 'Response Date']);
-      const trackingNumber = findAfterAnyLabel(rawText, ['Tracking Number:', 'Tracking number:', 'Tracking Number']);
+      const requestDate = firstRegexGroup(normalized, /\bRequest Date:\s*(\d{2}[-/]\d{2}[-/]\d{4})/i);
+      const responseDate = firstRegexGroup(normalized, /\bResponse Date:\s*(\d{2}[-/]\d{2}[-/]\d{4})/i);
+      const trackingNumber = firstRegexGroup(normalized, /\bTracking Number:\s*([0-9]{6,})/i);
+      const formNumber = firstRegexGroup(normalized, /\bForm Number:\s*([0-9A-Za-z-]+)/i);
 
-      const taxPeriodEnding = findAfterAnyLabel(rawText, ['Report for Tax Period Ending:', 'Tax Period Ending:', 'Tax period ending:', 'Tax Period:']);
-      const tinMasked = findAfterAnyLabel(rawText, ['Taxpayer Identification Number:', 'Taxpayer identification number:', 'TIN:', 'SSN:', 'SSN']);
-      const accountBalance = findAfterAnyLabel(rawText, ['Account balance:', 'Account Balance:']);
+      const taxPeriodEnding = firstRegexGroup(normalized, /\bReport for Tax Period Ending:\s*(\d{2}[-/]\d{2}[-/]\d{4})/i) ||
+        firstRegexGroup(normalized, /\bTax Period Ending:\s*(\d{2}[-/]\d{2}[-/]\d{4})/i);
 
-      const transactions = parseTransactions(rawText);
+      const tinMasked = firstRegexGroup(normalized, /\bTaxpayer Identification Number:\s*([X\*0-9]{3}-[X\*0-9]{2}-[0-9]{4})/i) ||
+        firstRegexGroup(normalized, /\b(?:SSN|TIN):\s*([X\*0-9]{3}-[X\*0-9]{2}-[0-9]{4})/i);
+
+      const accountBalance = firstRegexGroup(normalized, /\bAccount balance:\s*(-?\$?\d{1,3}(?:,\d{3})*(?:\.\d{2})|-?\$?\d+(?:\.\d{2}))/i);
+
+      const transactions = parseTransactions(normalized);
 
       const codesSet = new Set();
       for (const t of transactions) codesSet.add(t.code);
@@ -907,7 +902,7 @@
           transcriptType,
         },
         transactions,
-        version: 'parse_lab_v2_first_pass',
+        version: 'parse_lab_v4_regex_fixed',
       };
     }
 
@@ -934,12 +929,13 @@
       document.body.style.overflow = '';
     }
 
-    // Basic self-tests (run only when ?selftest=1)
     function runSelfTests() {
       const params = new URLSearchParams(window.location.search);
       if (params.get('selftest') !== '1') return;
 
       const tests = [
+        { name: 'amountRe.dollar', fn: () => String('X $0.00').match(/(-?\$?\d{1,3}(?:,\d{3})*(?:\.\d{2})|-?\$?\d+(?:\.\d{2}))/g)[0] === '$0.00' },
+        { name: 'amountRe.negative', fn: () => String('X -$1,234.56').match(/(-?\$?\d{1,3}(?:,\d{3})*(?:\.\d{2})|-?\$?\d+(?:\.\d{2}))/g)[0] === '-$1,234.56' },
         { name: 'detectTranscriptType.account', fn: () => detectTranscriptType('FORM 1040 ACCOUNT TRANSCRIPT') === 'account' },
         { name: 'detectTranscriptType.return', fn: () => detectTranscriptType('RETURN TRANSCRIPT') === 'return' },
         { name: 'extractFirstDate.dash', fn: () => extractFirstDate('Processing date: 06-16-2025') === '06-16-2025' },
@@ -1006,7 +1002,6 @@
       updateControls();
     }
 
-    // Verify via click
     if (parserTokenBtn) {
       parserTokenBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -1016,7 +1011,6 @@
       showFatal('Verify Token button not found (id="parser-save-token").');
     }
 
-    // Verify via Enter key
     if (parserTokenInput) {
       parserTokenInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -1145,9 +1139,9 @@
         '<div style="margin-bottom:34px;">' +
         '<div class="title">Key information</div>' +
         '<div class="grid">' +
-        '<div class="block"><div class="label">Tax period</div><div class="value">' + String(meta.taxPeriod || '-') + '</div></div>' +
+        '<div class="block"><div class="label">Tax period</div><div class="value">' + String(meta.taxPeriodEnding || '-') + '</div></div>' +
         '<div class="block"><div class="label">TIN</div><div class="value">' + String(meta.tinMasked || '-') + '</div></div>' +
-        '<div class="block"><div class="label">Codes found</div><div class="value">' + String((state.structured.codesFound || []).length) + '</div></div>' +
+        '<div class="block"><div class="label">Account balance</div><div class="value">' + String(meta.accountBalance || '-') + '</div></div>' +
         '<div class="block"><div class="label">Rows detected</div><div class="value">' + String((state.structured.transactions || []).length) + '</div></div>' +
         '</div></div>' +
         '<div style="margin-bottom:34px;">' +
@@ -1168,7 +1162,6 @@
     // Init
     try {
       updateControls();
-      // Prove JS is running and wiring succeeded.
       setTokenStatus('Ready. Enter a token and click Verify Token.', '');
       runSelfTests();
     } catch (e) {
