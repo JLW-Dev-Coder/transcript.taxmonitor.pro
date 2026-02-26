@@ -19,13 +19,7 @@
     };
   </script>
 
-  <!-- PDF.js (may be blocked by CSP/extensions; we also dynamically load fallbacks at runtime) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js"></script>
-  <script>
-    if (typeof window.pdfjsLib !== 'undefined') {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.js';
-    }
-  </script>
+  <!-- PDF.js: loaded dynamically (local-first). External CDNs may be blocked. -->
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -628,12 +622,14 @@
       // If pdfjsLib is already present, ensure workerSrc and move on.
       if (typeof window.pdfjsLib !== 'undefined') {
         if (!window.pdfjsLib.GlobalWorkerOptions || !window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/scripts/pdf.worker.min.js';
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/scripts/pdf.worker.min.mjs';
         }
         return;
       }
 
-      const loadScript = (src) => new Promise((resolve, reject) => {
+      const isModule = (src) => String(src || '').toLowerCase().endsWith('.mjs');
+
+      const loadClassicScript = (src) => new Promise((resolve, reject) => {
         const s = document.createElement('script');
         s.src = src;
         s.async = true;
@@ -642,17 +638,21 @@
         document.head.appendChild(s);
       });
 
-      // NOTE: Your environment is blocking external CDNs. So we try local first.
-      // Put these files in your repo and ship them:
-      // - /scripts/pdf.min.js
-      // - /scripts/pdf.worker.min.js
-      // (You can also place them under /assets/; the loader tries both.)
+      const loadModule = async (src) => {
+        // Dynamic import returns the module namespace.
+        const mod = await import(src);
+        // PDF.js exposes itself as the default export in many builds, but to be safe, accept namespace.
+        // We'll set window.pdfjsLib to the namespace.
+        window.pdfjsLib = mod && (mod.default || mod);
+      };
+
+      // Local-first (ship these files).
+      // For pdfjs-dist@4.x, the distributed files are .mjs (ES modules). ([app.unpkg.com](https://app.unpkg.com/pdfjs-dist%404.10.38/files/build?utm_source=chatgpt.com))
       const candidates = [
-        '/assets/pdf.min.js',
-        '/scripts/pdf.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js',
-        'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.js',
-        'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.min.js',
+        '/scripts/pdf.min.mjs',
+        '/assets/pdf.min.mjs',
+        // Remote fallbacks (may be blocked by CSP/extensions/network)
+        'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.min.mjs',
       ];
 
       let lastErr = null;
@@ -660,7 +660,12 @@
 
       for (const src of candidates) {
         try {
-          await loadScript(src);
+          if (isModule(src)) {
+            await loadModule(src);
+          } else {
+            await loadClassicScript(src);
+          }
+
           if (typeof window.pdfjsLib !== 'undefined') {
             loadedFrom = src;
             break;
@@ -674,19 +679,17 @@
         const msg = lastErr && lastErr.message ? lastErr.message : 'PDF.js failed to load.';
         throw new Error(
           'PDF.js failed to load (pdfjsLib is undefined). ' + msg +
-          ' | Fix: add /scripts/pdf.min.js and /scripts/pdf.worker.min.js (or /assets equivalents) to your site build output.'
+          ' | Fix: add /scripts/pdf.min.mjs and /scripts/pdf.worker.min.mjs (or /assets equivalents) to your site build output.'
         );
       }
 
       const workerCandidates = [
-        '/assets/pdf.worker.min.js',
-        '/scripts/pdf.worker.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.js',
-        'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.js',
-        'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.js',
+        '/scripts/pdf.worker.min.mjs',
+        '/assets/pdf.worker.min.mjs',
+        'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs',
       ];
 
-      // If we loaded from local, prefer local worker too.
+      // Prefer local worker when we loaded local.
       const preferLocal = loadedFrom.startsWith('/');
       const orderedWorkers = preferLocal
         ? workerCandidates
