@@ -356,12 +356,12 @@
 
         <div class="mb-10 pb-10 border-b border-slate-700/30">
           <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-3">
-            <span class="step-number text-sm">1</span> Enter Your API Token
+            <span class="step-number text-sm">1</span> Enter Your Token
           </h3>
 
           <div class="space-y-4">
             <div>
-              <label for="parser-token-id" class="block text-sm font-medium text-slate-300 mb-2">API Token ID</label>
+              <label for="parser-token-id" class="block text-sm font-medium text-slate-300 mb-2">Token ID</label>
               <input id="parser-token-id" type="text" placeholder="Paste your token ID here" class="input-field w-full rounded-lg px-4 py-3" autocomplete="off" />
               <p class="text-xs text-slate-400 mt-2">Your token is never stored or transmitted. It only validates locally.</p>
             </div>
@@ -419,6 +419,24 @@
               <span>Parse Structured JSON</span>
             </button>
             <a id="preview-report-btn" href="#" class="btn-secondary flex-1 text-center opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true">Preview Report</a>
+          </div>
+
+          <div class="mt-4 rounded-xl border border-slate-700/40 bg-slate-950/30 overflow-hidden">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 px-4 py-3 border-b border-slate-700/40">
+              <div class="text-sm font-semibold text-white">Email report link (no storage)</div>
+              <div class="text-xs text-slate-400">We email a link. The report data lives in the link fragment (not uploaded).</div>
+            </div>
+            <div class="p-4 grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+              <div>
+                <label for="report-email" class="block text-sm font-medium text-slate-300 mb-2">Email</label>
+                <input id="report-email" type="email" placeholder="client@firm.com" class="input-field w-full rounded-lg px-4 py-3" autocomplete="email" />
+                <p class="text-xs text-slate-400 mt-2">Requires a verified Token ID and parsed JSON. No cookies.</p>
+              </div>
+              <div class="grid gap-2">
+                <button id="report-email-btn" type="button" class="btn-primary px-5 py-3 opacity-50 cursor-not-allowed" disabled>Email report link</button>
+                <div id="report-email-status" class="text-xs text-slate-400">Not ready.</div>
+              </div>
+            </div>
           </div>
 
           <div class="grid md:grid-cols-2 gap-4">
@@ -520,14 +538,19 @@
     const pdfUpload = document.getElementById('pdf-upload');
     const previewReportBtn = document.getElementById('preview-report-btn');
     const rawOutput = document.getElementById('raw-output');
+    const reportEmailBtn = document.getElementById('report-email-btn');
+    const reportEmailInput = document.getElementById('report-email');
+    const reportEmailStatus = document.getElementById('report-email-status');
 
     const NL = String.fromCharCode(10);
 
     const state = {
       brandLogoDataUrl: '',
+      lastReportLink: '',
       pdfFile: null,
       rawText: '',
       structured: null,
+      tokenId: '',
       tokenValid: false,
     };
 
@@ -592,10 +615,16 @@
       const hasPdf = !!state.pdfFile;
       const canExtract = state.tokenValid && hasPdf;
       const canParse = state.tokenValid && hasPdf && !!state.rawText;
+      const canEmail = state.tokenValid && !!state.structured;
 
       setButtonEnabled(extractRawBtn, canExtract);
       setButtonEnabled(parseStructuredBtn, canParse);
+      setButtonEnabled(reportEmailBtn, canEmail);
       setPreviewEnabled(!!state.structured);
+
+      if (reportEmailStatus && !canEmail) {
+        setText(reportEmailStatus, state.tokenValid ? 'Parse JSON to enable emailing.' : 'Verify Token ID to enable emailing.');
+      }
     }
 
     async function copyToClipboard(text) {
@@ -680,6 +709,118 @@
         : workerCandidates.slice(2).concat(workerCandidates.slice(0, 2));
 
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = orderedWorkers[0];
+    }
+
+    function fromB64Url(s) {
+      const str = String(s || '').replace(/-/g, '+').replace(/_/g, '/');
+      const pad = str.length % 4 ? '='.repeat(4 - (str.length % 4)) : '';
+      const bin = atob(str + pad);
+      const out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+
+    function toB64Url(bytes) {
+      const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes || []);
+      let bin = '';
+      for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    }
+
+    function setReportEmailStatus(msg, tone) {
+      if (!reportEmailStatus) return;
+      const base = 'text-xs ';
+      const color = tone === 'error' ? 'text-red-300' : (tone === 'ok' ? 'text-green-300' : 'text-slate-400');
+      reportEmailStatus.className = base + color;
+      setText(reportEmailStatus, msg);
+    }
+
+    function buildReportModel(structured) {
+      const s = structured || {};
+      return {
+        codesFound: Array.isArray(s.codesFound) ? s.codesFound : [],
+        header: s.header || {},
+        meta: s.meta || {},
+        transactions: Array.isArray(s.transactions) ? s.transactions : [],
+        version: s.version || 'unknown',
+      };
+    }
+
+    async function buildEncryptedReportLink(structured) {
+      const model = buildReportModel(structured);
+      const plaintext = new TextEncoder().encode(JSON.stringify(model));
+
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const key = await crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
+      const rawKey = new Uint8Array(await crypto.subtle.exportKey('raw', key));
+
+      const ciphertext = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext));
+
+      const k = toB64Url(rawKey);
+      const r = toB64Url(ciphertext);
+      const v = toB64Url(iv);
+
+      const base = window.location.origin + '/assets/report-preview.html';
+      const frag = '#v=1&k=' + encodeURIComponent(k) + '&iv=' + encodeURIComponent(v) + '&r=' + encodeURIComponent(r);
+      return base + frag;
+    }
+
+    function sanitizeEmail(v) {
+      return String(v || '').trim().toLowerCase();
+    }
+
+    async function emailReportLink() {
+      if (!state.tokenValid || !state.tokenId) {
+        setReportEmailStatus('Verify Token ID first.', 'error');
+        return;
+      }
+      if (!state.structured) {
+        setReportEmailStatus('Parse structured JSON first.', 'error');
+        return;
+      }
+
+      const email = sanitizeEmail(reportEmailInput && reportEmailInput.value);
+      if (!email || !email.includes('@')) {
+        setReportEmailStatus('Enter a valid email.', 'error');
+        return;
+      }
+
+      setButtonEnabled(reportEmailBtn, false);
+      setReportEmailStatus('Building secure link...', '');
+
+      try {
+        const reportUrl = await buildEncryptedReportLink(state.structured);
+        state.lastReportLink = reportUrl;
+
+        const body = {
+          email,
+          eventId: crypto.randomUUID(),
+          reportId: crypto.randomUUID(),
+          reportUrl,
+          tokenId: state.tokenId,
+        };
+
+        setReportEmailStatus('Sending email...', '');
+
+        const res = await fetch('https://api.transcript.taxmonitor.pro/forms/transcript/report-email', {
+          method: 'POST',
+          mode: 'cors',
+          credentials: 'omit',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+
+        if (!res.ok) {
+          const t = await res.text().catch(() => '');
+          throw new Error('Email endpoint failed (' + String(res.status) + '): ' + (t || res.statusText));
+        }
+
+        setReportEmailStatus('✓ Email sent. The link is in their inbox, not on our servers.', 'ok');
+      } catch (e) {
+        setReportEmailStatus(String(e && e.message ? e.message : e), 'error');
+      } finally {
+        updateControls();
+      }
     }
 
     async function extractTextFromPDF(file) {
@@ -943,6 +1084,12 @@
         { name: 'looksLikeDate10.bad', fn: () => looksLikeDate10('2025-12-31') === false },
         { name: 'looksLikeDate10.goodDash', fn: () => looksLikeDate10('12-31-2025') === true },
         { name: 'looksLikeDate10.goodSlash', fn: () => looksLikeDate10('12/31/2025') === true },
+        { name: 'b64url.roundtrip', fn: () => {
+          const bytes = new Uint8Array([0, 1, 2, 3, 250, 251, 252, 253, 254, 255]);
+          const enc = toB64Url(bytes);
+          const dec = fromB64Url(enc);
+          return dec.length === bytes.length && dec.every((b, i) => b === bytes[i]);
+        }},
       ];
 
       const failures = [];
@@ -982,6 +1129,7 @@
       const token = String(parserTokenInput && parserTokenInput.value ? parserTokenInput.value : '').trim();
 
       if (!token) {
+        state.tokenId = '';
         state.tokenValid = false;
         setParserAvailable('-');
         setTokenStatus('Please enter a token ID.', 'error');
@@ -989,6 +1137,7 @@
         return;
       }
 
+      state.tokenId = token;
       state.tokenValid = token.length >= 8;
       if (!state.tokenValid) {
         setParserAvailable('-');
@@ -999,6 +1148,7 @@
 
       setParserAvailable(150);
       setTokenStatus('✓ Token verified (local check). Upload a PDF to extract text.', 'ok');
+      if (reportEmailStatus) setText(reportEmailStatus, 'Ready after you parse JSON.');
       updateControls();
     }
 
@@ -1085,10 +1235,12 @@
         state.structured = structured;
         setText(jsonOutput, JSON.stringify(structured, null, 2));
         setTokenStatus('Parsed ' + structured.codesFound.length + ' unique codes.', 'ok');
+        setReportEmailStatus('Ready to email a secure link.', 'ok');
       } catch (e) {
         state.structured = null;
         setText(jsonOutput, '(parse failed)');
         setTokenStatus(String(e && e.message ? e.message : e), 'error');
+        setReportEmailStatus('Not ready.', '');
       } finally {
         updateControls();
       }
@@ -1154,6 +1306,13 @@
 
     miniReportClose.addEventListener('click', () => closeOverlay());
     miniReportOverlay.addEventListener('click', (e) => { if (e.target === miniReportOverlay) closeOverlay(); });
+
+    if (reportEmailBtn) {
+      reportEmailBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        emailReportLink();
+      });
+    }
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && !miniReportOverlay.classList.contains('hidden')) closeOverlay();
