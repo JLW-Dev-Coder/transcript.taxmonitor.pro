@@ -625,9 +625,10 @@
     }
 
     async function ensurePdfJs() {
+      // If pdfjsLib is already present, ensure workerSrc and move on.
       if (typeof window.pdfjsLib !== 'undefined') {
         if (!window.pdfjsLib.GlobalWorkerOptions || !window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
-          window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.js';
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = '/scripts/pdf.worker.min.js';
         }
         return;
       }
@@ -641,17 +642,29 @@
         document.head.appendChild(s);
       });
 
+      // NOTE: Your environment is blocking external CDNs. So we try local first.
+      // Put these files in your repo and ship them:
+      // - /scripts/pdf.min.js
+      // - /scripts/pdf.worker.min.js
+      // (You can also place them under /assets/; the loader tries both.)
       const candidates = [
+        '/assets/pdf.min.js',
+        '/scripts/pdf.min.js',
         'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js',
         'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.js',
         'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.min.js',
       ];
 
       let lastErr = null;
+      let loadedFrom = '';
+
       for (const src of candidates) {
         try {
           await loadScript(src);
-          if (typeof window.pdfjsLib !== 'undefined') break;
+          if (typeof window.pdfjsLib !== 'undefined') {
+            loadedFrom = src;
+            break;
+          }
         } catch (e) {
           lastErr = e;
         }
@@ -659,10 +672,27 @@
 
       if (typeof window.pdfjsLib === 'undefined') {
         const msg = lastErr && lastErr.message ? lastErr.message : 'PDF.js failed to load.';
-        throw new Error('PDF.js failed to load (pdfjsLib is undefined). ' + msg);
+        throw new Error(
+          'PDF.js failed to load (pdfjsLib is undefined). ' + msg +
+          ' | Fix: add /scripts/pdf.min.js and /scripts/pdf.worker.min.js (or /assets equivalents) to your site build output.'
+        );
       }
 
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.js';
+      const workerCandidates = [
+        '/assets/pdf.worker.min.js',
+        '/scripts/pdf.worker.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.worker.min.js',
+        'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.js',
+        'https://unpkg.com/pdfjs-dist@4.10.38/build/pdf.worker.min.js',
+      ];
+
+      // If we loaded from local, prefer local worker too.
+      const preferLocal = loadedFrom.startsWith('/');
+      const orderedWorkers = preferLocal
+        ? workerCandidates
+        : workerCandidates.slice(2).concat(workerCandidates.slice(0, 2));
+
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = orderedWorkers[0];
     }
 
     async function extractTextFromPDF(file) {
