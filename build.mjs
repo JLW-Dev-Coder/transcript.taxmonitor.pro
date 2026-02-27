@@ -24,7 +24,7 @@ const COPY_DIRS = [
 ].sort();
 
 // Copy these root files into dist/ (alphabetical)
-const COPY_FILES = ["_redirects"].sort();
+const COPY_FILES = ["_redirects", "sitemap.xml"].sort();
 
 async function exists(p) {
   try {
