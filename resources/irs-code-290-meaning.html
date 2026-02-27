@@ -113,7 +113,7 @@
    </nav>
    <header class="mt-6">
     <div class="inline-flex items-center gap-2 rounded-full tm-kbd px-4 py-2 text-xs text-slate-300">
-     <span class="font-semibold text-white">IRS Transcript Codes</span> <span class="text-slate-500">•</span> <span>For tax professionals</span>
+     <span class="font-semibold text-white">IRS Transcript Codes</span> <span class="text-slate-500">•</span> <span>Built for 750,000+ U.S. Tax Professionals</span>
     </div>
     <h1 class="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">IRS Code <span class="text-purple-300">290</span> Meaning</h1>
     <p class="mt-3 max-w-3xl text-base text-slate-300 tm-prose">IRS Code 290 typically means <strong>additional tax has been assessed or internally adjusted</strong>. This page explains when it shows up on transcripts, what it usually signals, and practical next steps. Want to see what clients get? Open the sample report, then run your own transcript when you're ready.</p>
@@ -322,6 +322,25 @@
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && isOpen()) closeModal();
       });
+    })();
+  </script>
+
+  <!-- Footer (standalone) -->
+  <footer class="tm-no-print px-6 py-3 mt-1 border-t border-slate-800/60 bg-slate-950/80 backdrop-blur">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+      <p class="text-slate-500 text-sm">© <span id="footer-year"></span> Transcript.Tax Monitor Pro. All rights reserved.</p>
+      <div class="flex items-center gap-6">
+        <a href="/legal/privacy.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Privacy Policy</a>
+        <a href="/legal/terms.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Terms of Service</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var y = String(new Date().getFullYear());
+      var el = document.getElementById('footer-year');
+      if (el) el.textContent = y;
     })();
   </script>
  </body>
