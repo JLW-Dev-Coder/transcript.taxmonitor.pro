@@ -1,0 +1,556 @@
+<!-- /resources/how-to-read-irs-transcripts.html -->
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <title>How to Read IRS Transcripts (For Tax Professionals) – Transcript.Tax Monitor Pro</title>
+  <meta name="description" content="Learn how to read IRS transcripts like a pro. Understand transcript types, key transaction codes, refund and collection signals, and how to turn transcript timelines into client-ready reports.">
+  <link rel="canonical" href="https://transcript.taxmonitor.pro/resources/how-to-read-irs-transcripts.html">
+
+  <meta property="og:title" content="How to Read IRS Transcripts (For Tax Professionals) – Transcript.Tax Monitor Pro">
+  <meta property="og:description" content="A practical, tax-pro-focused guide to reading IRS transcripts: transcript types, transaction code sequences, refund holds, offsets, and collection signals you can translate into a billable report.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://transcript.taxmonitor.pro/resources/how-to-read-irs-transcripts.html">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['DM Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    .tm-prose a { text-decoration: underline; text-underline-offset: 3px; }
+    .tm-card { background: rgba(2, 6, 23, 0.6); border: 1px solid rgba(148, 163, 184, 0.18); }
+    .tm-soft { background: rgba(2, 6, 23, 0.35); border: 1px solid rgba(148, 163, 184, 0.14); }
+    .tm-kbd { border: 1px solid rgba(148, 163, 184, 0.25); background: rgba(15, 23, 42, 0.65); }
+
+    .code-block {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      color: #94a3b8;
+    }
+    .code-label { color: #cbd5e1; font-weight: 600; margin-bottom: 0.5rem; }
+    .code-key { color: #a78bfa; }
+  </style>
+
+  <!-- FAQ Schema -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {
+        "@type":"Question",
+        "name":"What is the fastest way to understand an IRS transcript?",
+        "acceptedAnswer":{"@type":"Answer","text":"Start by confirming the transcript type and tax period, then scan transaction codes in date order. Identify the initial assessment (TC 150), credits/payments (e.g., TC 806, TC 670), refund outcomes (TC 846) or holds (e.g., TC 570, TC 810), and any collection or enforcement signals (e.g., TC 520, TC 582). Summarize only the codes that change outcomes or timelines."}
+      },
+      {
+        "@type":"Question",
+        "name":"Which transcript should I pull first for a new representation matter?",
+        "acceptedAnswer":{"@type":"Answer","text":"In most cases, start with an Account Transcript to get the transaction ledger, balances, and key codes quickly. Pull a Record of Account when you need return-line context plus the transaction history in one place, especially for amended returns, exam adjustments, or complicated credit activity."}
+      },
+      {
+        "@type":"Question",
+        "name":"Does a transcript show what notice the IRS sent?",
+        "acceptedAnswer":{"@type":"Answer","text":"Often, yes at a high level. TC 971 indicates a notice or significant action occurred, and the posting date helps you align the timeline. You may still need the actual notice copy (or IRS correspondence history) to confirm the exact letter/CP notice and required response."}
+      },
+      {
+        "@type":"Question",
+        "name":"What codes should I focus on when a refund is delayed?",
+        "acceptedAnswer":{"@type":"Answer","text":"Look for credits (TC 806, TC 766, TC 768), refund issuance (TC 846), refund holds/freezes (TC 570, TC 810), and reversal/return activity (TC 740, TC 841). Also check for offsets/transfers (TC 826, TC 820, TC 898) that can reduce or reroute the refund."}
+      },
+      {
+        "@type":"Question",
+        "name":"Is the date next to a code the same as the check/direct deposit date?",
+        "acceptedAnswer":{"@type":"Answer","text":"Not always. The posting date is the IRS ledger date for the transaction. For refunds, TC 846 is the key event, but the taxpayer’s actual receipt timing can vary by delivery method, bank processing, and any post-issuance return/reversal events."}
+      },
+      {
+        "@type":"Question",
+        "name":"How do I turn transcript review into a billable deliverable?",
+        "acceptedAnswer":{"@type":"Answer","text":"Use a consistent framework: identify the key phase (assessment, refund, collection), list only the codes that change outcome/timing, translate them into plain-English statements, and end with documented next steps. A standardized report format keeps your analysis consistent across staff and cases."}
+      },
+      {
+        "@type":"Question",
+        "name":"How often should I re-pull transcripts for an active case?",
+        "acceptedAnswer":{"@type":"Answer","text":"Use the case timeline as your driver: after submissions, after promised IRS action windows, and anytime a new notice or hold appears. For refund or exam situations, a scheduled cadence can help you catch movement (or stagnation) and document it for the client."}
+      },
+      {
+        "@type":"Question",
+        "name":"What is the purpose of the transcript codes index?",
+        "acceptedAnswer":{"@type":"Answer","text":"The index organizes code pages in one place so you can jump from a code you see on a transcript to a specific explanation, related codes, and next-step guidance. Use it as your starting point, then drill into the codes that drive the client’s outcome."}
+      }
+    ]
+  }
+  </script>
+
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
+ </head>
+
+ <body class="h-full w-full bg-slate-950 text-slate-100 font-sans">
+  <!-- Sticky Close Header -->
+  <header class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
+    <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+      <a href="https://transcript.taxmonitor.pro/" class="flex items-center gap-3 text-white" aria-label="Transcript.Tax Monitor Pro">
+        <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-slate-950 font-extrabold">TM</span>
+        <div class="leading-tight">
+          <div class="text-sm font-semibold">Transcript.Tax Monitor Pro</div>
+          <div class="text-[11px] text-white/60">How to read IRS transcripts</div>
+        </div>
+      </a>
+
+      <a href="https://transcript.taxmonitor.pro/" class="inline-flex items-center justify-center rounded-2xl border border-slate-800/60 bg-slate-950/60 p-4 text-white/80 backdrop-blur hover:text-white hover:scale-105 transition" aria-label="Close">
+        <svg class="h-[32px] w-[32px]" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6L6 18" />
+          <path d="M6 6l12 12" />
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <main class="mx-auto w-full max-w-5xl px-6 py-10">
+    <!-- Breadcrumb Navigation -->
+    <nav class="text-sm text-slate-400">
+      <ol class="flex flex-wrap items-center gap-2">
+        <li><a class="hover:text-white transition" href="/resources/transcript-codes.html">IRS Transcript Codes</a></li>
+        <li class="text-slate-600">/</li>
+        <li class="text-slate-200">How to read IRS transcripts</li>
+      </ol>
+    </nav>
+
+    <!-- Hero -->
+    <header class="mt-6">
+      <div class="inline-flex items-center gap-2 rounded-full tm-kbd px-4 py-2 text-xs text-slate-300">
+        <span class="font-semibold text-white">IRS Transcript Codes</span>
+        <span class="text-slate-500">•</span>
+        <span>Built for 750,000+ U.S. Tax Professionals</span>
+      </div>
+
+      <h1 class="mt-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
+        How to Read IRS Transcripts (For Tax Professionals)
+      </h1>
+
+      <p class="mt-3 max-w-3xl text-base text-slate-300 tm-prose">
+        IRS transcripts are not “helpful paperwork.” They’re the IRS’s ledger, written in code, with a timeline that determines what the IRS believes is true about a tax year.
+        This guide shows how to read transcripts efficiently, translate the codes into client-facing explanations, and document next steps in a way that holds up when a case gets messy.
+      </p>
+
+      <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <button type="button" data-open-sample class="inline-flex items-center justify-center rounded-xl bg-purple-500 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-purple-400 transition">View sample report</button>
+        <a href="/#how-it-works" class="inline-flex items-center justify-center rounded-xl tm-soft px-5 py-3 text-sm font-semibold text-white hover:border-slate-400/30 transition">Try the parser (requires credits)</a>
+      </div>
+
+      <div class="mt-6 tm-soft rounded-2xl p-5">
+        <div class="text-sm font-semibold text-white">Start here</div>
+        <p class="mt-1 text-sm text-slate-300 tm-prose">
+          Use the index hub to jump from a code on the transcript to a dedicated explanation:
+          <a href="/resources/transcript-codes.html" class="text-purple-300 hover:text-purple-200">All IRS transcript codes</a>.
+        </p>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <section class="mt-10 grid gap-6 lg:grid-cols-3">
+      <!-- Article -->
+      <article class="lg:col-span-2 tm-card rounded-2xl p-6 sm:p-8">
+        <div class="tm-prose">
+          <h2 class="text-xl font-bold text-white">What is an IRS transcript?</h2>
+          <p class="mt-3 text-sm text-slate-300">
+            An IRS transcript is the IRS’s internal account history for a taxpayer and a specific tax period. It’s not the return itself. It’s the ledger of what the IRS posted over time:
+            assessments, credits, payments, holds, notices, offsets, and collection status changes. If a notice is the IRS talking at a taxpayer, the transcript is the IRS writing in its own notebook.
+          </p>
+          <p class="mt-3 text-sm text-slate-300">
+            For tax professionals, transcripts are often more useful than the original filed return when you need to answer practical questions like:
+          </p>
+          <ul class="mt-3 list-disc pl-6 text-sm text-slate-300">
+            <li>Did the IRS actually process the return yet?</li>
+            <li>Why is the refund delayed, reduced, or rerouted?</li>
+            <li>Did the IRS assess additional tax, penalty, or interest?</li>
+            <li>Is the year moving toward collection enforcement or closure?</li>
+            <li>What happened after the IRS issued a notice?</li>
+          </ul>
+
+          <h2 class="mt-10 text-xl font-bold text-white">Why transcripts matter more than notices</h2>
+          <p class="mt-3 text-sm text-slate-300">
+            Notices are outcome-driven and simplified. They usually tell you what the IRS wants next, but they do not show the full sequence of events that produced the outcome.
+            Transcripts show the sequence. That sequence is where you find:
+          </p>
+          <ul class="mt-3 list-disc pl-6 text-sm text-slate-300">
+            <li>Which event triggered a hold, freeze, or offset.</li>
+            <li>Whether the IRS posted a reversal, transfer, or reissue later.</li>
+            <li>Whether collection activity is paused due to bankruptcy/litigation or other status.</li>
+            <li>Whether the IRS “believes” a filing requirement is open or closed for the year.</li>
+          </ul>
+
+          <h2 class="mt-10 text-xl font-bold text-white">Account transcript vs record of account</h2>
+          <p class="mt-3 text-sm text-slate-300">
+            Two transcript types show up constantly in representation and planning work. Your workflow is usually faster when you pick the right one first:
+          </p>
+
+          <h3 class="mt-6 text-lg font-semibold text-white">Account transcript</h3>
+          <p class="mt-2 text-sm text-slate-300">
+            This is the transaction ledger. It’s the best starting point for most matters because it’s focused: transaction codes, dates, amounts, and balance movement.
+            If you are trying to understand what the IRS thinks happened and when, this transcript is usually the one you want first.
+          </p>
+
+          <h3 class="mt-6 text-lg font-semibold text-white">Record of account</h3>
+          <p class="mt-2 text-sm text-slate-300">
+            This combines return information with the transaction ledger. It can be useful when you need return-line context alongside posted activity, but it’s also noisier.
+            If the issue involves an amended return, exam adjustment, or credit activity you need to reconcile back to the return, record of account can be worth the extra clutter.
+          </p>
+
+          <div class="mt-8 tm-soft rounded-2xl p-5">
+            <div class="text-sm font-semibold text-white">Practical rule of thumb</div>
+            <ul class="mt-2 list-disc pl-6 text-sm text-slate-300">
+              <li>Start with an Account Transcript to understand balances and key events quickly.</li>
+              <li>Add a Record of Account when you need to reconcile complex situations or return-line context.</li>
+            </ul>
+          </div>
+
+          <h2 class="mt-10 text-xl font-bold text-white">Understanding transaction codes</h2>
+          <p class="mt-3 text-sm text-slate-300">
+            Every meaningful line on an IRS transcript is anchored to a transaction code (TC). These are typically three-digit codes that represent a specific IRS action:
+            an assessment, a credit, a payment posting, a hold, a notice, a transfer, or a collection status change.
+          </p>
+          <p class="mt-3 text-sm text-slate-300">
+            What matters is not just the definition of a code in isolation. It’s the code <em>in sequence</em>, and the pattern formed by the codes around it.
+            A refund timeline that includes credits, a freeze, a release, and issuance is a very different story than a refund timeline that ends in offset or returned check activity.
+          </p>
+
+          <div class="mt-8">
+            <div class="code-label">Example: transcript events as a timeline</div>
+            <div class="code-block">
+              <div><span class="code-key">2025-02-10</span>  TC 150  Return filed / tax assessed</div>
+              <div><span class="code-key">2025-02-10</span>  TC 806  Withholding credit posted</div>
+              <div><span class="code-key">2025-02-15</span>  TC 766  Credit applied (refundable credit)</div>
+              <div><span class="code-key">2025-02-20</span>  TC 570  Additional account action pending (hold)</div>
+              <div><span class="code-key">2025-03-05</span>  TC 571  Additional account action completed (release)</div>
+              <div><span class="code-key">2025-03-10</span>  TC 846  Refund issued</div>
+            </div>
+            <p class="mt-3 text-sm text-slate-300">
+              This sequence gives you a client-ready narrative: return processed, credits posted, a temporary hold occurred, the hold resolved, and the refund issued.
+              Dedicated pages exist for each of these codes so you can translate them precisely:
+              <a href="/resources/irs-code-150-meaning.html" class="text-purple-300 hover:text-purple-200">IRS Code 150 Meaning</a>,
+              <a href="/resources/irs-code-806-meaning.html" class="text-purple-300 hover:text-purple-200">IRS Code 806 Meaning</a>,
+              <a href="/resources/irs-code-570-meaning.html" class="text-purple-300 hover:text-purple-200">IRS Code 570 Meaning</a>,
+              <a href="/resources/irs-code-571-meaning.html" class="text-purple-300 hover:text-purple-200">IRS Code 571 Meaning</a>,
+              and
+              <a href="/resources/irs-code-846-meaning.html" class="text-purple-300 hover:text-purple-200">IRS Code 846 Meaning</a>.
+            </p>
+          </div>
+
+          <h2 class="mt-10 text-xl font-bold text-white">How to scan a transcript in under five minutes</h2>
+          <p class="mt-3 text-sm text-slate-300">
+            The fastest professional scan is consistent. You are not “reading everything.” You are identifying the few codes that drive outcome and timeline.
+            A quick scan works best when you do it in the same order every time:
+          </p>
+          <ol class="mt-3 list-decimal pl-6 text-sm text-slate-300">
+            <li>Confirm the tax period and transcript type.</li>
+            <li>Locate the initial assessment and filing events (start with <a href="/resources/irs-code-150-meaning.html" class="text-purple-300 hover:text-purple-200">TC 150</a>).</li>
+            <li>Identify credits and payments that affect balance or refund math (e.g., <a href="/resources/irs-code-806-meaning.html" class="text-purple-300 hover:text-purple-200">TC 806</a>, <a href="/resources/irs-code-670-meaning.html" class="text-purple-300 hover:text-purple-200">TC 670</a>).</li>
+            <li>Check for holds, freezes, or pending actions that change timing (e.g., <a href="/resources/irs-code-570-meaning.html" class="text-purple-300 hover:text-purple-200">TC 570</a>, <a href="/resources/irs-code-810-meaning.html" class="text-purple-300 hover:text-purple-200">TC 810</a>).</li>
+            <li>Confirm the end state: refund issued, offset, enforcement action, closure, or ongoing review.</li>
+          </ol>
+
+          <h2 class="mt-10 text-xl font-bold text-white">Core code categories tax pros care about</h2>
+
+          <h3 class="mt-6 text-lg font-semibold text-white">Assessment and adjustment</h3>
+          <p class="mt-2 text-sm text-slate-300">
+            Start with the assessment layer. It tells you what the IRS believes the liability is, and whether it changed after processing:
+          </p>
+          <ul class="mt-3 list-disc pl-6 text-sm text-slate-300">
+            <li><a href="/resources/irs-code-150-meaning.html" class="text-purple-300 hover:text-purple-200">TC 150</a> sets the initial assessment.</li>
+            <li><a href="/resources/irs-code-290-meaning.html" class="text-purple-300 hover:text-purple-200">TC 290</a> often signals an additional assessment or adjustment (including $0 adjustments).</li>
+            <li><a href="/resources/irs-code-300-meaning.html" class="text-purple-300 hover:text-purple-200">TC 300</a> can indicate a deficiency assessment, commonly after exam-related activity.</li>
+            <li><a href="/resources/irs-code-971-meaning.html" class="text-purple-300 hover:text-purple-200">TC 971</a> marks that a notice or significant action posted, often tied to a change.</li>
+          </ul>
+
+          <h3 class="mt-6 text-lg font-semibold text-white">Refunds, credits, and offsets</h3>
+          <p class="mt-2 text-sm text-slate-300">
+            Refund outcomes are rarely “mysterious” once you map credits, holds, and transfers. The core questions:
+            what credits posted, whether a hold or freeze interrupted processing, whether an offset reduced the refund, and whether issuance actually happened.
+          </p>
+          <ul class="mt-3 list-disc pl-6 text-sm text-slate-300">
+            <li>Withholding: <a href="/resources/irs-code-806-meaning.html" class="text-purple-300 hover:text-purple-200">TC 806</a></li>
+            <li>Credits applied: <a href="/resources/irs-code-766-meaning.html" class="text-purple-300 hover:text-purple-200">TC 766</a> and <a href="/resources/irs-code-768-meaning.html" class="text-purple-300 hover:text-purple-200">TC 768</a></li>
+            <li>Refund freeze / release: <a href="/resources/irs-code-810-meaning.html" class="text-purple-300 hover:text-purple-200">TC 810</a> and <a href="/resources/irs-code-811-meaning.html" class="text-purple-300 hover:text-purple-200">TC 811</a></li>
+            <li>Transfers: <a href="/resources/irs-code-820-meaning.html" class="text-purple-300 hover:text-purple-200">TC 820</a> and <a href="/resources/irs-code-826-meaning.html" class="text-purple-300 hover:text-purple-200">TC 826</a></li>
+            <li>Refund issued: <a href="/resources/irs-code-846-meaning.html" class="text-purple-300 hover:text-purple-200">TC 846</a></li>
+            <li>Returned or cancelled activity: <a href="/resources/irs-code-740-meaning.html" class="text-purple-300 hover:text-purple-200">TC 740</a> and <a href="/resources/irs-code-841-meaning.html" class="text-purple-300 hover:text-purple-200">TC 841</a></li>
+            <li>Offset/intercept: <a href="/resources/irs-code-898-meaning.html" class="text-purple-300 hover:text-purple-200">TC 898</a></li>
+          </ul>
+
+          <h3 class="mt-6 text-lg font-semibold text-white">Collection and enforcement</h3>
+          <p class="mt-2 text-sm text-slate-300">
+            Collection signals are where transcripts become high-stakes. You’re looking for events that pause collection, escalate it, or close it.
+            These codes often change what you can reasonably tell the client about timeline and next steps.
+          </p>
+          <ul class="mt-3 list-disc pl-6 text-sm text-slate-300">
+            <li>Litigation/bankruptcy freeze: <a href="/resources/irs-code-520-meaning.html" class="text-purple-300 hover:text-purple-200">TC 520</a></li>
+            <li>Offer in compromise: <a href="/resources/irs-code-480-meaning.html" class="text-purple-300 hover:text-purple-200">TC 480</a> (pending) and <a href="/resources/irs-code-760-meaning.html" class="text-purple-300 hover:text-purple-200">TC 760</a> (accepted)</li>
+            <li>Bankruptcy status changes: <a href="/resources/irs-code-530-meaning.html" class="text-purple-300 hover:text-purple-200">TC 530</a>, <a href="/resources/irs-code-531-meaning.html" class="text-purple-300 hover:text-purple-200">TC 531</a>, <a href="/resources/irs-code-532-meaning.html" class="text-purple-300 hover:text-purple-200">TC 532</a>, <a href="/resources/irs-code-534-meaning.html" class="text-purple-300 hover:text-purple-200">TC 534</a>, <a href="/resources/irs-code-535-meaning.html" class="text-purple-300 hover:text-purple-200">TC 535</a></li>
+            <li>Innocent spouse consideration: <a href="/resources/irs-code-560-meaning.html" class="text-purple-300 hover:text-purple-200">TC 560</a></li>
+            <li>Notice of federal tax lien filed: <a href="/resources/irs-code-582-meaning.html" class="text-purple-300 hover:text-purple-200">TC 582</a></li>
+            <li>Non-filer / filing requirement status: <a href="/resources/irs-code-590-meaning.html" class="text-purple-300 hover:text-purple-200">TC 590</a> and <a href="/resources/irs-code-594-meaning.html" class="text-purple-300 hover:text-purple-200">TC 594</a></li>
+            <li>Return processed status: <a href="/resources/irs-code-597-meaning.html" class="text-purple-300 hover:text-purple-200">TC 597</a> and <a href="/resources/irs-code-599-meaning.html" class="text-purple-300 hover:text-purple-200">TC 599</a></li>
+            <li>Payments and reversals: <a href="/resources/irs-code-670-meaning.html" class="text-purple-300 hover:text-purple-200">TC 670</a> and <a href="/resources/irs-code-640-meaning.html" class="text-purple-300 hover:text-purple-200">TC 640</a></li>
+            <li>Interest events: <a href="/resources/irs-code-700-meaning.html" class="text-purple-300 hover:text-purple-200">TC 700</a> and <a href="/resources/irs-code-706-meaning.html" class="text-purple-300 hover:text-purple-200">TC 706</a></li>
+            <li>Currently not collectible: <a href="/resources/irs-code-900-meaning.html" class="text-purple-300 hover:text-purple-200">TC 900</a></li>
+          </ul>
+
+          <h2 class="mt-10 text-xl font-bold text-white">Building a client-ready transcript summary</h2>
+          <p class="mt-3 text-sm text-slate-300">
+            Most clients do not need to see every code. They need a stable narrative:
+            what happened, what it means, what the IRS will likely do next, and what you recommend doing.
+            A good summary reads like a timeline, not like a transcript dump.
+          </p>
+
+          <h3 class="mt-6 text-lg font-semibold text-white">A professional structure that works</h3>
+          <p class="mt-2 text-sm text-slate-300">
+            Use a consistent four-part structure. It stays understandable even when the transcript is ugly:
+          </p>
+          <ul class="mt-3 list-disc pl-6 text-sm text-slate-300">
+            <li><strong>What posted:</strong> the key codes that changed the outcome or timeline.</li>
+            <li><strong>What it means:</strong> plain-English interpretation tied to the client’s question.</li>
+            <li><strong>What happens next:</strong> the most likely next transcript events or IRS steps.</li>
+            <li><strong>What we recommend:</strong> documented actions, requests, and follow-ups.</li>
+          </ul>
+
+          <div class="mt-8 tm-soft rounded-2xl p-5">
+            <div class="text-sm font-semibold text-white">Make it billable</div>
+            <p class="mt-2 text-sm text-slate-300">
+              The “billable” part is the professionalism and repeatability: consistent categories, consistent explanations, and a deliverable you can attach to a consult.
+              If you want a preview of what that looks like, use the sample report button at the top of this page.
+            </p>
+          </div>
+
+          <h2 class="mt-10 text-xl font-bold text-white">Screenshot placement guidance (text-only)</h2>
+          <p class="mt-3 text-sm text-slate-300">
+            If you add screenshots later, keep them functional, not decorative. Use them to reduce time-to-understanding for a reader who is scanning:
+          </p>
+          <ul class="mt-3 list-disc pl-6 text-sm text-slate-300">
+            <li>One screenshot near the top showing where transaction codes appear on an Account Transcript (with a simple callout).</li>
+            <li>One screenshot in the “timeline” section showing a short sequence (assessment → hold → refund issued).</li>
+            <li>One screenshot in the “refund delayed” explanation highlighting freeze/hold codes.</li>
+          </ul>
+          <p class="mt-3 text-sm text-slate-300">
+            Do not introduce a new layout system for images. Use the existing card system and keep captions short and literal.
+          </p>
+
+          <h2 class="mt-12 text-xl font-bold text-white">Frequently asked questions</h2>
+          <div class="mt-4 space-y-4">
+            <details class="tm-soft rounded-xl p-4">
+              <summary class="cursor-pointer text-sm font-semibold text-white">What is the fastest way to understand an IRS transcript?</summary>
+              <p class="mt-2 text-sm text-slate-300">Start by confirming the transcript type and tax period, then scan transaction codes in date order. Identify the initial assessment (TC 150), credits/payments (e.g., TC 806, TC 670), refund outcomes (TC 846) or holds (e.g., TC 570, TC 810), and any collection or enforcement signals (e.g., TC 520, TC 582). Summarize only the codes that change outcomes or timelines.</p>
+            </details>
+
+            <details class="tm-soft rounded-xl p-4">
+              <summary class="cursor-pointer text-sm font-semibold text-white">Which transcript should I pull first for a new representation matter?</summary>
+              <p class="mt-2 text-sm text-slate-300">In most cases, start with an Account Transcript to get the transaction ledger, balances, and key codes quickly. Pull a Record of Account when you need return-line context plus the transaction history in one place, especially for amended returns, exam adjustments, or complicated credit activity.</p>
+            </details>
+
+            <details class="tm-soft rounded-xl p-4">
+              <summary class="cursor-pointer text-sm font-semibold text-white">Does a transcript show what notice the IRS sent?</summary>
+              <p class="mt-2 text-sm text-slate-300">Often, yes at a high level. TC 971 indicates a notice or significant action occurred, and the posting date helps you align the timeline. You may still need the actual notice copy (or IRS correspondence history) to confirm the exact letter/CP notice and required response.</p>
+            </details>
+
+            <details class="tm-soft rounded-xl p-4">
+              <summary class="cursor-pointer text-sm font-semibold text-white">What codes should I focus on when a refund is delayed?</summary>
+              <p class="mt-2 text-sm text-slate-300">Look for credits (TC 806, TC 766, TC 768), refund issuance (TC 846), refund holds/freezes (TC 570, TC 810), and reversal/return activity (TC 740, TC 841). Also check for offsets/transfers (TC 826, TC 820, TC 898) that can reduce or reroute the refund.</p>
+            </details>
+
+            <details class="tm-soft rounded-xl p-4">
+              <summary class="cursor-pointer text-sm font-semibold text-white">Is the date next to a code the same as the check/direct deposit date?</summary>
+              <p class="mt-2 text-sm text-slate-300">Not always. The posting date is the IRS ledger date for the transaction. For refunds, TC 846 is the key event, but the taxpayer’s actual receipt timing can vary by delivery method, bank processing, and any post-issuance return/reversal events.</p>
+            </details>
+
+            <details class="tm-soft rounded-xl p-4">
+              <summary class="cursor-pointer text-sm font-semibold text-white">How do I turn transcript review into a billable deliverable?</summary>
+              <p class="mt-2 text-sm text-slate-300">Use a consistent framework: identify the key phase (assessment, refund, collection), list only the codes that change outcome/timing, translate them into plain-English statements, and end with documented next steps. A standardized report format keeps your analysis consistent across staff and cases.</p>
+            </details>
+
+            <details class="tm-soft rounded-xl p-4">
+              <summary class="cursor-pointer text-sm font-semibold text-white">How often should I re-pull transcripts for an active case?</summary>
+              <p class="mt-2 text-sm text-slate-300">Use the case timeline as your driver: after submissions, after promised IRS action windows, and anytime a new notice or hold appears. For refund or exam situations, a scheduled cadence can help you catch movement (or stagnation) and document it for the client.</p>
+            </details>
+
+            <details class="tm-soft rounded-xl p-4">
+              <summary class="cursor-pointer text-sm font-semibold text-white">What is the purpose of the transcript codes index?</summary>
+              <p class="mt-2 text-sm text-slate-300">The index organizes code pages in one place so you can jump from a code on the transcript to a specific explanation, related codes, and next-step guidance. Use it as your starting point, then drill into the codes that drive the client’s outcome.</p>
+            </details>
+          </div>
+
+          <div class="mt-10 tm-soft rounded-2xl p-5">
+            <div class="text-sm font-semibold text-white">Next step</div>
+            <p class="mt-2 text-sm text-slate-300 tm-prose">
+              Jump to the index hub to browse codes by number:
+              <a href="/resources/transcript-codes.html" class="text-purple-300 hover:text-purple-200">All IRS transcript codes</a>.
+              When you’re ready to test the workflow, use:
+              <a href="/#how-it-works" class="text-purple-300 hover:text-purple-200">Try the parser (requires credits)</a>.
+            </p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Sidebar -->
+      <aside class="space-y-6">
+        <div class="tm-card rounded-2xl p-6">
+          <div class="text-sm font-semibold text-white">Make this billable</div>
+          <p class="mt-2 text-sm text-slate-300">Use a repeatable framework: key codes, timeline, outcome, next steps. Then hand the client a deliverable instead of a transcript dump.</p>
+          <div class="mt-4 flex flex-col gap-3">
+            <button type="button" data-open-sample class="inline-flex items-center justify-center rounded-xl bg-purple-500 px-5 py-3 text-sm font-semibold text-slate-950 hover:bg-purple-400 transition">View sample report</button>
+            <a href="/#how-it-works" class="inline-flex items-center justify-center rounded-xl tm-soft px-5 py-3 text-sm font-semibold text-white hover:border-slate-400/30 transition">Try the parser (requires credits)</a>
+          </div>
+        </div>
+
+        <div class="tm-card rounded-2xl p-6">
+          <div class="text-sm font-semibold text-white">Core resources</div>
+          <ul class="mt-3 space-y-2 text-sm text-slate-300 tm-prose">
+            <li><a href="/resources/transcript-codes.html" class="text-purple-300 hover:text-purple-200">All IRS transcript codes</a></li>
+            <li><a href="/resources/irs-code-150-meaning.html" class="text-purple-300 hover:text-purple-200">IRS Code 150 Meaning</a></li>
+            <li><a href="/resources/irs-code-570-meaning.html" class="text-purple-300 hover:text-purple-200">IRS Code 570 Meaning</a></li>
+            <li><a href="/resources/irs-code-846-meaning.html" class="text-purple-300 hover:text-purple-200">IRS Code 846 Meaning</a></li>
+            <li><a href="/resources/irs-code-971-meaning.html" class="text-purple-300 hover:text-purple-200">IRS Code 971 Meaning</a></li>
+          </ul>
+        </div>
+
+        <div class="tm-card rounded-2xl p-6">
+          <div class="text-sm font-semibold text-white">Common workflows</div>
+          <ul class="mt-3 space-y-2 text-sm text-slate-300">
+            <li>Refund delayed: credits → hold/freeze → release/issue/offset.</li>
+            <li>Balance change: assessment → adjustment → notice → payment or enforcement.</li>
+            <li>Collection status: pause events → enforcement events → closure events.</li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <!-- Standalone Footer (must match magnets/guide.html in your repo) -->
+  <footer class="border-t border-slate-800/60 bg-slate-950/80">
+    <div class="mx-auto max-w-7xl px-6 py-10">
+      <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-center gap-3">
+          <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-slate-950 font-extrabold">TM</span>
+          <div class="leading-tight">
+            <div class="text-sm font-semibold text-white">Transcript.Tax Monitor Pro</div>
+            <div class="text-[11px] text-white/60">Transcript parsing for tax professionals.</div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4 text-sm text-slate-300">
+          <a href="/legal/privacy.html" class="hover:text-white transition">Privacy</a>
+          <a href="/legal/terms.html" class="hover:text-white transition">Terms</a>
+          <a href="/#how-it-works" class="hover:text-white transition">Try the parser</a>
+        </div>
+      </div>
+
+      <div class="mt-6 text-xs text-slate-500">
+        <span>© <span id="footer-year"></span> Transcript.Tax Monitor Pro. All rights reserved.</span>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var y = document.getElementById('footer-year');
+        if (y) y.textContent = String(new Date().getFullYear());
+      })();
+    </script>
+  </footer>
+
+  <!-- Sample Report Modal (must match Code 150 exactly) -->
+  <div id="tmSampleReportModal" class="fixed inset-0 z-[999] hidden" aria-hidden="true">
+    <div id="tmSampleReportBackdrop" class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"></div>
+
+    <div class="relative z-10 flex min-h-full items-center justify-center p-4">
+      <div role="dialog" aria-modal="true" aria-labelledby="tmSampleReportTitle" class="w-full max-w-6xl overflow-hidden rounded-2xl border border-slate-800/60 bg-slate-950 shadow-2xl">
+        <div class="flex items-center justify-between gap-3 border-b border-slate-800/60 px-4 py-3 sm:px-6">
+          <div class="min-w-0">
+            <h2 id="tmSampleReportTitle" class="truncate text-sm font-semibold text-white">Sample transcript report</h2>
+            <p class="mt-0.5 text-xs text-slate-400">Preview the deliverable clients receive.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <a href="/assets/report-preview.html" target="_blank" rel="noopener" class="inline-flex items-center justify-center rounded-xl tm-soft px-3 py-2 text-xs font-semibold text-white hover:border-slate-400/30 transition">Open in new tab</a>
+            <button type="button" data-close-sample class="inline-flex items-center justify-center rounded-xl border border-slate-800/60 bg-slate-950/60 px-3 py-2 text-xs font-semibold text-white/80 hover:text-white transition">Close</button>
+          </div>
+        </div>
+
+        <div class="bg-slate-950">
+          <iframe title="Sample transcript report preview" src="/assets/report-preview.html" class="h-[78vh] w-full" loading="lazy"></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal wiring script (must match Code 150 exactly) -->
+  <script>
+    (function () {
+      var modal = document.getElementById('tmSampleReportModal');
+      var backdrop = document.getElementById('tmSampleReportBackdrop');
+
+      function isOpen() {
+        return modal && !modal.classList.contains('hidden');
+      }
+
+      function openModal() {
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.setAttribute('aria-hidden', 'false');
+        document.documentElement.classList.add('overflow-hidden');
+      }
+
+      function closeModal() {
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.setAttribute('aria-hidden', 'true');
+        document.documentElement.classList.remove('overflow-hidden');
+      }
+
+      document.addEventListener('click', function (e) {
+        var t = e.target;
+        if (!t) return;
+
+        var openBtn = t.closest && t.closest('[data-open-sample]');
+        if (openBtn) {
+          e.preventDefault();
+          openModal();
+          return;
+        }
+
+        var closeBtn = t.closest && t.closest('[data-close-sample]');
+        if (closeBtn) {
+          e.preventDefault();
+          closeModal();
+          return;
+        }
+      });
+
+      if (backdrop) backdrop.addEventListener('click', closeModal);
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && isOpen()) closeModal();
+      });
+    })();
+  </script>
+ </body>
+</html>
