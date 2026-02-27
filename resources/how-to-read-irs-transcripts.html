@@ -134,6 +134,95 @@
     }
 
     body { box-sizing: border-box; }
+
+    /* Final CTA Section (match index panel style) */
+    .final-cta-section {
+      margin-top: 5rem;
+      padding: 56px 24px;
+      background: transparent;
+    }
+
+    .final-cta-content {
+      max-width: 72rem;
+      margin: 0 auto;
+      text-align: center;
+      border-radius: 16px;
+      padding: 48px 24px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(1200px 220px at 50% 0%, rgba(167,139,250,0.28), transparent 60%),
+        linear-gradient(180deg, rgba(139,92,246,0.34) 0%, rgba(139,92,246,0.18) 45%, rgba(26,26,26,0.12) 100%);
+    }
+
+    .final-cta-content::after {
+      content: '';
+      position: absolute;
+      left: -10%;
+      right: -10%;
+      bottom: -70px;
+      height: 180px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.25);
+      filter: blur(26px);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .final-cta-content h2 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+
+    .final-cta-text {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.82);
+      margin: 0 auto 28px;
+      line-height: 1.8;
+      max-width: 52rem;
+    }
+
+    .final-cta-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .final-cta-section .btn-primary {
+      background: #ffffff;
+      color: #0b1220;
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-weight: 800;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    }
+
+    .final-cta-section .btn-primary:hover {
+      background: rgba(255,255,255,0.92);
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+    }
+
+    .final-cta-section .btn-secondary {
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.92);
+      border: 1px solid rgba(255,255,255,0.20);
+      border-radius: 12px;
+      padding: 14px 28px;
+      font-weight: 800;
+    }
+
+    .final-cta-section .btn-secondary:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.28);
+      transform: translateY(-2px);
+    }
   </style>
 
   <!-- SDKs (defer so DOM is ready, and we can guard init safely) -->
@@ -274,13 +363,18 @@
    </section>
 
    <!-- Final CTA Section -->
-   <section class="mt-20 px-6">
-    <div class="max-w-4xl mx-auto rounded-lg overflow-hidden">
-     <div class="bg-gradient-to-r from-purple-600/40 via-purple-500/30 to-purple-700/20 border border-purple-500/40 p-12 text-center">
-      <h2 class="text-3xl font-bold text-white mb-4">Turn transcripts into client-ready explanations in minutes.</h2>
-      <p class="text-slate-300 mb-8 max-w-xl mx-auto">Streamline your transcript analysis process with professional templates and automated code interpretation.</p>
-      <a href="/index.html#how-it-works" class="btn-primary text-lg inline-flex items-center justify-center">Get Started Today</a>
-     </div>
+   <section class="final-cta-section">
+    <div class="final-cta-content">
+      <h2>Turn transcripts into clear answers</h2>
+      <p class="final-cta-text">
+        Use this guide to interpret a transcript quickly, summarize findings clearly, and decide next steps.
+        When you need a clean client-ready deliverable, generate a transcript report in minutes.
+      </p>
+
+      <div class="final-cta-buttons">
+        <a href="/index.html#how-it-works" class="btn-primary">Start Generating Transcript Reports</a>
+        <a href="/resources/transcript-codes.html" class="btn-secondary">Browse Code Database</a>
+      </div>
     </div>
    </section>
 
