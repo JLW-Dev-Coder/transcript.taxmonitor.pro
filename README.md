@@ -711,9 +711,6 @@ TRANSCRIPT_RETURN_ORIGINS_JSON = "[\"https://transcript.taxmonitor.pro\"]"
 # Payloads (Stripe, Transcript Report, Cal Support)
 
 This section documents the inbound payload shapes the Worker must accept.
-* checkout.session.completed
-* payment_intent.succeeded
-* charge.succeeded
 
 ## Stripe (checkout.session.completed)
 
