@@ -6,6 +6,7 @@
 
 ## Table of Contents (Alphabetical)
 
+* [About Transcript.Tax Monitor Pro Is](#what-transcripttax-monitor-pro-is)
 * [Authentication Model](#authentication-model)
 * [ClickUp Projection Layer](#clickup-projection-layer)
 * [Contracts (Mutation Ingress Only)](#contracts-mutation-ingress-only)
@@ -25,12 +26,11 @@
 * [Stripe Payments (Payment Links + Confirmation Redirect)](#stripe-payments-payment-links--confirmation-redirect)
 * [Support Message Contract (v1)](#support-message-contract-v1)
 * [System Architecture](#system-architecture)
-* [What Transcript.Tax Monitor Pro Is](#what-transcripttax-monitor-pro-is)
 * [Worker Environment Variables](#worker-environment-variables)
 
 ---
 
-# What Transcript.Tax Monitor Pro Is
+# About Transcript.Tax Monitor Pro Is
 
 Transcript.Tax Monitor Pro is a **serverless CRM + delivery system for IRS transcript monitoring and structured report generation**.
 
