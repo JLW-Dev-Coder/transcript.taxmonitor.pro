@@ -407,18 +407,19 @@ ClickUp projection must be idempotent:
 ---
 ```
 {
-  "id": "901711473499",
+  "id": "901710909567",
   "name": "Accounts",
   "deleted": false,
   "orderindex": 0,
+  "content": "",
   "priority": null,
   "assignee": null,
-  "task_count": 1,
+  "task_count": 0,
   "due_date": null,
   "start_date": null,
   "folder": {
-    "id": "90177070460",
-    "name": "VA Starter Track",
+    "id": "90176523466",
+    "name": "Tax Monitor Pro",
     "hidden": false,
     "access": true
   },
@@ -427,57 +428,57 @@ ClickUp projection must be idempotent:
     "name": "Admin",
     "access": true
   },
-  "inbound_address": "a.t.901711473499.u-10505295.52a1190a-b1ef-4327-ad0d-4575859c3166@tasks.clickup.com",
+  "inbound_address": "a.t.901710909567.u-10505295.fde3b5ce-31ca-499e-b9a4-0df142a86785@tasks.clickup.com",
   "archived": false,
   "override_statuses": true,
   "statuses": [
     {
-      "id": "sc901711473499_ql3JDGwp",
+      "id": "sc901710909567_xIp7IGFz",
       "status": "lead",
       "orderindex": 0,
       "color": "#87909e",
       "type": "open",
-      "status_group": "subcat_901711473499"
+      "status_group": "subcat_901710909567"
     },
     {
-      "id": "sc901711473499_YGi7USAJ",
+      "id": "sc901710909567_28lOSeqB",
       "status": "active prospect",
       "orderindex": 1,
       "color": "#5f55ee",
       "type": "custom",
-      "status_group": "subcat_901711473499"
+      "status_group": "subcat_901710909567"
     },
     {
-      "id": "sc901711473499_paQXZWfu",
+      "id": "sc901710909567_HQFUVvsP",
       "status": "active client",
       "orderindex": 2,
       "color": "#30a46c",
       "type": "custom",
-      "status_group": "subcat_901711473499"
+      "status_group": "subcat_901710909567"
     },
     {
-      "id": "sc901711473499_PtMresA8",
+      "id": "sc901710909567_FQloihMJ",
       "status": "inactive prospect",
       "orderindex": 3,
       "color": "#f76808",
       "type": "done",
-      "status_group": "subcat_901711473499"
+      "status_group": "subcat_901710909567"
     },
     {
-      "id": "sc901711473499_P199BDW5",
+      "id": "sc901710909567_xkb7cJgK",
       "status": "inactive client",
       "orderindex": 4,
       "color": "#e5484d",
       "type": "done",
-      "status_group": "subcat_901711473499"
+      "status_group": "subcat_901710909567"
     },
     {
-      "id": "sc901711473499_2rFUlBQ6",
+      "id": "sc901710909567_3L7zz4ba",
       "status": "case closed",
       "orderindex": 5,
       "color": "#008844",
       "type": "closed",
-      "status_group": "subcat_901711473499"
+      "status_group": "subcat_901710909567"
     }
   ],
   "permission_level": "create"
@@ -487,20 +488,11 @@ ClickUp projection must be idempotent:
 {
   "fields": [
     {
-      "id": "059a571b-aa5d-41b4-ae12-3681b451b474",
-      "name": "Account Company Name",
-      "type": "short_text",
+      "id": "1d4be8be-b920-455a-9c32-68c93ae2954a",
+      "name": "Account Gaming Credits",
+      "type": "number",
       "type_config": {},
-      "date_created": "1772037874392",
-      "hide_from_guests": false,
-      "required": false
-    },
-    {
-      "id": "1b9a762e-cf3e-47d7-8ae7-98efe9e11eab",
-      "name": "Stripe Payment Status",
-      "type": "short_text",
-      "type_config": {},
-      "date_created": "1770919480157",
+      "date_created": "1772567949897",
       "hide_from_guests": false,
       "required": false
     },
@@ -514,20 +506,69 @@ ClickUp projection must be idempotent:
       "required": false
     },
     {
-      "id": "57e6c42b-a471-4316-92dc-23ce0f59d8b4",
-      "name": "Stripe Session ID",
-      "type": "short_text",
-      "type_config": {},
-      "date_created": "1770919466454",
+      "id": "4b22ab15-26f3-4f6f-98b5-7b4f5446e62d",
+      "name": "Account Order Task Link",
+      "type": "tasks",
+      "type_config": {
+        "fields": []
+      },
+      "date_created": "1770919091487",
       "hide_from_guests": false,
       "required": false
     },
     {
-      "id": "6fc65cba-9060-4d70-ab36-02b239dd4718",
-      "name": "Stripe Payment Intent ID",
-      "type": "short_text",
-      "type_config": {},
-      "date_created": "1772042380577",
+      "id": "94cd8fb3-4ee5-461f-8049-b111c9b8c375",
+      "name": "Account Orders Status",
+      "type": "drop_down",
+      "type_config": {
+        "sorting": "manual",
+        "new_drop_down": true,
+        "options": [
+          {
+            "id": "86793eda-9687-4374-9340-63fa930a28d2",
+            "name": "New / Open",
+            "color": "#3082B7",
+            "orderindex": 0
+          },
+          {
+            "id": "912497e5-98d8-40da-89a0-d23e72daf25e",
+            "name": "Blocked",
+            "color": "#bf55ec",
+            "orderindex": 1
+          },
+          {
+            "id": "1906114c-c0e4-4407-a916-a2688698f634",
+            "name": "In Progress",
+            "color": "#12a594",
+            "orderindex": 2
+          },
+          {
+            "id": "e3fb4fb0-afb4-4ff9-a356-b235fb28d067",
+            "name": "Needs Review",
+            "color": "#667684",
+            "orderindex": 3
+          },
+          {
+            "id": "7d7b1535-64c4-4ed7-9204-f059a5506cbd",
+            "name": "Waiting on Client",
+            "color": "#E65100",
+            "orderindex": 4
+          },
+          {
+            "id": "70449d6a-da67-4962-800d-d33e25a5f780",
+            "name": "Complete",
+            "color": "#f9d900",
+            "orderindex": 5
+          },
+          {
+            "id": "71ce100e-591b-4293-92ae-f360143b05e9",
+            "name": "Closed",
+            "color": "#bf55ec",
+            "orderindex": 6
+          }
+        ]
+      },
+      "date_created": "1771370603124",
       "hide_from_guests": false,
       "required": false
     },
@@ -548,6 +589,15 @@ ClickUp projection must be idempotent:
       "type": "email",
       "type_config": {},
       "date_created": "1770919006808",
+      "hide_from_guests": false,
+      "required": false
+    },
+    {
+      "id": "a348d629-fa05-45d8-a2dd-b909f78ddf49",
+      "name": "Account Last Name",
+      "type": "short_text",
+      "type_config": {},
+      "date_created": "1770918997021",
       "hide_from_guests": false,
       "required": false
     },
@@ -617,6 +667,97 @@ ClickUp projection must be idempotent:
       "required": false
     },
     {
+      "id": "d12d0194-4c14-4486-9720-18efc2f0c061",
+      "name": "Account Form(s) Submitted",
+      "type": "labels",
+      "type_config": {
+        "sorting": "manual",
+        "options": [
+          {
+            "id": "26f0d89e-9d3e-4dd1-abf1-2e3d4d1fca34",
+            "label": "Intake Submitted (Form 1)",
+            "color": "#e50000",
+            "orderindex": 0
+          },
+          {
+            "id": "a2325b22-c414-40da-89f0-5a9e5891f24f",
+            "label": "Offer Submitted (Form 2)",
+            "color": "#FF7FAB",
+            "orderindex": 1
+          },
+          {
+            "id": "2ac2badb-7993-4fb2-9a56-a6b727c76d75",
+            "label": "Agreement Submitted (Form 3)",
+            "color": "#667684",
+            "orderindex": 2
+          },
+          {
+            "id": "f22d82e3-f1f7-47c8-a396-73547d88e6a5",
+            "label": "Payment Submitted (Form 4)",
+            "color": "#bf55ec",
+            "orderindex": 3
+          },
+          {
+            "id": "a7384f13-ab52-4c6b-b600-e2a3a8cf814f",
+            "label": "Welcome Submitted (Form 5)",
+            "color": "#667684",
+            "orderindex": 4
+          },
+          {
+            "id": "cf6dde60-7566-462f-b298-1d44af637556",
+            "label": "Filing Status Submitted (Form 6)",
+            "color": "#7C4DFF",
+            "orderindex": 5
+          },
+          {
+            "id": "b65c2c26-4d4f-402c-8764-b1cebbd5a302",
+            "label": "Address Update Submitted (Form 7)",
+            "color": "#7C4DFF",
+            "orderindex": 6
+          },
+          {
+            "id": "50551c8b-c64d-4a63-add3-dbab188e9c8b",
+            "label": "2848 Submitted (Form 8)",
+            "color": "#FF7FAB",
+            "orderindex": 7
+          },
+          {
+            "id": "eed5c567-9a2a-4286-bf17-e97be540fd03",
+            "label": "Wet Signed 2848 Submitted (Form 9)",
+            "color": "#fff",
+            "orderindex": 8
+          },
+          {
+            "id": "6308153e-5e73-41d8-bd52-d5df697c3a93",
+            "label": "Compliance Records Submitted (Form 10)",
+            "color": "#f9d900",
+            "orderindex": 9
+          },
+          {
+            "id": "ed5f6252-98e0-452a-90de-2e4f75bdfcab",
+            "label": "Compliance Report Submitted (Form 11)",
+            "color": "#667684",
+            "orderindex": 10
+          },
+          {
+            "id": "2823cf90-9902-41e8-a3af-339718494b47",
+            "label": "Client Exit Survey Submitted (Form 12)",
+            "color": "#AF7E2E",
+            "orderindex": 11
+          },
+          {
+            "id": "c1a20aff-44c4-40fc-8558-b74ceba621cc",
+            "label": "Support Ticket (Form 13)",
+            "color": "#fff",
+            "orderindex": 12
+          }
+        ]
+      },
+      "date_created": "1771370552415",
+      "hide_from_guests": false,
+      "required": false
+    },
+    {
       "id": "e5f176ba-82c8-47d8-b3b1-0716d075f43f",
       "name": "Account ID",
       "type": "short_text",
@@ -626,11 +767,20 @@ ClickUp projection must be idempotent:
       "required": false
     },
     {
-      "id": "f8cb77f1-26b3-4788-83ed-2914bb608c11",
-      "name": "Stripe Receipt URL",
-      "type": "url",
+      "id": "f5c9f6da-c994-4733-a15f-59188b37f531",
+      "name": "Account First Name",
+      "type": "short_text",
       "type_config": {},
-      "date_created": "1772042441485",
+      "date_created": "1770918990431",
+      "hide_from_guests": false,
+      "required": false
+    },
+    {
+      "id": "f938260c-600d-405a-bee7-a8db5d09bf6d",
+      "name": "Account Transcript Credits",
+      "type": "number",
+      "type_config": {},
+      "date_created": "1772037894733",
       "hide_from_guests": false,
       "required": false
     }
@@ -639,10 +789,10 @@ ClickUp projection must be idempotent:
 ```
 ```
 {
-  "id": "901711478590",
+  "id": "901710818377",
   "name": "Support",
   "deleted": false,
-  "orderindex": 1,
+  "orderindex": 2,
   "content": "",
   "priority": null,
   "assignee": null,
@@ -650,8 +800,8 @@ ClickUp projection must be idempotent:
   "due_date": null,
   "start_date": null,
   "folder": {
-    "id": "90177070460",
-    "name": "VA Starter Track",
+    "id": "90176523466",
+    "name": "Tax Monitor Pro",
     "hidden": false,
     "access": true
   },
@@ -660,81 +810,81 @@ ClickUp projection must be idempotent:
     "name": "Admin",
     "access": true
   },
-  "inbound_address": "a.t.901711478590.u-10505295.0efe4f13-5134-457f-8106-3bb6cacfe01a@tasks.clickup.com",
+  "inbound_address": "a.t.901710818377.u-10505295.067b0f45-cd13-4f96-a904-de4d52fdeaf9@tasks.clickup.com",
   "archived": false,
   "override_statuses": true,
   "statuses": [
     {
-      "id": "sc901711478590_dn2dRFVb",
+      "id": "sc901710818377_dn2dRFVb",
       "status": "open / new",
       "orderindex": 0,
       "color": "#87909e",
       "type": "open",
-      "status_group": "subcat_901711478590"
+      "status_group": "subcat_901710818377"
     },
     {
-      "id": "sc901711478590_OKMm7y2k",
+      "id": "sc901710818377_OKMm7y2k",
       "status": "in progress",
       "orderindex": 1,
       "color": "#5f55ee",
       "type": "custom",
-      "status_group": "subcat_901711478590"
+      "status_group": "subcat_901710818377"
     },
     {
-      "id": "sc901711478590_gpKVHSl7",
+      "id": "sc901710818377_gpKVHSl7",
       "status": "waiting on client",
       "orderindex": 2,
       "color": "#4466ff",
       "type": "custom",
-      "status_group": "subcat_901711478590"
+      "status_group": "subcat_901710818377"
     },
     {
-      "id": "sc901711478590_HlAcH0UR",
+      "id": "sc901710818377_HlAcH0UR",
       "status": "blocked",
       "orderindex": 3,
       "color": "#1090e0",
       "type": "custom",
-      "status_group": "subcat_901711478590"
+      "status_group": "subcat_901710818377"
     },
     {
-      "id": "sc901711478590_fdQqQDwm",
+      "id": "sc901710818377_fdQqQDwm",
       "status": "in review",
       "orderindex": 4,
       "color": "#b660e0",
       "type": "custom",
-      "status_group": "subcat_901711478590"
+      "status_group": "subcat_901710818377"
     },
     {
-      "id": "sc901711478590_cExcoTWL",
+      "id": "sc901710818377_cExcoTWL",
       "status": "resolved",
       "orderindex": 5,
       "color": "#f8ae00",
       "type": "custom",
-      "status_group": "subcat_901711478590"
+      "status_group": "subcat_901710818377"
     },
     {
-      "id": "sc901711478590_B9XfYTKa",
+      "id": "sc901710818377_B9XfYTKa",
       "status": "client feedback",
       "orderindex": 6,
       "color": "#aa8d80",
       "type": "custom",
-      "status_group": "subcat_901711478590"
+      "status_group": "subcat_901710818377"
     },
     {
-      "id": "sc901711478590_eLZNX2kO",
+      "id": "sc901710818377_eLZNX2kO",
       "status": "complete",
       "orderindex": 7,
       "color": "#656f7d",
       "type": "done",
-      "status_group": "subcat_901711478590"
+      "status_group": "subcat_901710818377"
     },
     {
-      "id": "sc901711478590_jEEaBdaL",
+      "id": "sc901710818377_jEEaBdaL",
       "status": "Closed",
       "orderindex": 8,
       "color": "#008844",
       "type": "closed",
-      "status_group": "subcat_901711478590"
+      "status_group": "subcat_901710818377"
     }
   ],
   "permission_level": "create"
@@ -749,6 +899,15 @@ ClickUp projection must be idempotent:
       "type": "text",
       "type_config": {},
       "date_created": "1772135243246",
+      "hide_from_guests": false,
+      "required": false
+    },
+    {
+      "id": "423fda3b-f7c0-471e-aaa2-464d78db0a31",
+      "name": "Support Related Order ID",
+      "type": "short_text",
+      "type_config": {},
+      "date_created": "1770919707782",
       "hide_from_guests": false,
       "required": false
     },
