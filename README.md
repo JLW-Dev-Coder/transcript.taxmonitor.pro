@@ -949,10 +949,22 @@ ClickUp projection must be idempotent:
             "orderindex": 15
           },
           {
+            "id": "1e837d40-495d-4078-80d1-246c2a76e830",
+            "name": "Ticket - Gaming Token",
+            "color": "#aec0f5",
+            "orderindex": 16
+          },
+          {
+            "id": "9fa5592b-3b29-4ce8-84b8-052698ad026b",
+            "name": "Ticket - Transcript Token",
+            "color": "#96c7f2",
+            "orderindex": 17
+          },
+          {
             "id": "84c7bb75-1f12-48b2-82d5-6b4f76db62a7",
             "name": "Ticket - VA Landing Page Setup",
             "color": "#b6b6ff",
-            "orderindex": 16
+            "orderindex": 18
           }
         ]
       },
