@@ -549,6 +549,7 @@ async function handleCreateTranscriptCheckout(request, env) {
   try {
     const session = await stripeFetch(env, "POST", "/checkout/sessions", {
       mode: "payment",
+      allow_promotion_codes: "true",
       "line_items[0][price]": priceId,
       "line_items[0][quantity]": "1",
       cancel_url: `${returnOrigin}/index.html#pricing`,
