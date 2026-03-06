@@ -1,0 +1,14 @@
+name = "transcript-tax-monitor-pro-api"
+main = "src/index.js"
+compatibility_date = "2026-03-06"
+
+[observability.logs]
+enabled = true
+
+[[durable_objects.bindings]]
+name = "TOKEN_LEDGER"
+class_name = "TokenLedger"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["TokenLedger"]
