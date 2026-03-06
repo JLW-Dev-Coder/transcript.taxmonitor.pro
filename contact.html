@@ -4,992 +4,531 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Contact Support — Transcript.Tax Monitor Pro</title>
+    <title>Contact Support - Transcript.Tax Monitor Pro</title>
+    <meta name="description" content="Contact Transcript.Tax Monitor Pro support for help with transcript parsing, reports, credits, and product questions. Submit a ticket to get a Support ID and track updates." />
+
+    <!-- Favicon -->
+    <link rel="icon" href="/assets/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon" />
+
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script src="/_sdk/element_sdk.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;display=swap"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
       rel="stylesheet"
     />
-    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
-
-    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: [
-                "DM Sans",
-                "ui-sans-serif",
-                "system-ui",
-                "-apple-system",
-                "Segoe UI",
-                "Roboto",
-                "Helvetica",
-                "Arial",
-              ],
-            },
-          },
-        },
-      };
-    </script>
-
-    <script src="/_sdk/element_sdk.js"></script>
-    <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
 
     <style>
-      html,
-      body {
-        box-sizing: border-box;
-        height: 100%;
-      }
-      * {
-        font-family: "DM Sans", system-ui, sans-serif;
-      }
+      * { font-family: 'DM Sans', system-ui, sans-serif; }
+      body { box-sizing: border-box; }
 
-      .noise {
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' seed='2'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
-      }
-
-      .gradient-hero {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      /* Canonical hero grid + glow */
+      .hero-grid {
+        background-color: #0f2747;
+        background-image:
+          linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+        background-size: 40px 40px;
         position: relative;
         overflow: hidden;
       }
 
-      .gradient-hero::before {
-        content: "";
+      .hero-glow::before {
+        content: '';
         position: absolute;
-        top: -40%;
-        right: -10%;
-        width: 600px;
-        height: 600px;
-        background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, transparent 70%);
-        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 800px;
+        height: 800px;
+        background: radial-gradient(circle, rgba(245,158,11,0.28) 0%, rgba(251,191,36,0.16) 35%, rgba(15,39,71,0) 70%);
         pointer-events: none;
+        z-index: 0;
       }
 
-      .gradient-hero::after {
-        content: "";
-        position: absolute;
-        bottom: -20%;
-        left: -5%;
-        width: 500px;
-        height: 500px;
-        background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
-        border-radius: 50%;
-        pointer-events: none;
+      .hero-content { position: relative; z-index: 1; }
+
+      @keyframes slideUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+      .animate-slide-up { animation: slideUp 0.5s ease-out forwards; }
+
+      /* Inputs */
+      .input {
+        background: #ffffff;
+        border: 1px solid rgba(15, 39, 71, 0.12);
+        color: #2d3748;
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-size: 14px;
+        line-height: 1.25rem;
+        width: 100%;
+        outline: none;
+        transition: box-shadow 0.15s ease, border-color 0.15s ease;
       }
 
-      .glass {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+      .input:focus {
+        border-color: rgba(245, 158, 11, 0.55);
+        box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.12);
       }
 
-      .glass-secondary {
-        background: rgba(15, 23, 42, 0.7);
-        border: 1px solid rgba(168, 85, 247, 0.15);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-      }
-
-      .card-elevated {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(168, 85, 247, 0.1);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      .card-elevated:hover {
-        border-color: rgba(168, 85, 247, 0.25);
-        box-shadow: 0 16px 48px rgba(168, 85, 247, 0.12);
-        transform: translateY(-4px);
-      }
-
-      .input-refined {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(168, 85, 247, 0.15);
-        color: white;
-        transition: all 0.3s ease;
-      }
-
-      select.input-refined {
+      /* Selects: keep blank until clicked (placeholder option has empty label) */
+      select.input {
         appearance: none;
         -webkit-appearance: none;
         -moz-appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23d8b4fe' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 14px center;
         background-size: 18px;
         padding-right: 44px;
         cursor: pointer;
-        transition: none;
       }
 
-      select.input-refined:hover {
-        border-color: rgba(168, 85, 247, 0.4);
-      }
+      select.input option { color: #0f2747; }
+      select.input option:disabled { color: #94a3b8; }
 
-      select.input-refined:focus {
-        border-color: rgba(168, 85, 247, 0.6);
-        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
-      }
-
-      select.input-refined option {
-        background: #1a1a2e;
-        color: #d1d5db;
-      }
-
-      select.input-refined option:hover {
-        background: #16213e;
-        color: #f3f4f6;
-      }
-
-      select.input-refined option:checked {
-        background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
-        color: white;
-      }
-
-      .input-refined::placeholder {
-        color: rgba(255, 255, 255, 0.4);
-      }
-
-      .input-refined:focus {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(168, 85, 247, 0.5);
-        box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.1);
-        outline: none;
-      }
-
-      .button-primary {
-        background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
-        color: white;
-        font-weight: 600;
-        box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
-        transition: all 0.3s ease;
-        border: none;
-        cursor: pointer;
-      }
-
-      .button-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(168, 85, 247, 0.4);
-      }
-
-      .button-primary:active {
-        transform: translateY(0);
-      }
-
-      .button-secondary {
-        background: transparent;
-        border: 1.5px solid rgba(168, 85, 247, 0.3);
-        color: white;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        cursor: pointer;
-      }
-
-      .button-secondary:hover {
-        border-color: rgba(168, 85, 247, 0.6);
-        background: rgba(168, 85, 247, 0.08);
-        transform: translateY(-2px);
-      }
-
-      .section-title {
-        font-size: 28px;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        color: white;
-      }
-
-      .status-box {
-        border-radius: 12px;
-        border: 1px solid rgba(168, 85, 247, 0.2);
-        background: rgba(168, 85, 247, 0.08);
-        padding: 14px 16px;
+      .status {
+        border-radius: 14px;
+        border: 1px solid rgba(2, 6, 23, 0.08);
+        background: #f8fafc;
+        padding: 12px 14px;
         font-size: 13px;
-        line-height: 1.5;
-        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.25rem;
       }
 
-      .status-success {
-        border-color: rgba(34, 197, 94, 0.3);
-        background: rgba(34, 197, 94, 0.1);
-        color: rgb(134, 239, 172);
+      .status-error { border-color: rgba(239, 68, 68, 0.25); background: rgba(239, 68, 68, 0.06); color: rgb(153, 27, 27); }
+      .status-info { border-color: rgba(245, 158, 11, 0.24); background: rgba(245, 158, 11, 0.08); color: rgb(146, 64, 14); }
+      .status-success { border-color: rgba(16, 185, 129, 0.25); background: rgba(16, 185, 129, 0.08); color: rgb(6, 95, 70); }
+
+      /* Dark-hero readability: lookup status sits on a dark background */
+      .hero-grid .status {
+        border-color: rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.10);
+        color: rgba(255, 255, 255, 0.92);
       }
 
-      .status-error {
-        border-color: rgba(239, 68, 68, 0.3);
-        background: rgba(239, 68, 68, 0.1);
-        color: rgb(252, 165, 165);
+      .hero-grid .status-error {
+        border-color: rgba(239, 68, 68, 0.55);
+        background: rgba(239, 68, 68, 0.22);
+        color: rgba(255, 255, 255, 0.95);
       }
 
-      .status-info {
-        border-color: rgba(168, 85, 247, 0.3);
-        background: rgba(168, 85, 247, 0.1);
-        color: rgb(217, 191, 255);
-      }
-
-      @keyframes slideUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-
-      .animate-in {
-        animation: slideUp 0.6s ease-out forwards;
-      }
-
-      .animate-fade {
-        animation: fadeIn 0.4s ease-out;
-      }
-
-      .delay-100 {
-        animation-delay: 100ms;
-      }
-      .delay-200 {
-        animation-delay: 200ms;
-      }
-      .delay-300 {
-        animation-delay: 300ms;
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        .animate-in,
-        .animate-fade {
-          animation: none;
-          opacity: 1;
-          transform: none;
-        }
-      }
-
-      .feature-icon {
-        width: 48px;
-        height: 48px;
-        background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(59, 130, 246, 0.1));
-        border: 1px solid rgba(168, 85, 247, 0.2);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #d8b4fe;
-      }
-
-      .form-section {
-        padding-bottom: 32px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      }
-
-      .form-section:last-child {
-        border-bottom: none;
-      }
-
-      .form-section-title {
-        font-size: 13px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: rgba(255, 255, 255, 0.9);
-        margin-bottom: 8px;
-      }
-
-      .form-section-subtitle {
-        font-size: 12px;
-        color: rgba(255, 255, 255, 0.5);
-        margin-bottom: 16px;
-      }
-
-      /* FAQ (styled details/summary) */
-      .faq-card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(168, 85, 247, 0.12);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-      }
-
-      .faq-card[open] {
-        border-color: rgba(168, 85, 247, 0.25);
-        box-shadow: 0 10px 40px rgba(168, 85, 247, 0.1);
-      }
-
-      .faq-summary {
-        list-style: none;
-      }
-
-      .faq-summary::-webkit-details-marker {
-        display: none;
-      }
-
-      .faq-chevron {
-        transition: transform 0.2s ease;
-      }
-
-      details[open] .faq-chevron {
-        transform: rotate(180deg);
+      .hero-grid .status-error a {
+        color: rgba(255, 255, 255, 0.95);
+        text-decoration: underline;
       }
     </style>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              navy: '#0f2747',
+              charcoal: '#2d3748',
+              action: '#f59e0b',
+              gold: '#fbbf24',
+              warm: '#fbbf24'
+            }
+          }
+        }
+      };
+    </script>
   </head>
 
-  <body class="min-h-screen noise bg-slate-950 text-slate-300">
-    <div id="app" class="min-h-screen flex flex-col w-full">
+  <body class="h-full bg-white text-charcoal overflow-auto">
+    <div id="app" class="w-full min-h-screen flex flex-col">
       <!-- PARTIAL:header -->
 
-      <div class="gradient-hero min-h-screen flex flex-col relative">
-        <main class="flex-1 relative z-10 w-full">
-          <!-- Hero Header -->
-          <section class="max-w-7xl mx-auto px-6 py-20 relative z-10">
-            <div class="animate-in">
-              <div
-                class="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold mb-6 bg-purple-500/10 border border-purple-500/30 text-purple-200"
-              >
-                <span class="w-2 h-2 rounded-full bg-purple-400"></span>
-                Support
+      <!-- Hero -->
+      <section class="hero-grid hero-glow py-16 md:py-24 text-white">
+        <div class="max-w-6xl mx-auto px-4 hero-content">
+          <div class="grid lg:grid-cols-2 gap-10 items-center">
+            <div class="text-center lg:text-left">
+              <div class="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6 backdrop-blur">
+                <span class="w-2 h-2 rounded-full bg-gold"></span>
+                Transcript support
               </div>
-              <h1 class="text-5xl md:text-6xl font-bold tracking-tight text-white mt-2 leading-tight mb-4">
-                We're Here to Help
-              </h1>
-              <p class="text-lg text-white/70 max-w-2xl leading-relaxed">
-                Choose your preferred way to reach us. Whether you need immediate assistance or have a detailed
-                question, we'll get you sorted quickly.
+              <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-5">Contact Transcript Support</h1>
+              <p class="text-lg text-white/80 max-w-xl mx-auto lg:mx-0">
+                Submit a ticket for help with transcript parsing, report generation, credits, or account questions. You’ll get a Support ID to track progress.
               </p>
+
+              <div class="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <a href="#support-form" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-8 py-4 rounded-xl transition-all shadow-lg hover:shadow-xl" data-scroll>
+                  Create a ticket
+                </a>
+                <a href="/index.html#how-it-works" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-8 py-4 rounded-xl border border-white/20 transition-all">
+                  See How It Works
+                </a>
+              </div>
+
+              <p class="mt-6 text-white/70 text-sm">No passwords. No SSNs. No full transcript attachments in the message box unless requested.</p>
             </div>
-          </section>
 
-          <!-- Support Options Grid -->
-          <section class="max-w-7xl mx-auto px-6 pb-20 relative z-10">
-            <div class="grid gap-6 md:grid-cols-3 max-w-7xl mx-auto">
-              <!-- Schedule Call Card -->
-              <div class="card-elevated rounded-2xl p-8 animate-in delay-100 flex flex-col h-full">
-                <div class="feature-icon mb-6">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
+            <div class="animate-slide-up">
+              <div class="bg-white/10 border border-white/15 rounded-3xl p-6 md:p-8 backdrop-blur shadow-2xl">
+                <div class="flex items-center justify-between mb-5">
+                  <div class="inline-flex items-center gap-2 bg-white/10 text-white px-3 py-1.5 rounded-full text-xs font-semibold">
+                    <span class="w-2 h-2 rounded-full bg-gold"></span>
+                    Support lookup
+                  </div>
+                  <div class="text-white/70 text-sm">Status</div>
                 </div>
-                <h2 class="text-lg font-bold text-white mb-2">Schedule a Call</h2>
-                <p class="text-white/70 text-sm leading-relaxed mb-6 flex-1">
-                  Pick a time that works for you. Live support typically resolves issues in minutes, not days.
-                </p>
-                <button
-                  class="button-primary rounded-lg px-4 py-2.5 text-sm font-semibold w-full"
-                  data-cal-link="tax-monitor-pro/tax-monitor-transcript-support"
-                  data-cal-namespace="tax-monitor-transcript-support"
-                  data-cal-config='{"layout":"month_view","useSlotsViewOnSmallScreen":"true"}'
-                  type="button"
-                >
-                  Book a Time
-                </button>
-              </div>
 
-              <!-- Message Form Card -->
-              <div class="card-elevated rounded-2xl p-8 animate-in delay-200 flex flex-col h-full">
-                <div class="feature-icon mb-6">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                    />
-                  </svg>
-                </div>
-                <h2 class="text-lg font-bold text-white mb-2">Create a Ticket</h2>
-                <p class="text-white/70 text-sm leading-relaxed mb-6 flex-1">
-                  For detailed questions or non-urgent issues. We'll respond within 24 hours with a tracking ID.
-                </p>
-                <a
-                  href="#support-form-section"
-                  class="button-secondary rounded-lg px-4 py-2.5 text-sm font-semibold w-full text-center block"
-                  data-scroll
-                  >Go to Form</a
-                >
-              </div>
+                <p class="text-white/80 text-sm mb-4">Already have a Support ID? Check transcript support status here.</p>
 
-              <!-- FAQ Card -->
-              <div class="card-elevated rounded-2xl p-8 animate-in delay-300 flex flex-col h-full">
-                <div class="feature-icon mb-6">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                </div>
-                <h2 class="text-lg font-bold text-white mb-2">Browse FAQ</h2>
-                <p class="text-white/70 text-sm leading-relaxed mb-6 flex-1">
-                  Answers to common questions about parsing, billing, reports, and your account.
-                </p>
-                <a
-                  href="#faq"
-                  class="button-secondary rounded-lg px-4 py-2.5 text-sm font-semibold w-full text-center"
-                  data-scroll
-                  >View FAQ</a
-                >
-              </div>
-            </div>
-          </section>
-
-          <!-- Support Form Section -->
-          <section
-            id="support-form-section"
-            class="max-w-7xl mx-auto px-6 pb-20 relative z-10 scroll-mt-[220px]"
-          >
-            <div class="animate-in max-w-3xl mx-auto">
-              <!-- Form Header -->
-              <div class="mb-12">
-                <h2 class="section-title mb-3">Create a Support Ticket</h2>
-                <p class="text-white/70">We'll respond within 24 hours with your Support ID and next steps.</p>
-              </div>
-
-              <!-- Quick Lookup -->
-              <div class="mb-10 p-6 rounded-xl bg-purple-500/5 border border-purple-500/15">
-                <p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-4">Already have a support ID?</p>
                 <div class="flex flex-col sm:flex-row gap-3">
-                  <input
-                    id="support-id-lookup"
-                    type="text"
-                    placeholder="Enter your Support ID"
-                    class="input-refined flex-1 rounded-lg px-4 py-2.5 text-sm"
-                    autocomplete="off"
-                  />
-                  <button
-                    id="support-id-lookup-btn"
-                    type="button"
-                    class="button-secondary rounded-lg px-6 py-2.5 text-sm font-semibold text-center whitespace-nowrap"
-                  >
-                    Check Status
+                  <input id="support-id-lookup" type="text" class="input" placeholder="Support ID" autocomplete="off" />
+                  <button id="support-id-lookup-btn" type="button" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-5 py-3 rounded-xl border border-white/20 transition-all whitespace-nowrap">
+                    Check status
                   </button>
                 </div>
-                <div id="support-lookup-status" class="hidden status-box status-info mt-4" aria-live="polite"></div>
+                <div id="support-lookup-status" class="hidden status status-info mt-4" aria-live="polite"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Form -->
+      <section id="support-form" class="py-16 md:py-24 bg-slate-50 scroll-mt-[220px]">
+        <div class="max-w-3xl mx-auto px-4">
+          <div class="text-center mb-10">
+            <span class="inline-flex items-center gap-2 bg-amber-500/10 text-amber-600 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+              Create a ticket
+            </span>
+            <h2 class="text-3xl md:text-4xl font-bold text-navy">Tell us what’s happening with the transcript</h2>
+            <p class="text-gray-600 mt-3">We’ll reply by email and include a Support ID for tracking.</p>
+          </div>
+
+          <form id="support-form-el" class="bg-white rounded-3xl shadow-xl p-6 md:p-8 border border-gray-100" novalidate>
+            <input type="hidden" id="eventId" name="eventId" />
+            <input type="hidden" id="sessionToken" name="sessionToken" />
+            <input type="hidden" id="utm_source" name="utm_source" />
+            <input type="hidden" id="utm_medium" name="utm_medium" />
+            <input type="hidden" id="utm_campaign" name="utm_campaign" />
+            <input type="hidden" id="utm_term" name="utm_term" />
+            <input type="hidden" id="utm_content" name="utm_content" />
+
+            <div class="grid md:grid-cols-2 gap-5">
+              <div>
+                <label for="name" class="text-xs font-semibold text-navy uppercase tracking-wide block mb-2">Name *</label>
+                <input id="name" name="name" class="input" placeholder="Your name" required />
+              </div>
+              <div>
+                <label for="email" class="text-xs font-semibold text-navy uppercase tracking-wide block mb-2">Email *</label>
+                <input id="email" name="email" class="input" placeholder="you@email.com" type="email" required />
               </div>
             </div>
 
-            <!-- Main Form -->
-            <form id="support-form" class="space-y-0 max-w-3xl mx-auto" novalidate>
-              <input type="hidden" id="eventId" name="eventId" />
-              <input type="hidden" id="sessionToken" name="sessionToken" />
-              <input type="hidden" id="utm_source" name="utm_source" />
-              <input type="hidden" id="utm_medium" name="utm_medium" />
-              <input type="hidden" id="utm_campaign" name="utm_campaign" />
-              <input type="hidden" id="utm_term" name="utm_term" />
-              <input type="hidden" id="utm_content" name="utm_content" />
-
-              <!-- Section 1: Your Info -->
-              <div class="form-section">
-                <h3 class="form-section-title">Your Information</h3>
-                <p class="form-section-subtitle">So we know who to follow up with</p>
-                <div class="grid gap-5 md:grid-cols-2">
-                  <div>
-                    <label
-                      class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2"
-                      for="name"
-                      >Name *</label
-                    >
-                    <input
-                      id="name"
-                      name="name"
-                      required
-                      class="input-refined w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-white/30"
-                      placeholder="Your name"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2"
-                      for="email"
-                      >Email *</label
-                    >
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      class="input-refined w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-white/30"
-                      placeholder="your@email.com"
-                    />
-                  </div>
-                </div>
+            <div class="mt-6 grid md:grid-cols-2 gap-5">
+              <div>
+                <label for="category" class="text-xs font-semibold text-navy uppercase tracking-wide block mb-2">Category *</label>
+                <select id="category" name="category" class="input" required>
+                  <option value="" selected disabled hidden></option>
+                  <option value="Access / Portal">Access / Portal</option>
+                  <option value="Account / Reports / Monitoring">Account / Reports / Monitoring</option>
+                  <option value="Billing / Credits">Billing / Credits</option>
+                  <option value="General">General</option>
+                  <option value="Other">Other</option>
+                  <option value="Parsing">Parsing</option>
+                  <option value="Transcript Report">Transcript Report</option>
+                </select>
               </div>
-
-              <!-- Section 2: Issue Details -->
-              <div class="form-section">
-                <h3 class="form-section-title">What's the Issue?</h3>
-                <p class="form-section-subtitle">Help us route your request to the right team</p>
-                <div class="grid gap-5 md:grid-cols-2 mb-5">
-                  <div>
-                    <label
-                      class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2"
-                      for="category"
-                      >Category *</label
-                    >
-                    <select id="category" name="category" required class="input-refined w-full rounded-lg px-4 py-2.5 text-sm">
-                      <option value="">Select a category</option>
-                      <option value="Access / Portal">Access / Portal</option>
-                      <option value="Account / Reports / Monitoring">Account / Reports / Monitoring</option>
-                      <option value="Billing / Credits">Billing / Credits</option>
-                      <option value="General">General</option>
-                      <option value="Other">Other</option>
-                      <option value="Parsing">Parsing</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label
-                      class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2"
-                      for="issueType"
-                      >Issue Type *</label
-                    >
-                    <select id="issueType" name="issueType" required class="input-refined w-full rounded-lg px-4 py-2.5 text-sm">
-                      <option value="">Select an issue type</option>
-                      <option value="Account">Account</option>
-                      <option value="Billing">Billing</option>
-                      <option value="Credits">Credits</option>
-                      <option value="Other">Other</option>
-                      <option value="Parsing">Parsing</option>
-                      <option value="Report">Report</option>
-                      <option value="Token">Token</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="grid gap-5 md:grid-cols-2">
-                  <div>
-                    <label
-                      class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2"
-                      for="urgency"
-                      >Urgency Level *</label
-                    >
-                    <select id="urgency" name="urgency" required class="input-refined w-full rounded-lg px-4 py-2.5 text-sm">
-                      <option value="">Select urgency</option>
-                      <option value="Normal">Normal</option>
-                      <option value="Time-sensitive (deadline)">Time-sensitive (deadline)</option>
-                      <option value="Urgent (service blocked)">Urgent (service blocked)</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label
-                      class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2"
-                      for="priority"
-                      >Priority *</label
-                    >
-                    <select id="priority" name="priority" required class="input-refined w-full rounded-lg px-4 py-2.5 text-sm">
-                      <option value="">Select priority</option>
-                      <option value="Critical">Critical</option>
-                      <option value="High">High</option>
-                      <option value="Low">Low</option>
-                      <option value="Normal">Normal</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Section 3: Describe the Problem -->
-              <div class="form-section">
-                <h3 class="form-section-title">Describe Your Problem</h3>
-                <p class="form-section-subtitle">Give us enough detail to solve it quickly</p>
-                <div class="space-y-5">
-                  <div>
-                    <label
-                      class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2"
-                      for="subject"
-                      >Subject *</label
-                    >
-                    <input
-                      id="subject"
-                      name="subject"
-                      required
-                      class="input-refined w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-white/30"
-                      placeholder="e.g., I can't download my report"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2"
-                      for="message"
-                      >Message *</label
-                    >
-                    <textarea
-                      id="message"
-                      name="message"
-                      required
-                      rows="5"
-                      class="input-refined w-full rounded-lg px-4 py-2.5 text-sm resize-none placeholder:text-white/30"
-                      placeholder="Tell us what happened, what you expected, and any error messages you saw"
-                    ></textarea>
-                    <p class="mt-2 text-xs text-white/50 inline-flex items-center gap-2">
-                      <svg
-                        class="w-4 h-4 text-purple-200"
-                        aria-hidden="true"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        stroke-width="2.2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      >
-                        <path d="M9 18h6" />
-                        <path d="M10 22h4" />
-                        <path
-                          d="M12 2a7 7 0 0 1 4 12c-.6.5-1 1.2-1.1 2H9.1c-.1-.8-.5-1.5-1.1-2A7 7 0 0 1 12 2Z"
-                        />
-                        <path d="M12 10v3" />
-                      </svg>
-                      <span>Include exact error messages, steps to reproduce, and what you expected vs. what happened</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Section 4: Account Details (Optional) -->
-              <div class="form-section">
-                <h3 class="form-section-title">Account Information</h3>
-                <p class="form-section-subtitle">Optional but helps us find you faster</p>
-                <div class="grid gap-5 md:grid-cols-2">
-                  <div>
-                    <label
-                      class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2"
-                      for="tokenId"
-                      >Token ID</label
-                    >
-                    <input
-                      id="tokenId"
-                      name="tokenId"
-                      class="input-refined w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-white/30"
-                      placeholder="Your account token"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="text-xs font-semibold text-white/80 uppercase tracking-wide block mb-2"
-                      for="relatedOrderId"
-                      >Related ID</label
-                    >
-                    <input
-                      id="relatedOrderId"
-                      name="relatedOrderId"
-                      class="input-refined w-full rounded-lg px-4 py-2.5 text-sm placeholder:text-white/30"
-                      placeholder="Stripe ID, reference number, etc."
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Submit Button -->
-              <div class="pt-8 space-y-4">
-                <button id="submit-btn" type="submit" class="button-primary w-full rounded-lg px-5 py-3.5 text-base font-semibold">
-                  Submit Support Ticket
-                </button>
-                <p class="text-xs text-white/50 text-center">
-                  By submitting, you agree to our
-                  <a class="text-purple-300 hover:text-purple-200 transition" href="/legal/terms.html">Terms</a>
-                  and
-                  <a class="text-purple-300 hover:text-purple-200 transition" href="/legal/privacy.html">Privacy Policy</a>
-                </p>
-              </div>
-
-              <!-- Status Messages -->
-              <div id="form-status" class="hidden status-box mt-4" aria-live="polite"></div>
-
-              <!-- Success Confirmation -->
-              <div id="support-id-display" class="hidden mt-6 p-6 rounded-xl bg-green-500/10 border border-green-500/30">
-                <p class="text-xs text-white/50 font-semibold uppercase tracking-wide mb-2">Your Support ID</p>
-                <div class="text-3xl font-bold text-white font-mono mb-3" id="support-id"></div>
-                <p class="text-sm text-white/70">We've sent a confirmation email with next steps. Keep this ID handy for reference.</p>
-              </div>
-            </form>
-
-            <!-- FAQ Section -->
-            <div id="faq" class="mt-16 pt-20 scroll-mt-[220px] border-t border-white/10 max-w-3xl mx-auto">
-              <div class="mb-8">
-                <h2 class="section-title mb-3">FAQ</h2>
-                <p class="text-white/70">Quick answers to the most common questions.</p>
-              </div>
-
-              <div class="space-y-4">
-                <details class="faq-card rounded-xl p-5">
-                  <summary class="faq-summary flex items-center justify-between gap-4 cursor-pointer">
-                    <span class="text-sm font-semibold text-white">Do I need to upload my transcript to get help?</span>
-                    <svg class="faq-chevron w-5 h-5 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </summary>
-                  <p class="mt-3 text-sm text-white/70">No. For support, describe what happened and include any error messages. If you choose to use the parser, it runs locally in your browser.</p>
-                </details>
-
-                <details class="faq-card rounded-xl p-5">
-                  <summary class="faq-summary flex items-center justify-between gap-4 cursor-pointer">
-                    <span class="text-sm font-semibold text-white">Where do I find my Support ID?</span>
-                    <svg class="faq-chevron w-5 h-5 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </summary>
-                  <p class="mt-3 text-sm text-white/70">After you submit a ticket, we show your Support ID on this page and email it to you. Use the lookup box above to check status later.</p>
-                </details>
-
-                <details class="faq-card rounded-xl p-5">
-                  <summary class="faq-summary flex items-center justify-between gap-4 cursor-pointer">
-                    <span class="text-sm font-semibold text-white">What is your response time?</span>
-                    <svg class="faq-chevron w-5 h-5 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </summary>
-                  <p class="mt-3 text-sm text-white/70">For standard tickets, you'll hear back within 24 hours. For time-sensitive issues, booking a call is the fastest option.</p>
-                </details>
-
-                <details class="faq-card rounded-xl p-5">
-                  <summary class="faq-summary flex items-center justify-between gap-4 cursor-pointer">
-                    <span class="text-sm font-semibold text-white">What information should I include in my ticket?</span>
-                    <svg class="faq-chevron w-5 h-5 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                  </summary>
-                  <p class="mt-3 text-sm text-white/70">Exact error message, steps to reproduce, and your Token ID (if you have one). No passwords, full SSNs, or payment card details.</p>
-                </details>
+              <div>
+                <label for="issueType" class="text-xs font-semibold text-navy uppercase tracking-wide block mb-2">Issue Type *</label>
+                <select id="issueType" name="issueType" class="input" required>
+                  <option value="" selected disabled hidden></option>
+                  <option value="Account">Account</option>
+                  <option value="Billing">Billing</option>
+                  <option value="Credits">Credits</option>
+                  <option value="Other">Other</option>
+                  <option value="Parsing">Parsing</option>
+                  <option value="Report">Report</option>
+                  <option value="Token">Token</option>
+                  <option value="Transcript Code Question">Transcript Code Question</option>
+                </select>
               </div>
             </div>
 
-            <div class="mt-16 pt-12 border-t border-white/10 max-w-3xl mx-auto">
-              <div class="grid gap-5 md:grid-cols-3">
-                <div class="card-elevated rounded-xl p-5">
-                  <div class="text-xs font-semibold text-white/90 mb-3 uppercase tracking-wide">
-                    <span class="inline-flex items-center gap-2">
-                      <svg class="w-4 h-4 text-purple-200" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 12l2 2 4-4" />
-                        <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                      </svg>
-                      <span>Do Include</span>
-                    </span>
-                  </div>
-                  <ul class="space-y-2 text-xs text-white/70">
-                    <li>Exact error message</li>
-                    <li>Steps to reproduce</li>
-                    <li>Your Token ID</li>
-                    <li>Browser/device info</li>
-                  </ul>
-                </div>
-
-                <div class="card-elevated rounded-xl p-5">
-                  <div class="text-xs font-semibold text-white/90 mb-3 uppercase tracking-wide">
-                    <span class="inline-flex items-center gap-2">
-                      <svg class="w-4 h-4 text-purple-200" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M18 6 6 18" />
-                        <path d="M6 6l12 12" />
-                        <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                      </svg>
-                      <span>Don't Include</span>
-                    </span>
-                  </div>
-                  <ul class="space-y-2 text-xs text-white/70">
-                    <li>Full SSNs</li>
-                    <li>Full bank numbers</li>
-                    <li>Passwords</li>
-                    <li>Credit card info</li>
-                  </ul>
-                </div>
-
-                <div class="card-elevated rounded-xl p-5">
-                  <div class="text-xs font-semibold text-white/90 mb-3 uppercase tracking-wide">
-                    <span class="inline-flex items-center gap-2">
-                      <svg class="w-4 h-4 text-purple-200" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 6h16v12H4z" />
-                        <path d="m4 7 8 6 8-6" />
-                      </svg>
-                      <span>Direct Email</span>
-                    </span>
-                  </div>
-                  <p class="text-xs text-white/70 mb-2">
-                    <a class="text-purple-300 hover:text-purple-200 transition font-semibold" href="mailto:support@taxmonitor.pro"
-                      >support@taxmonitor.pro</a
-                    >
-                  </p>
-                  <p class="text-xs text-white/50">For general support inquiries, we respond within 24 hours.</p>
-                </div>
+            <div class="mt-6 grid md:grid-cols-2 gap-5">
+              <div>
+                <label for="priority" class="text-xs font-semibold text-navy uppercase tracking-wide block mb-2">Priority *</label>
+                <select id="priority" name="priority" class="input" required>
+                  <option value="" selected disabled hidden></option>
+                  <option value="Critical">Critical</option>
+                  <option value="High">High</option>
+                  <option value="Low">Low</option>
+                  <option value="Normal">Normal</option>
+                </select>
+              </div>
+              <div>
+                <label for="urgency" class="text-xs font-semibold text-navy uppercase tracking-wide block mb-2">Urgency *</label>
+                <select id="urgency" name="urgency" class="input" required>
+                  <option value="" selected disabled hidden></option>
+                  <option value="Normal">Normal</option>
+                  <option value="Time-sensitive (deadline)">Time-sensitive (deadline)</option>
+                  <option value="Urgent (service blocked)">Urgent (service blocked)</option>
+                </select>
               </div>
             </div>
-          </section>
-        </main>
 
+            <div class="mt-6">
+              <label for="subject" class="text-xs font-semibold text-navy uppercase tracking-wide block mb-2">Subject *</label>
+              <input id="subject" name="subject" class="input" placeholder="e.g., Client transcript will not parse" required />
+            </div>
+
+            <div class="mt-6">
+              <label for="message" class="text-xs font-semibold text-navy uppercase tracking-wide block mb-2">Message *</label>
+              <textarea id="message" name="message" rows="5" class="input" placeholder="What happened, what you expected, the transcript year or type, and any error message" required></textarea>
+              <p class="mt-2 text-xs text-gray-500">Include steps to reproduce, exact error text, and what outcome you expected. Don’t include sensitive info.</p>
+            </div>
+
+            <div class="mt-6 grid md:grid-cols-2 gap-5">
+              <div>
+                <label for="tokenId" class="text-xs font-semibold text-navy uppercase tracking-wide block mb-2">Token ID</label>
+                <input id="tokenId" name="tokenId" class="input" placeholder="Optional" />
+              </div>
+              <div>
+                <label for="relatedOrderId" class="text-xs font-semibold text-navy uppercase tracking-wide block mb-2">Related ID</label>
+                <input id="relatedOrderId" name="relatedOrderId" class="input" placeholder="Optional (credit purchase ID, Stripe ID, reference, etc.)" />
+              </div>
+            </div>
+
+            <div class="mt-8">
+              <button id="submit-btn" type="submit" class="bg-amber-500 hover:bg-amber-400 text-slate-950 px-8 py-4 rounded-xl font-semibold shadow-lg transition-all w-full">
+                Submit ticket
+              </button>
+              <p class="text-xs text-gray-500 text-center mt-4">
+                By submitting, you agree to our
+                <a class="text-amber-600 hover:underline" href="/legal/terms.html">Terms</a>
+                and
+                <a class="text-amber-600 hover:underline" href="/legal/privacy.html">Privacy Policy</a>.
+              </p>
+            </div>
+
+            <div id="form-status" class="hidden status mt-4" aria-live="polite"></div>
+
+            <div id="support-id-display" class="hidden mt-6 p-6 rounded-2xl bg-emerald-50 border border-emerald-100">
+              <p class="text-xs text-emerald-800 font-semibold uppercase tracking-wide mb-2">Your Support ID</p>
+              <div class="text-3xl font-bold text-navy font-mono mb-3" id="support-id"></div>
+              <p class="text-sm text-emerald-900/80">We’ve emailed confirmation. Keep this ID for transcript support status checks.</p>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- CTA -->
+      <section class="py-16 md:py-24 bg-gradient-to-br from-navy via-slate-800 to-navy text-white">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+          <div class="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-full text-sm font-semibold mb-6 backdrop-blur">
+            <svg class="w-4 h-4 text-gold" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            Transcript.Tax Monitor Pro • Fast, clear support
+          </div>
+          <h2 class="text-3xl md:text-5xl font-bold mb-6">Want answers before opening a ticket?</h2>
+          <p class="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl mx-auto">Many transcript workflow questions are solved faster by checking the product flow first. If the issue is still blocking you, send the ticket and we’ll handle it.</p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/index.html#how-it-works" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-10 py-4 rounded-xl text-lg transition-all shadow-lg hover:shadow-xl">See How It Works</a>
+            <a href="/index.html#pricing" class="bg-white/10 hover:bg-white/20 text-white font-semibold px-10 py-4 rounded-xl text-lg border border-white/20 transition-all">View Pricing</a>
+          </div>
+          <p class="text-white/60 text-sm mt-8">Credits available instantly • Support replies by email • Transcript-focused help</p>
+        </div>
+      </section>
+
+      <div class="mt-auto">
         <!-- PARTIAL:footer -->
       </div>
     </div>
 
     <script>
       (function () {
-        const API_ENDPOINT = "https://api.taxmonitor.pro/forms/support/message";
+        const API_BASE = 'https://tools-api.taxmonitor.pro';
+        const SUPPORT_POST = API_BASE + '/v1/help/tickets';
+        const SUPPORT_STATUS_GET = API_BASE + '/v1/help/status?ticket_id=';
 
-        // ===== tiny tests (run with ?runTests=1) =====
-        function assert(name, condition) {
-          if (!condition) {
-            console.error("test_failed", name);
-            throw new Error("test_failed:" + name);
+        function redirectToEntry() {
+          window.location.href = '/index.html';
+        }
+
+        // Support endpoints are PUBLIC. A 401 is likely a config bug (CORS, route) and should not bounce users.
+        function handleAuth(res) {
+          if (res && res.status === 401) {
+            return true;
           }
+          return false;
         }
 
-        function runTests() {
-          // Anchor targets exist
-          assert("faq_exists", !!document.getElementById("faq"));
-          assert("support_form_section_exists", !!document.getElementById("support-form-section"));
-
-          // Buttons exist
-          assert("lookup_btn_exists", !!document.getElementById("support-id-lookup-btn"));
-          assert("submit_btn_exists", !!document.getElementById("submit-btn"));
-
-          // Cal namespace bootstrap should exist after embed loads
-          assert("cal_fn_exists", typeof window.Cal === "function");
-
-          // Critical handlers exist
-          assert("support_form_exists", !!document.getElementById("support-form"));
-        }
-
-        // ===== UTILITY FUNCTIONS =====
         function getParam(name) {
-          try {
-            return new URLSearchParams(window.location.search).get(name) || "";
-          } catch (_) {
-            return "";
-          }
+          try { return new URLSearchParams(window.location.search).get(name) || ''; } catch (_) { return ''; }
         }
 
         function newEventId() {
           if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
-          return "evt_" + String(Date.now()) + "_" + Math.random().toString(16).slice(2);
+          return 'evt_' + String(Date.now()) + '_' + Math.random().toString(16).slice(2);
         }
 
         function setStatus(kind, text) {
-          var el = document.getElementById("form-status");
+          const el = document.getElementById('form-status');
           if (!el) return;
-          el.classList.remove("hidden");
-          el.classList.remove("status-success", "status-error", "status-info");
-          el.classList.add(kind);
-          el.textContent = String(text || "");
+          el.classList.remove('hidden', 'status-error', 'status-info', 'status-success');
+          el.classList.add('status', kind);
+          el.textContent = String(text || '');
+        }
+
+        function setLookupStatus(kind, text) {
+          const el = document.getElementById('support-lookup-status');
+          if (!el) return;
+          el.classList.remove('hidden', 'status-error', 'status-info', 'status-success');
+          el.classList.add('status', kind);
+          el.textContent = String(text || '');
         }
 
         function disable(btn) {
           if (!btn) return;
           btn.disabled = true;
-          btn.classList.add("opacity-50", "cursor-not-allowed");
+          btn.classList.add('opacity-60', 'cursor-not-allowed');
         }
 
         function enable(btn) {
           if (!btn) return;
           btn.disabled = false;
-          btn.classList.remove("opacity-50", "cursor-not-allowed");
-        }
-
-        function clearScrollLocks() {
-          try {
-            document.body.style.overflow = "";
-            document.documentElement.style.overflow = "";
-            document.body.classList.remove("overflow-hidden");
-          } catch (_) {}
+          btn.classList.remove('opacity-60', 'cursor-not-allowed');
         }
 
         function scrollToId(id) {
-          if (!id) return;
-          var el = document.getElementById(id);
+          const el = document.getElementById(id);
           if (!el) return;
-
-          clearScrollLocks();
-
-          // Keep this a bit generous so section titles don't tuck under the sticky header.
-          var offset = 200;
-          var top = el.getBoundingClientRect().top + window.pageYOffset - offset;
-          window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+          const offset = 200;
+          const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
+          window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
         }
 
-        // ===== LOOKUP FUNCTIONS =====
-        async function lookupSupportId() {
-          var input = document.getElementById("support-id-lookup");
-          var btn = document.getElementById("support-id-lookup-btn");
-          var box = document.getElementById("support-lookup-status");
+        function initAnchorNav() {
+          document.addEventListener('click', function (e) {
+            const a = e.target && e.target.closest ? e.target.closest('a') : null;
+            if (!a) return;
+            const href = String(a.getAttribute('href') || '');
+            if (!href || href[0] !== '#') return;
+            if (!a.hasAttribute('data-scroll')) return;
+            e.preventDefault();
+            const id = href.slice(1);
+            try { history.replaceState(null, '', href); } catch (_) {}
+            scrollToId(id);
+          });
 
-          function show(kind, text) {
-            if (!box) return;
-            box.classList.remove("hidden");
-            box.classList.remove("status-success", "status-error", "status-info");
-            box.classList.add(kind);
-            box.textContent = String(text || "");
+          if (window.location.hash) {
+            const id = window.location.hash.replace(/^#/, '');
+            if (id) setTimeout(function () { scrollToId(id); }, 0);
           }
 
-          var supportId = input && input.value ? String(input.value).trim() : "";
+          window.addEventListener('hashchange', function () {
+            const id = window.location.hash.replace(/^#/, '');
+            if (id) scrollToId(id);
+          });
+        }
+
+        function seedHiddenFields() {
+          const eventIdEl = document.getElementById('eventId');
+          if (eventIdEl) eventIdEl.value = newEventId();
+
+          const sessionTokenEl = document.getElementById('sessionToken');
+          if (sessionTokenEl) sessionTokenEl.value = getParam('sessionToken');
+
+          ['utm_campaign', 'utm_content', 'utm_medium', 'utm_source', 'utm_term'].forEach(function (k) {
+            const el = document.getElementById(k);
+            if (el) el.value = getParam(k);
+          });
+
+          const tokenParam = getParam('tokenId') || '';
+          const tokenInput = document.getElementById('tokenId');
+          if (tokenInput && tokenParam) tokenInput.value = tokenParam;
+
+          // Optional: prefill lookup from URL (?ticket_id= or ?supportId=)
+          const pref = getParam('ticket_id') || getParam('supportId') || getParam('support_id') || '';
+          const lookup = document.getElementById('support-id-lookup');
+          if (lookup && pref) lookup.value = pref;
+        }
+
+        function pickSupportId(obj) {
+          if (!obj || typeof obj !== 'object') return '';
+          const raw = obj.supportId || obj.support_id || obj.ticket_id || obj.ticketId || '';
+          return raw ? String(raw).trim() : '';
+        }
+
+        function formatIso(ts) {
+          if (!ts) return '';
+          const s = String(ts);
+          const d = new Date(s);
+          if (isNaN(d.getTime())) return s;
+          return d.toLocaleString();
+        }
+
+        async function lookupSupportId() {
+          const input = document.getElementById('support-id-lookup');
+          const btn = document.getElementById('support-id-lookup-btn');
+          const supportId = input && input.value ? String(input.value).trim() : '';
+
           if (!supportId) {
-            show("status-error", "Enter a Support ID to check status.");
+            setLookupStatus('status-error', 'Enter a Support ID to check status.');
             return;
           }
 
           disable(btn);
-          show("status-info", "Checking status...");
-
-          // Read model (no receipts, no mutations). Support ID passed as query param.
-          var url = "https://api.taxmonitor.pro/support/status?supportId=" + encodeURIComponent(supportId);
+          setLookupStatus('status-info', 'Checking status...');
 
           try {
-            var res = await fetch(url, { method: "GET" });
-            var json = null;
-            try {
-              json = await res.json();
-            } catch (_) {
-              json = null;
-            }
+            const res = await fetch(SUPPORT_STATUS_GET + encodeURIComponent(supportId), {
+              method: 'GET',
+              credentials: 'omit'
+            });
 
-            if (!res.ok) {
-              var msg = json && (json.error || json.message) ? String(json.error || json.message) : "Request failed (" + res.status + ")";
-              show("status-error", msg);
+            if (handleAuth(res)) {
+              setLookupStatus('status-error', 'Support status is temporarily unavailable (401).');
               enable(btn);
               return;
             }
 
-            var status = json && json.status ? String(json.status) : "";
-            var updatedAt = json && (json.updatedAt || json.updated_at) ? String(json.updatedAt || json.updated_at) : "";
-            var latestUpdate = json && (json.latestUpdate || json.latest_update) ? String(json.latestUpdate || json.latest_update) : "";
+            let json = null;
+            try { json = await res.json(); } catch (_) { json = null; }
 
-            var parts = [];
-            if (latestUpdate) parts.push(latestUpdate);
-            if (status) parts.push("Status: " + status);
-            if (updatedAt) parts.push("Updated: " + updatedAt);
-
-            if (parts.length) {
-              show("status-success", parts.join(" • "));
-            } else {
-              show("status-info", "Your request is being processed. Please check back later for more details.");
+            if (!res.ok) {
+              const msg = json && (json.error || json.message) ? String(json.error || json.message) : 'Request failed (' + res.status + ')';
+              setLookupStatus('status-error', msg);
+              enable(btn);
+              return;
             }
 
+            const status = json && json.status ? String(json.status) : '';
+            const updatedAt = json && (json.updatedAt || json.updated_at) ? String(json.updatedAt || json.updated_at) : '';
+            const latestUpdate = json && (json.latestUpdate || json.latest_update) ? String(json.latestUpdate || json.latest_update) : '';
+
+            const parts = [];
+            if (latestUpdate) parts.push(latestUpdate);
+            if (status) parts.push('Status: ' + status);
+            if (updatedAt) parts.push('Updated: ' + formatIso(updatedAt));
+
+            setLookupStatus('status-success', parts.length ? parts.join(' • ') : 'Your ticket is in progress. Please check back later.');
             enable(btn);
           } catch (_) {
-            show("status-error", "Network error. Please try again.");
+            setLookupStatus('status-error', 'Network error. Please try again.');
             enable(btn);
           }
         }
 
         function initLookupHandler() {
-          var input = document.getElementById("support-id-lookup");
-          var btn = document.getElementById("support-id-lookup-btn");
-          if (btn) btn.addEventListener("click", lookupSupportId);
+          const input = document.getElementById('support-id-lookup');
+          const btn = document.getElementById('support-id-lookup-btn');
 
+          if (btn) btn.addEventListener('click', lookupSupportId);
           if (input) {
-            input.addEventListener("keydown", function (e) {
-              if (e.key === "Enter") {
+            input.addEventListener('keydown', function (e) {
+              if (e.key === 'Enter') {
                 e.preventDefault();
                 lookupSupportId();
               }
@@ -997,232 +536,138 @@
           }
         }
 
-        // ===== ANCHOR NAV (fix cut-off titles + avoid scroll lock) =====
-        function initAnchorNav() {
-          document.addEventListener(
-            "click",
-            function (e) {
-              var a = e.target && e.target.closest ? e.target.closest("a") : null;
-              if (!a) return;
-
-              var href = String(a.getAttribute("href") || "");
-              if (!href) return;
-
-              // Only handle in-page anchors.
-              if (href[0] !== "#") return;
-
-              // Only handle anchors we own.
-              if (!a.hasAttribute("data-scroll")) return;
-
-              e.preventDefault();
-
-              var id = href.slice(1);
-              if (!id) return;
-
-              try {
-                history.replaceState(null, "", href);
-              } catch (_) {}
-
-              scrollToId(id);
-            },
-            false
-          );
-
-          // Landing with a hash should also offset.
-          if (window.location.hash) {
-            var id = window.location.hash.replace(/^#/, "");
-            if (id) setTimeout(function () { scrollToId(id); }, 0);
-          }
-
-          window.addEventListener("hashchange", function () {
-            var id = window.location.hash.replace(/^#/, "");
-            if (id) scrollToId(id);
-          });
-        }
-
-        // ===== FORM FUNCTIONS =====
-        function seedFormFields() {
-          var eventIdEl = document.getElementById("eventId");
-          if (eventIdEl) eventIdEl.value = newEventId();
-
-          var sessionTokenEl = document.getElementById("sessionToken");
-          if (sessionTokenEl) sessionTokenEl.value = getParam("sessionToken");
-
-          ["utm_campaign", "utm_content", "utm_medium", "utm_source", "utm_term"].forEach(function (k) {
-            var el = document.getElementById(k);
-            if (el) el.value = getParam(k);
-          });
-
-          var tokenParam = getParam("tokenId") || "";
-          var tokenInput = document.getElementById("tokenId");
-          if (tokenInput && tokenParam) tokenInput.value = tokenParam;
-        }
-
         function initFormHandler() {
-          var form = document.getElementById("support-form");
-          var btn = document.getElementById("submit-btn");
-
+          const form = document.getElementById('support-form-el');
+          const btn = document.getElementById('submit-btn');
           if (!form) return;
 
-          form.addEventListener("submit", async function (e) {
+          form.addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            var payload = {
-              category: (document.getElementById("category") || {}).value || "",
-              email: (document.getElementById("email") || {}).value || "",
-              eventId: (document.getElementById("eventId") || {}).value || "",
-              issueType: (document.getElementById("issueType") || {}).value || "",
-              message: (document.getElementById("message") || {}).value || "",
-              name: (document.getElementById("name") || {}).value || "",
-              priority: (document.getElementById("priority") || {}).value || "",
-              subject: (document.getElementById("subject") || {}).value || "",
-              urgency: (document.getElementById("urgency") || {}).value || "",
+            const payload = {
+              category: (document.getElementById('category') || {}).value || '',
+              email: (document.getElementById('email') || {}).value || '',
+              eventId: (document.getElementById('eventId') || {}).value || '',
+              issueType: (document.getElementById('issueType') || {}).value || '',
+              message: (document.getElementById('message') || {}).value || '',
+              name: (document.getElementById('name') || {}).value || '',
+              priority: (document.getElementById('priority') || {}).value || '',
+              subject: (document.getElementById('subject') || {}).value || '',
+              urgency: (document.getElementById('urgency') || {}).value || ''
             };
 
-            var sessionToken = (document.getElementById("sessionToken") || {}).value || "";
+            const sessionToken = (document.getElementById('sessionToken') || {}).value || '';
             if (sessionToken) payload.sessionToken = sessionToken;
 
-            var tokenId = (document.getElementById("tokenId") || {}).value || "";
+            const tokenId = (document.getElementById('tokenId') || {}).value || '';
             if (tokenId) payload.tokenId = tokenId;
 
-            var relatedOrderId = (document.getElementById("relatedOrderId") || {}).value || "";
+            const relatedOrderId = (document.getElementById('relatedOrderId') || {}).value || '';
             if (relatedOrderId) payload.relatedOrderId = relatedOrderId;
 
-            ["utm_campaign", "utm_content", "utm_medium", "utm_source", "utm_term"].forEach(function (k) {
-              var v = (document.getElementById(k) || {}).value || "";
+            ['utm_campaign', 'utm_content', 'utm_medium', 'utm_source', 'utm_term'].forEach(function (k) {
+              const v = (document.getElementById(k) || {}).value || '';
               if (v) payload[k] = v;
             });
 
-            // Validation
-            var missing = [];
-            if (!payload.category) missing.push("category");
-            if (!payload.email) missing.push("email");
-            if (!payload.eventId) missing.push("eventId");
-            if (!payload.issueType) missing.push("issueType");
-            if (!payload.message) missing.push("message");
-            if (!payload.name) missing.push("name");
-            if (!payload.priority) missing.push("priority");
-            if (!payload.subject) missing.push("subject");
-            if (!payload.urgency) missing.push("urgency");
+            const missing = [];
+            if (!payload.category) missing.push('category');
+            if (!payload.email) missing.push('email');
+            if (!payload.eventId) missing.push('eventId');
+            if (!payload.issueType) missing.push('issueType');
+            if (!payload.message) missing.push('message');
+            if (!payload.name) missing.push('name');
+            if (!payload.priority) missing.push('priority');
+            if (!payload.subject) missing.push('subject');
+            if (!payload.urgency) missing.push('urgency');
 
             if (missing.length) {
-              setStatus("status-error", "Please fill in all required fields.");
+              setStatus('status-error', 'Please fill in all required fields.');
               return;
             }
 
             disable(btn);
-            setStatus("status-info", "Submitting your ticket...");
+            setStatus('status-info', 'Submitting your ticket...');
 
             try {
-              var res = await fetch(API_ENDPOINT, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
+              const res = await fetch(SUPPORT_POST, {
+                method: 'POST',
+                credentials: 'omit',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
               });
 
-              var json = null;
-              try {
-                json = await res.json();
-              } catch (_) {
-                json = null;
-              }
-
-              if (!res.ok) {
-                var msg = json && (json.error || json.message) ? String(json.error || json.message) : "Request failed (" + res.status + ")";
-                setStatus("status-error", msg);
+              if (handleAuth(res)) {
+                setStatus('status-error', 'Support submission is temporarily unavailable (401).');
                 enable(btn);
                 return;
               }
 
-              var supportId = json && (json.supportId || json.support_id) ? String(json.supportId || json.support_id) : "";
+              let json = null;
+              try { json = await res.json(); } catch (_) { json = null; }
 
-              if (supportId) {
-                var sid = document.getElementById("support-id");
-                var display = document.getElementById("support-id-display");
-                var statusEl = document.getElementById("form-status");
-                if (sid) sid.textContent = supportId;
-                if (display) display.classList.remove("hidden");
-                if (statusEl) statusEl.classList.add("hidden");
+              if (!res.ok) {
+                const msg = json && (json.error || json.message) ? String(json.error || json.message) : 'Request failed (' + res.status + ')';
+                setStatus('status-error', msg);
+                enable(btn);
+                return;
               }
 
-              form.style.display = "none";
+              const supportId = pickSupportId(json);
+
+              if (supportId) {
+                const sid = document.getElementById('support-id');
+                const display = document.getElementById('support-id-display');
+                const statusEl = document.getElementById('form-status');
+                if (sid) sid.textContent = supportId;
+                if (display) display.classList.remove('hidden');
+                if (statusEl) statusEl.classList.add('hidden');
+
+                // Auto-fill lookup and update URL for easy sharing
+                const lookup = document.getElementById('support-id-lookup');
+                if (lookup) lookup.value = supportId;
+                try {
+                  const u = new URL(window.location.href);
+                  u.searchParams.set('ticket_id', supportId);
+                  history.replaceState(null, '', u.toString());
+                } catch (_) {}
+
+                // Fire an immediate status check so the user sees it working
+                lookupSupportId();
+              } else {
+                setStatus('status-success', 'Ticket submitted. Check your email for your Support ID.');
+              }
+
+              form.reset();
+              form.style.display = 'none';
               enable(btn);
 
-              var eventIdEl = document.getElementById("eventId");
+              const eventIdEl = document.getElementById('eventId');
               if (eventIdEl) eventIdEl.value = newEventId();
             } catch (_) {
-              setStatus("status-error", "Network error. Please try again.");
+              setStatus('status-error', 'Network error. Please try again.');
               enable(btn);
             }
           });
         }
 
-        // ===== INITIALIZATION =====
         function initAll() {
-          var url = new URL(window.location.href);
-          var run = String(url.searchParams.get("runTests") || "").trim().toLowerCase();
-          if (run === "1" || run === "true") runTests();
-
-          seedFormFields();
+          seedHiddenFields();
           initAnchorNav();
           initFormHandler();
           initLookupHandler();
+
+          // If URL includes a ticket id, auto-check
+          const pref = getParam('ticket_id') || getParam('supportId') || getParam('support_id') || '';
+          if (pref) lookupSupportId();
         }
 
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", initAll);
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', initAll);
         } else {
           initAll();
         }
       })();
     </script>
-
-    <!-- Cal element-click embed code begins -->
-    <script type="text/javascript">
-      (function (C, A, L) {
-        let p = function (a, ar) {
-          a.q.push(ar);
-        };
-        let d = C.document;
-        C.Cal =
-          C.Cal ||
-          function () {
-            let cal = C.Cal;
-            let ar = arguments;
-            if (!cal.loaded) {
-              cal.ns = {};
-              cal.q = cal.q || [];
-              d.head.appendChild(d.createElement("script")).src = A;
-              cal.loaded = true;
-            }
-            if (ar[0] === L) {
-              const api = function () {
-                p(api, arguments);
-              };
-              const namespace = ar[1];
-              api.q = api.q || [];
-              if (typeof namespace === "string") {
-                cal.ns[namespace] = cal.ns[namespace] || api;
-                p(cal.ns[namespace], ar);
-                p(cal, ["initNamespace", namespace]);
-              } else p(cal, ar);
-              return;
-            }
-            p(cal, ar);
-          };
-      })(window, "https://app.cal.com/embed/embed.js", "init");
-
-      Cal("init", "tax-monitor-transcript-support", { origin: "https://app.cal.com" });
-
-      Cal.ns["tax-monitor-transcript-support"]("ui", {
-        cssVarsPerTheme: {
-          light: { "cal-brand": "#292929" },
-          dark: { "cal-brand": "#f97316" },
-        },
-        hideEventTypeDetails: false,
-        layout: "month_view",
-      });
-    </script>
-    <!-- Cal element-click embed code ends -->
   </body>
 </html>
