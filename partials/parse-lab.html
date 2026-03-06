@@ -83,7 +83,25 @@
         >
           Verify token → upload PDF → extract → parse → preview. Preview consumes 1 credit.
         </div>
+
+        <div class="rounded-xl border border-slate-700/40 bg-slate-950/30 p-4 grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <label for="parser-checkout-price" class="block text-sm font-medium text-slate-300 mb-2">Buy credits</label>
+            <select
+              id="parser-checkout-price"
+              class="w-full rounded-lg px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/40"
+            >
+              <option value="price_1T83KXQEa4WBi79g8sD2NI7c">10 credits</option>
+            </select>
+            <p class="text-xs text-slate-400 mt-2">Creates a live Stripe Checkout session for this token.</p>
+          </div>
+          <div class="grid gap-2">
+            <button id="parser-buy-credits" type="button" class="btn-secondary px-5 py-3 opacity-50 cursor-not-allowed" disabled>Buy Credits</button>
+            <div id="parser-checkout-status" class="text-xs text-slate-400">Verify token to enable checkout.</div>
+          </div>
+        </div>
       </div>
+    </div>
     </div>
 
     <!-- Upload -->
@@ -199,6 +217,8 @@
     const brandLogoInput = document.getElementById("brand-logo");
     const brandLogoName = document.getElementById("brand-logo-file-name");
     const copyJsonBtn = document.getElementById("copy-json");
+    const checkoutPriceInput = document.getElementById("parser-checkout-price");
+    const checkoutStatus = document.getElementById("parser-checkout-status");
     const copyRawBtn = document.getElementById("copy-raw");
     const extractRawBtn = document.getElementById("extract-raw-btn");
     const jsonOutput = document.getElementById("json-output");
@@ -206,6 +226,7 @@
     const miniReportIframe = document.getElementById("mini-report-iframe");
     const miniReportOverlay = document.getElementById("mini-report-overlay");
     const parseStructuredBtn = document.getElementById("parse-structured-btn");
+    const parserBuyCreditsBtn = document.getElementById("parser-buy-credits");
     const parserTokenBtn = document.getElementById("parser-save-token");
     const parserTokenInput = document.getElementById("parser-token-id");
     const parserTokenStatus = document.getElementById("parser-token-status");
@@ -219,6 +240,10 @@
 
     const API_BASE = "https://api-transcript.taxmonitor.pro";
     const NL = String.fromCharCode(10);
+
+    const PRICE_LABELS = {
+      price_1T83KXQEa4WBi79g8sD2NI7c: "10 credits",
+    };
 
     const state = {
       brandLogoDataUrl: "",
@@ -244,6 +269,14 @@
       btn.disabled = !enabled;
       btn.classList.toggle("opacity-50", !enabled);
       btn.classList.toggle("cursor-not-allowed", !enabled);
+    }
+
+    function setCheckoutStatus(msg, tone) {
+      if (!checkoutStatus) return;
+      const base = "text-xs ";
+      const color = tone === "error" ? "text-red-300" : tone === "ok" ? "text-green-300" : "text-slate-400";
+      checkoutStatus.className = base + color;
+      setText(checkoutStatus, msg);
     }
 
     function setParserAvailable(val) {
@@ -281,6 +314,7 @@
 
     function updateControls() {
       const hasPdf = !!state.pdfFile;
+      const canBuy = state.tokenValid;
       const canExtract = state.tokenValid && hasPdf;
       const canParse = state.tokenValid && hasPdf && !!state.rawText;
       const canPreviewUse = state.tokenValid && !!state.structured && !state.tokenConsumed;
@@ -288,8 +322,13 @@
 
       setButtonEnabled(extractRawBtn, canExtract);
       setButtonEnabled(parseStructuredBtn, canParse);
+      setButtonEnabled(parserBuyCreditsBtn, canBuy);
       setButtonEnabled(reportEmailBtn, canEmail);
       setPreviewEnabled(canPreviewUse);
+
+      if (!canBuy) setCheckoutStatus("Verify token to enable checkout.", "");
+      else if (!checkoutPriceInput || !checkoutPriceInput.value) setCheckoutStatus("Choose a credit package.", "");
+      else setCheckoutStatus("Ready to open Stripe Checkout for this token.", "");
 
       if (reportEmailStatus && !canEmail) {
         if (!state.tokenValid) setText(reportEmailStatus, "Verify token to enable emailing.");
@@ -335,6 +374,27 @@
       const remaining = out.json && typeof out.json.balance === "number" ? out.json.balance : null;
       if (remaining === null) throw new Error("Token lookup returned no remaining balance.");
       return remaining;
+    }
+
+    async function createCheckoutSession(priceId, returnUrlBase, tokenId) {
+      const url = API_BASE + "/transcript/checkout";
+      const body = { priceId, returnUrlBase, tokenId };
+
+      const out = await fetchJson(url, {
+        method: "POST",
+        mode: "cors",
+        credentials: "omit",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!out.ok) {
+        const msg = out.json && out.json.error ? String(out.json.error) : (out.text || out.res.statusText);
+        throw new Error("Checkout session failed (" + String(out.res.status) + "): " + msg);
+      }
+
+      if (!out.json || !out.json.url) throw new Error("Checkout session returned no URL.");
+      return out.json;
     }
 
     async function consumeToken(tokenId, requestId) {
@@ -799,6 +859,32 @@
       }
     }
 
+    async function beginCheckout() {
+      if (!state.tokenValid || !state.tokenId) {
+        setCheckoutStatus("Verify token first.", "error");
+        return;
+      }
+
+      const priceId = String((checkoutPriceInput && checkoutPriceInput.value) || "").trim();
+      if (!priceId) {
+        setCheckoutStatus("Choose a credit package.", "error");
+        return;
+      }
+
+      setButtonEnabled(parserBuyCreditsBtn, false);
+      setCheckoutStatus("Creating Stripe Checkout session…", "");
+
+      try {
+        const out = await createCheckoutSession(priceId, window.location.origin, state.tokenId);
+        const label = PRICE_LABELS[priceId] || "credits";
+        setCheckoutStatus("Redirecting to Stripe for " + label + ".", "ok");
+        window.location.href = String(out.url);
+      } catch (e) {
+        setCheckoutStatus(String((e && e.message) ? e.message : e), "error");
+        updateControls();
+      }
+    }
+
     async function emailReportLink() {
       if (!state.tokenValid || !state.tokenId) {
         setReportEmailStatus("Verify token first.", "error");
@@ -907,6 +993,7 @@
     if (miniReportClose) miniReportClose.addEventListener("click", () => closeOverlay());
     if (miniReportOverlay) miniReportOverlay.addEventListener("click", (e) => { if (e.target === miniReportOverlay) closeOverlay(); });
     if (parseStructuredBtn) parseStructuredBtn.addEventListener("click", (e) => { e.preventDefault(); parseStructured(); });
+    if (parserBuyCreditsBtn) parserBuyCreditsBtn.addEventListener("click", (e) => { e.preventDefault(); beginCheckout(); });
     if (parserTokenBtn) parserTokenBtn.addEventListener("click", (e) => { e.preventDefault(); verifyToken(); });
     if (previewReportBtn) previewReportBtn.addEventListener("click", (e) => { e.preventDefault(); previewAndConsume(); });
     if (reportEmailBtn) reportEmailBtn.addEventListener("click", (e) => { e.preventDefault(); emailReportLink(); });
