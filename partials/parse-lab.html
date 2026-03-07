@@ -211,16 +211,6 @@
   </div>
 </div>
 
-<!-- Overlay -->
-<div id="mini-report-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-6" aria-hidden="true">
-  <div class="relative w-full max-w-5xl h-[85vh] bg-slate-950 rounded-2xl overflow-hidden border border-purple-500/20">
-    <div class="absolute top-4 right-4 z-10 flex items-center gap-2">
-      <button id="mini-report-print" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Print</button>
-      <button id="mini-report-close" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition">Close</button>
-    </div>
-    <iframe id="mini-report-iframe" src="" class="w-full h-full border-0" title="Report preview"></iframe>
-  </div>
-</div>
 
 <script>
   (function () {
@@ -233,11 +223,7 @@
     const copyRawBtn = document.getElementById("copy-raw");
     const extractRawBtn = document.getElementById("extract-raw-btn");
     const jsonOutput = document.getElementById("json-output");
-    const miniReportClose = document.getElementById("mini-report-close");
-    const miniReportIframe = document.getElementById("mini-report-iframe");
-    const miniReportOverlay = document.getElementById("mini-report-overlay");
-    const miniReportPrint = document.getElementById("mini-report-print");
-    const parseStructuredBtn = document.getElementById("parse-structured-btn");
+        const parseStructuredBtn = document.getElementById("parse-structured-btn");
     const parserBuyCreditsBtn = document.getElementById("parser-buy-credits");
     const parserTokenBtn = document.getElementById("parser-save-token");
     const parserTokenInput = document.getElementById("parser-token-id");
@@ -340,17 +326,16 @@
       const canExtract = state.tokenValid && hasPdf;
       const canParse = state.tokenValid && hasPdf && !!state.rawText;
       const canPreviewUse = state.tokenValid && hasStructured && !state.tokenConsumed && hasCredits;
-      const canPrint = state.tokenValid && hasStructured && state.tokenConsumed && state.previewReady;
       const canEmail = state.tokenValid && hasStructured && state.tokenConsumed && !!state.eventId;
 
       setButtonEnabled(extractRawBtn, canExtract);
       setButtonEnabled(parseStructuredBtn, canParse);
       setButtonEnabled(parserBuyCreditsBtn, canBuy);
       setButtonEnabled(reportEmailBtn, canEmail);
-      setPreviewEnabled(canPreviewUse || canPrint);
+      setPreviewEnabled(canPreviewUse);
 
       if (previewReportBtn) {
-        setText(previewReportBtn, canPrint ? "Print Report" : "Preview Report & Use Token");
+        setText(previewReportBtn, "Preview Report & Use Token");
       }
 
       if (!canBuy) setCheckoutStatus("Verify token to enable checkout.", "");
@@ -365,8 +350,8 @@
         setPreviewActionStatus("Runs in your browser. Extract and parse the PDF before previewing.", "");
       } else if (!state.tokenConsumed && !hasCredits) {
         setPreviewActionStatus("Insufficient credits. Buy more credits before previewing.", "error");
-      } else if (canPrint) {
-        setPreviewActionStatus("Preview already generated for this upload. You can print it or email the link.", "ok");
+      } else if (state.tokenConsumed && state.lastReportLink) {
+        setPreviewActionStatus("Report generated for this upload. You can reopen it from the email flow or generate a new upload preview.", "ok");
       } else {
         setPreviewActionStatus("Runs in your browser. Preview consumes 1 credit only when you click the preview button.", "");
       }
@@ -762,36 +747,21 @@
       return normalizedUrl;
     }
 
-    async function openOverlayWithReport() {
-      if (!miniReportOverlay || !miniReportIframe || !state.structured) return;
+    function getParseLabReturnUrl() {
+      return window.location.origin + "/partials/parse-lab.html";
+    }
+
+    async function redirectToReportWithPayload() {
+      if (!state.structured) throw new Error("Missing structured report data.");
 
       const reportUrl = await buildEncryptedReportLink(state.structured, "hash", "/assets/report");
       const normalizedReportUrl = await createNormalizedReportLink(reportUrl);
+      const target = new URL(normalizedReportUrl, window.location.origin);
 
-      state.lastReportLink = normalizedReportUrl;
-      miniReportIframe.src = "";
-      miniReportIframe.src = normalizedReportUrl;
+      target.searchParams.set("return", getParseLabReturnUrl());
+      state.lastReportLink = target.toString();
 
-      miniReportOverlay.classList.remove("hidden");
-      miniReportOverlay.setAttribute("aria-hidden", "false");
-      document.body.style.overflow = "hidden";
-    }
-
-    function closeOverlay() {
-      if (!miniReportOverlay || !miniReportIframe) return;
-      miniReportOverlay.classList.add("hidden");
-      miniReportOverlay.setAttribute("aria-hidden", "true");
-      document.body.style.overflow = "";
-    }
-
-    function printOverlayReport() {
-      if (!miniReportIframe) return;
-      try {
-        miniReportIframe.contentWindow.focus();
-        miniReportIframe.contentWindow.print();
-      } catch {
-        window.print();
-      }
+      window.location.href = state.lastReportLink;
     }
 
     function handlePdfSelected(file) {
@@ -803,7 +773,6 @@
       state.structured = null;
       state.tokenConsumed = false;
 
-      closeOverlay();
       setText(rawOutput, "(ready. click Extract Raw Text)");
       setText(jsonOutput, "(no json yet)");
 
@@ -880,8 +849,8 @@
     async function previewAndConsume() {
       if (!state.tokenValid || !state.tokenId || !state.structured) return;
 
-      if (state.tokenConsumed && state.previewReady) {
-        await openOverlayWithReport();
+      if (state.tokenConsumed && state.lastReportLink) {
+        window.location.href = state.lastReportLink;
         return;
       }
 
@@ -893,30 +862,21 @@
 
       setPreviewEnabled(false);
 
-      let consumedThisAttempt = false;
-
       try {
         if (!state.eventId) state.eventId = crypto.randomUUID();
 
         await consumeToken(state.tokenId, state.eventId);
-        consumedThisAttempt = true;
 
         state.tokenConsumed = true;
         state.previewReady = true;
         state.tokenAvailable = Math.max(0, Number(state.tokenAvailable || 0) - 1);
         setParserAvailable(state.tokenAvailable);
-        setTokenStatus("Preview generated. 1 credit used for this upload.", "ok");
+        setTokenStatus("Report generated. 1 credit used for this upload.", "ok");
 
-        await openOverlayWithReport();
+        await redirectToReportWithPayload();
       } catch (e) {
         state.previewReady = false;
-
-        if (!consumedThisAttempt) {
-          state.tokenConsumed = false;
-        }
-
         setTokenStatus(String((e && e.message) ? e.message : e), "error");
-      } finally {
         updateControls();
       }
     }
@@ -1060,18 +1020,12 @@
     if (copyRawBtn) copyRawBtn.addEventListener("click", (e) => { e.preventDefault(); copyToClipboard(rawOutput ? rawOutput.textContent : ""); });
 
     if (extractRawBtn) extractRawBtn.addEventListener("click", (e) => { e.preventDefault(); extractRaw(); });
-    if (miniReportClose) miniReportClose.addEventListener("click", () => closeOverlay());
-    if (miniReportPrint) miniReportPrint.addEventListener("click", () => printOverlayReport());
-    if (miniReportOverlay) miniReportOverlay.addEventListener("click", (e) => { if (e.target === miniReportOverlay) closeOverlay(); });
-    if (parseStructuredBtn) parseStructuredBtn.addEventListener("click", (e) => { e.preventDefault(); parseStructured(); });
+        if (parseStructuredBtn) parseStructuredBtn.addEventListener("click", (e) => { e.preventDefault(); parseStructured(); });
     if (parserBuyCreditsBtn) parserBuyCreditsBtn.addEventListener("click", (e) => { e.preventDefault(); beginCheckout(); });
     if (parserTokenBtn) parserTokenBtn.addEventListener("click", (e) => { e.preventDefault(); verifyToken(); });
     if (previewReportBtn) previewReportBtn.addEventListener("click", (e) => { e.preventDefault(); previewAndConsume(); });
     if (reportEmailBtn) reportEmailBtn.addEventListener("click", (e) => { e.preventDefault(); emailReportLink(); });
 
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && miniReportOverlay && !miniReportOverlay.classList.contains("hidden")) closeOverlay();
-    });
 
     // Init
     (async function initParserLab() {
