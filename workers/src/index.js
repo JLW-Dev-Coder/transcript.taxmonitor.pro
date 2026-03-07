@@ -204,6 +204,38 @@ function extractStoredReportPayload(reportUrl) {
   return { ok: false, error: "missing_report_payload" };
 }
 
+function buildAssetReportUrl(payload, transport = "hash") {
+  const target = new URL("https://transcript.taxmonitor.pro/assets/report");
+
+  if (String(transport || "hash") === "query") {
+    target.searchParams.set("data", String(payload || ""));
+  } else {
+    target.hash = String(payload || "");
+  }
+
+  return target.toString();
+}
+
+function extractInboundReportPayload(input = {}) {
+  const payload = String(input?.payload || "").trim();
+  const reportUrl = String(input?.reportUrl || "").trim();
+  const transport = String(input?.transport || "").trim().toLowerCase();
+
+  if (payload) {
+    return {
+      ok: true,
+      payload,
+      transport: transport === "query" ? "query" : "hash",
+    };
+  }
+
+  if (reportUrl) {
+    return extractStoredReportPayload(reportUrl);
+  }
+
+  return { ok: false, error: "missing_report_payload" };
+}
+
 async function storeShortReportPayload(env, payload, meta = {}) {
   const kv = getReportKv(env);
   if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
@@ -1080,13 +1112,89 @@ Transcript Tax Monitor Pro`;
 }
 
 async function handleGetTranscriptReportLink(request, url, env) {
+  const payload = (url.searchParams.get("payload") || url.searchParams.get("data") || "").trim();
   const reportId = (url.searchParams.get("reportId") || url.searchParams.get("r") || "").trim();
-  if (!reportId) return json({ ok: false, error: "missing_reportId" }, 400, withCors(request));
+  const reportUrl = (url.searchParams.get("reportUrl") || "").trim();
+  const shouldShorten = ["1", "true", "yes"].includes(
+    String(url.searchParams.get("short") || "").trim().toLowerCase()
+  );
+  const transport = String(url.searchParams.get("transport") || "").trim().toLowerCase();
 
-  const link = await getShortReportLink(env, reportId);
-  if (!link) return json({ ok: false, error: "report_not_found" }, 404, withCors(request));
+  if (reportId) {
+    const link = await getShortReportLink(env, reportId);
+    if (!link) return json({ ok: false, error: "report_not_found" }, 404, withCors(request));
 
-  return json({ ok: true, reportId: link.reportId, reportUrl: link.reportUrl }, 200, withCors(request));
+    return json({ ok: true, reportId: link.reportId, reportUrl: link.reportUrl }, 200, withCors(request));
+  }
+
+  const extracted = extractInboundReportPayload({ payload, reportUrl, transport });
+  if (!extracted.ok) {
+    return json({ ok: false, error: extracted.error }, 400, withCors(request));
+  }
+
+  if (shouldShorten) {
+    const shortLink = await storeShortReportPayload(env, extracted.payload, {
+      payloadTransport: extracted.transport,
+      sourcePath: "/assets/report",
+    });
+
+    return json(
+      {
+        ok: true,
+        reportId: shortLink.reportId,
+        reportUrl: shortLink.shortUrl,
+      },
+      200,
+      withCors(request)
+    );
+  }
+
+  return json(
+    {
+      ok: true,
+      reportUrl: buildAssetReportUrl(extracted.payload, extracted.transport),
+      transport: extracted.transport,
+    },
+    200,
+    withCors(request)
+  );
+}
+
+async function handlePostTranscriptReportLink(request, env) {
+  const body = await request.json().catch(() => ({}));
+  const extracted = extractInboundReportPayload(body || {});
+  if (!extracted.ok) {
+    return json({ ok: false, error: extracted.error }, 400, withCors(request));
+  }
+
+  const shouldShorten = Boolean(body?.short);
+
+  if (shouldShorten) {
+    const shortLink = await storeShortReportPayload(env, extracted.payload, {
+      payloadTransport: extracted.transport,
+      sourcePath: "/assets/report",
+    });
+
+    return json(
+      {
+        ok: true,
+        reportId: shortLink.reportId,
+        reportUrl: shortLink.shortUrl,
+      },
+      200,
+      withCors(request)
+    );
+  }
+
+  return json(
+    {
+      ok: true,
+      reportUrl: buildAssetReportUrl(extracted.payload, extracted.transport),
+      transport: extracted.transport,
+    },
+    200,
+    withCors(request)
+  );
 }
 
 async function handleAssetReportRedirect(request, url, env) {
@@ -1095,6 +1203,14 @@ async function handleAssetReportRedirect(request, url, env) {
 
   return await handleShortReportLookup(request, env, url);
 }
+
+/*
+ * Preview integration note:
+ *
+ * The blank preview happens when the UI opens /assets/report with no payload.
+ * Normalize every preview URL through /transcript/report-link first so the
+ * iframe always receives either a hash payload, query payload, or short link.
+ */
 
 /* ------------------------------------------
  * Worker Entry
@@ -1139,9 +1255,17 @@ export default {
       }
     }
 
-    if (request.method === "GET" && isPath(url, "/transcript/report-link")) {
+    if (isPath(url, "/transcript/report-link")) {
       try {
-        return await handleGetTranscriptReportLink(request, url, env);
+        if (request.method === "GET") {
+          return await handleGetTranscriptReportLink(request, url, env);
+        }
+
+        if (request.method === "POST") {
+          return await handlePostTranscriptReportLink(request, env);
+        }
+
+        return jsonError(request, 405, "method_not_allowed");
       } catch (err) {
         return jsonError(request, 500, "internal_error", String(err?.message || err));
       }
