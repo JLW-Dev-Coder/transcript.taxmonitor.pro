@@ -84,20 +84,29 @@
           Verify token → upload PDF → extract → parse → preview. Preview consumes 1 credit.
         </div>
 
-        <div class="rounded-xl border border-slate-700/40 bg-slate-950/30 p-4 grid gap-3 md:grid-cols-[1fr_auto] md:items-end">
-          <div>
-            <label for="parser-checkout-price" class="block text-sm font-medium text-slate-300 mb-2">Buy credits</label>
-            <select
-              id="parser-checkout-price"
-              class="w-full rounded-lg px-4 py-3 bg-slate-900/40 border border-slate-700/50 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/40"
-            >
-              <option value="price_1T83KXQEa4WBi79g8sD2NI7c">10 credits</option>
-            </select>
-            <p class="text-xs text-slate-400 mt-2">Creates a live Stripe Checkout session for this token.</p>
-          </div>
-          <div class="grid gap-2">
-            <button id="parser-buy-credits" type="button" class="btn-secondary px-5 py-3 opacity-50 cursor-not-allowed" disabled>Buy Credits</button>
-            <div id="parser-checkout-status" class="text-xs text-slate-400">Verify token to enable checkout.</div>
+        <div class="rounded-2xl border border-purple-500/20 bg-gradient-to-br from-slate-950/70 via-slate-900/70 to-purple-950/20 p-5 shadow-[0_0_0_1px_rgba(168,85,247,0.08)]">
+          <div class="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
+            <div>
+              <label for="parser-checkout-price" class="block text-sm font-semibold text-white mb-2">Buy credits</label>
+              <div class="relative">
+                <select
+                  id="parser-checkout-price"
+                  class="w-full appearance-none rounded-xl px-4 py-3.5 pr-12 bg-slate-900/80 border border-purple-500/25 text-white font-medium shadow-inner shadow-black/20 focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-400/50"
+                >
+                  <option value="price_1T83KXQEa4WBi79g8sD2NI7c">10 credits</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-purple-200/90">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
+              <p class="text-xs text-slate-300 mt-2">Creates a live Stripe Checkout session for this token.</p>
+            </div>
+            <div class="grid gap-2">
+              <button id="parser-buy-credits" type="button" class="btn-secondary px-5 py-3 opacity-50 cursor-not-allowed" disabled>Buy Credits</button>
+              <div id="parser-checkout-status" class="text-xs text-slate-400">Verify token to enable checkout.</div>
+            </div>
           </div>
         </div>
       </div>
