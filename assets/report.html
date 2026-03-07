@@ -967,6 +967,60 @@
           return null;
         }
 
+        function readReportId() {
+          const url = new URL(window.location.href);
+          return String(url.searchParams.get('reportId') || '').trim();
+        }
+
+        async function decodeWorkerReportPayload(payload, transport) {
+          const raw = String(payload || '').trim();
+          if (!raw) return null;
+
+          const params = new URLSearchParams(raw);
+          const hasEncryptedParts =
+            params.get('v') &&
+            params.get('k') &&
+            params.get('iv') &&
+            params.get('r');
+
+          if (hasEncryptedParts) {
+            return await decryptEncryptedPayload(params);
+          }
+
+          return extractPayloadCandidate(raw);
+        }
+
+        async function fetchReportById(reportId) {
+          const response = await fetch(`/transcript/report-data?reportId=${encodeURIComponent(reportId)}`, {
+            method: 'GET',
+            credentials: 'omit'
+          });
+
+          const text = await response.text().catch(() => '');
+          let data = null;
+          try {
+            data = text ? JSON.parse(text) : null;
+          } catch (_) {
+            data = null;
+          }
+
+          if (!response.ok) {
+            const message = data && data.error ? String(data.error) : (text || response.statusText || 'report_fetch_failed');
+            throw new Error(message);
+          }
+
+          if (!data || !data.payload) {
+            throw new Error('missing_report_payload');
+          }
+
+          const decoded = await decodeWorkerReportPayload(data.payload, data.transport || 'hash');
+          if (!decoded) {
+            throw new Error('unable_to_decode_report_payload');
+          }
+
+          return decoded;
+        }
+
         function readWindowPayload() {
           const candidates = [
             window.reportData,
@@ -1342,8 +1396,8 @@
             },
             missing: {
               title: 'Missing report payload',
-              copy: 'This page needs a report payload from encrypted URL params, ?data=..., ?payload=..., or the URL hash. Right now it has none, which is not a report workflow so much as a polite failure.',
-              detail: 'Encrypted: ?v=1&k=...&iv=...&r=... | Plain: ?data=... | ?payload=... | #...'
+              copy: 'This page needs either a valid ?reportId=... value or a legacy report payload from encrypted URL params, ?data=..., ?payload=..., or the URL hash. Right now it has none, which is not a report workflow so much as a polite failure.',
+              detail: 'Preferred: ?reportId=... | Legacy encrypted: ?v=1&k=...&iv=...&r=... | Plain: ?data=... | ?payload=... | #...'
             },
             invalid: {
               title: 'Invalid report payload',
@@ -1393,10 +1447,33 @@
         }
 
         async function getPayloadResult() {
+          const reportId = readReportId();
+
+          if (reportId) {
+            try {
+              const reportFromWorker = await fetchReportById(reportId);
+              debugLog('Using payload source', 'reportId');
+              const normalizedReport = normalizeReport(reportFromWorker);
+
+              if (!normalizedReport || !normalizedReport.summary || !normalizedReport.metadata || !Array.isArray(normalizedReport.rows)) {
+                const invalidPreview = JSON.stringify(reportFromWorker).slice(0, 500);
+                debugLog('Worker report normalized into invalid report shape', invalidPreview);
+                return { status: 'invalid', payload: invalidPreview };
+              }
+
+              return { status: 'ok', payload: normalizedReport };
+            } catch (err) {
+              const message = String(err && err.message || err || 'report_fetch_failed');
+              debugLog('Report fetch by reportId failed', { reportId, message });
+              return { status: 'malformed', payload: `reportId=${reportId} :: ${message}` };
+            }
+          }
+
           const encryptedPayload = await readEncryptedPayload().catch((err) => ({ __decryptError: String(err && err.message || err || 'decrypt_failed') }));
           if (encryptedPayload && encryptedPayload.__decryptError) {
             debugLog('Encrypted payload decryption failed', encryptedPayload.__decryptError);
           }
+
           const paramsPayload = readParamsPayload();
           const hashPayload = readHashPayload();
           const winPayload = readWindowPayload();
@@ -1424,26 +1501,32 @@
             : null;
 
           const payload = encryptedPayload || paramsPayload || hashPayload || winPayload || storagePayload;
+
           if (!payload) {
             if (hasRawParam || hasRawHash) {
               const malformedHint = String(hasRawParam || hasRawHash).slice(0, 500);
               debugLog('Raw payload detected but parsing failed', { hasRawHash: Boolean(hasRawHash), hasRawParam: Boolean(hasRawParam), malformedHint });
               return { status: 'malformed', payload: malformedHint };
             }
+
             debugLog('No report payload found', {
               hash: String(window.location.hash || '').slice(0, 240),
               search: String(window.location.search || '').slice(0, 240)
             });
+
             return { status: 'missing', payload: null };
           }
+
           try {
             debugLog('Using payload source', payloadSource);
             const report = normalizeReport(payload);
+
             if (!report || !report.summary || !report.metadata || !Array.isArray(report.rows)) {
               const invalidPreview = JSON.stringify(payload).slice(0, 500);
               debugLog('Payload normalized into invalid report shape', invalidPreview);
               return { status: 'invalid', payload: invalidPreview };
             }
+
             return { status: 'ok', payload: report };
           } catch (err) {
             const errorMessage = String(err && err.message || err || 'Unknown error');
