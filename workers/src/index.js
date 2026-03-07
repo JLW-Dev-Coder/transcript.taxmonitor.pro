@@ -6,6 +6,7 @@
  * - GET  /transcript/prices
  * - POST /transcript/checkout
  * - GET  /transcript/tokens?tokenId=...
+ * - POST /transcript/credit
  * - POST /transcript/consume
  * - POST /transcript/stripe/webhook
  * - GET  /assets/report?r=...
@@ -719,6 +720,57 @@ async function handleGetTranscriptTokens(request, url, env) {
   return json({ balance: out.balance ?? 0, tokenId }, 200, withCors(request));
 }
 
+async function handleCreditTranscriptTokens(request, env, ctx) {
+  const body = await request.json().catch(() => ({}));
+  const tokenId = typeof body?.tokenId === "string" ? body.tokenId.trim() : "";
+  const amount = Number(body?.amount ?? 0);
+
+  const requestIdRaw = typeof body?.requestId === "string" ? body.requestId.trim() : "";
+  const requestId = requestIdRaw || crypto.randomUUID();
+
+  if (!tokenId) {
+    return json({ error: "missing_tokenId" }, 400, withCors(request));
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return json({ error: "invalid_amount" }, 400, withCors(request));
+  }
+
+  const stub = getLedgerStub(env, tokenId);
+
+  const res = await stub.fetch("https://ledger/credit", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ amount, requestId }),
+  });
+
+  const out = await res.json().catch(() => ({}));
+
+  if (env.R2_TRANSCRIPT) {
+    const key = `receipts/manual-credit/${requestId}.json`;
+    ctx.waitUntil(
+      env.R2_TRANSCRIPT.put(
+        key,
+        JSON.stringify(
+          {
+            amount,
+            at: new Date().toISOString(),
+            balance: out.balance ?? null,
+            requestId,
+            tokenId,
+            type: "manual_credit",
+          },
+          null,
+          2
+        ),
+        { httpMetadata: { contentType: "application/json" } }
+      )
+    );
+  }
+
+  return json({ ...out, requestId, tokenId }, res.status, withCors(request));
+}
+
 async function handleConsumeTranscriptTokens(request, env, ctx) {
   const body = await request.json().catch(() => ({}));
   const tokenId = typeof body?.tokenId === "string" ? body.tokenId.trim() : "";
@@ -1066,6 +1118,10 @@ export default {
 
         if (request.method === "GET" && isPath(url, "/transcript/tokens")) {
           return await handleGetTranscriptTokens(request, url, env);
+        }
+
+        if (request.method === "POST" && isPath(url, "/transcript/credit")) {
+          return await handleCreditTranscriptTokens(request, env, ctx);
         }
 
         if (request.method === "POST" && isPath(url, "/transcript/consume")) {
