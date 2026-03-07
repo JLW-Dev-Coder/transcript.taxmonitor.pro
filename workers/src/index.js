@@ -1718,6 +1718,7 @@ async function handleCreateTranscriptPreview(request, env, ctx) {
     {
       ok: true,
       balance: consumeOut.balance ?? 0,
+      eventId: requestId,
       reportId: shortLink.reportId,
       reportUrl: buildReportPageUrl(shortLink.reportId),
     },
