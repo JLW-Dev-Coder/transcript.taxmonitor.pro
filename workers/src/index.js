@@ -9,10 +9,10 @@
  * - POST /transcript/credit
  * - POST /transcript/consume
  * - POST /transcript/stripe/webhook
- * - GET  /assets/report?r=...
+ * - GET  /transcript/report?r=...
  * - POST /forms/transcript/report-email
  * - GET  /transcript/report-link?reportId=...
- * - GET  /assets/report?r=...
+ * - GET  /transcript/report?r=...
  *
  * Notes:
  * - Extracted from the mixed Tax Monitor Pro Worker.
@@ -122,9 +122,9 @@ function isSafeReportUrl(v) {
   if (url.origin !== "https://transcript.taxmonitor.pro") return false;
 
   const allowedPaths = new Set([
-    "/assets/report",
     "/assets/report.html",
     "/assets/report-preview.html",
+    "/transcript/report",
   ]);
 
   if (!allowedPaths.has(url.pathname)) return false;
@@ -240,7 +240,8 @@ async function storeShortReportPayload(env, payload, meta = {}) {
 }
 
 function buildShortReportUrl(reportId) {
-  return `https://transcript.taxmonitor.pro/assets/report?r=${encodeURIComponent(reportId)}`;
+  return `https://transcript.taxmonitor.pro/transcript/report?r=${encodeURIComponent(reportId)}`;
+}`;
 }
 
 async function resolveShortReportPayload(env, reportId) {
@@ -1146,7 +1147,7 @@ export default {
       }
     }
 
-    if (request.method === "GET" && isPath(url, "/assets/report")) {
+    if (request.method === "GET" && isPath(url, "/transcript/report")) {
       try {
         const redirectRes = await handleAssetReportRedirect(request, url, env);
         if (redirectRes) return redirectRes;
