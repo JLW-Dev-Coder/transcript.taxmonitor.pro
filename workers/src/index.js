@@ -13,6 +13,8 @@
  * - POST /forms/transcript/report-email
  * - GET  /transcript/report-link?reportId=...
  * - GET  /transcript/report?r=...
+ * - GET  /v1/help/status?ticket_id=...
+ * - POST /v1/clickup/webhook
  *
  * Notes:
  * - Extracted from the mixed Tax Monitor Pro Worker.
@@ -653,6 +655,309 @@ function getLedgerStub(env, tokenId) {
 
 const TRANSCRIPT_SESSION_COOKIE = "tm_transcript_session";
 
+/* ------------------------------------------
+ * Transcript: ClickUp projection config
+ * ------------------------------------------ */
+
+const CLICKUP_TRANSCRIPT = {
+  ACCOUNTS_LIST_ID: "901710909567",
+  SUPPORT_LIST_ID: "901710818377",
+  ACCOUNT_FIELDS: {
+    ACCOUNT_ID: "e5f176ba-82c8-47d8-b3b1-0716d075f43f",
+    PRIMARY_EMAIL: "a105f99e-b33d-4d12-bb24-f7c827ec761a",
+    SUPPORT_STATUS: "bbdf5418-8be0-452d-8bd0-b9f46643375e",
+    SUPPORT_TASK_LINK: "9e14a458-96fd-4109-a276-034d8270e15b",
+    TRANSCRIPT_CREDITS: "f938260c-600d-405a-bee7-a8db5d09bf6d",
+  },
+  SUPPORT_FIELDS: {
+    ACTION_REQUIRED: "aac0816d-0e05-4c57-8196-6098929f35ac",
+    EMAIL: "7f547901-690d-4f39-8851-d19e19f87bf8",
+    EVENT_ID: "8e8b453e-01f3-40fe-8156-2e9d9633ebd6",
+    LATEST_UPDATE: "03ebc8ba-714e-4f7c-9748-eb1b62e657f7",
+    PRIORITY: "b96403c7-028a-48eb-b6b1-349f295244b5",
+    RELATED_ORDER_ID: "423fda3b-f7c0-471e-aaa2-464d78db0a31",
+    SUPPORT_ID: "30fda9ea-12cd-4dc1-a89f-4633f4d06b27",
+    TYPE: "e09d9f53-4f03-49fe-8c5f-abe3b160b167",
+  },
+  WEBHOOK_ROUTE: "/v1/clickup/webhook",
+};
+
+function getClickUpApiToken(env) {
+  return String(env.CLICKUP_API_TOKEN || env.CLICKUP_TOKEN || "").trim();
+}
+
+function clickupHeaders(env) {
+  const token = getClickUpApiToken(env);
+  if (!token) throw new Error("Missing ClickUp API token");
+  return {
+    authorization: token,
+    "content-type": "application/json",
+  };
+}
+
+async function clickupFetchJson(env, path, init = {}) {
+  const response = await fetch(`https://api.clickup.com/api/v2${path}`, {
+    ...init,
+    headers: {
+      ...clickupHeaders(env),
+      ...(init.headers || {}),
+    },
+  });
+
+  const text = await response.text().catch(() => "");
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    const message =
+      (data && (data.err || data.error || data.message) ? String(data.err || data.error || data.message) : "") ||
+      text ||
+      response.statusText ||
+      "clickup_request_failed";
+    throw new Error(`ClickUp error (${response.status}): ${message}`);
+  }
+
+  return data;
+}
+
+function getSupportStatusKey(supportId) {
+  return `support-status:${String(supportId || "").trim()}`;
+}
+
+function getSupportTaskKey(taskId) {
+  return `support-task:${String(taskId || "").trim()}`;
+}
+
+function normalizeSupportId(value) {
+  return String(value || "").trim();
+}
+
+function normalizeSupportStatus(value) {
+  return String(value || "").trim() || "open / new";
+}
+
+function getTaskCustomField(task, fieldId) {
+  const fields = Array.isArray(task && task.custom_fields) ? task.custom_fields : [];
+  return fields.find((field) => String(field && field.id || "") === String(fieldId || "")) || null;
+}
+
+function getTaskCustomFieldValue(task, fieldId) {
+  const field = getTaskCustomField(task, fieldId);
+  if (!field) return "";
+
+  if (field.value === undefined || field.value === null) return "";
+
+  if (typeof field.value === "string") return field.value.trim();
+
+  if (typeof field.value === "number" || typeof field.value === "boolean") return String(field.value);
+
+  if (typeof field.value === "object") {
+    if (typeof field.value.name === "string") return field.value.name.trim();
+    if (typeof field.value.label === "string") return field.value.label.trim();
+    if (typeof field.value.text === "string") return field.value.text.trim();
+  }
+
+  return String(field.value || "").trim();
+}
+
+function buildSupportLatestUpdateFromTask(task, fallbackHistoryItem) {
+  const explicit = getTaskCustomFieldValue(task, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.LATEST_UPDATE);
+  if (explicit) return explicit;
+
+  const status = normalizeSupportStatus(task && task.status && task.status.status);
+  const at = task && task.date_updated ? new Date(Number(task.date_updated)).toISOString() : new Date().toISOString();
+  const by = fallbackHistoryItem && fallbackHistoryItem.user && fallbackHistoryItem.user.username ? String(fallbackHistoryItem.user.username).trim() : "Staff";
+
+  return `${status} • ${by} • ${at}`;
+}
+
+function mapSupportStatusToAccountStatus(status) {
+  const normalized = String(status || "").trim().toLowerCase();
+  if (normalized === "blocked") return "Blocked";
+  if (normalized === "client feedback") return "Waiting on Client";
+  if (normalized === "complete") return "Complete";
+  if (normalized === "closed") return "Closed";
+  if (normalized === "in progress") return "In Progress";
+  if (normalized === "in review") return "Needs Review";
+  if (normalized === "open / new") return "New / Open";
+  if (normalized === "resolved") return "Complete";
+  if (normalized === "waiting on client") return "Waiting on Client";
+  return "New / Open";
+}
+
+function getDropdownOptionIdByName(options, name) {
+  const target = String(name || "").trim().toLowerCase();
+  const list = Array.isArray(options) ? options : [];
+  const found = list.find((option) => String(option && option.name || "").trim().toLowerCase() === target);
+  return found && found.id ? String(found.id) : "";
+}
+
+async function setClickUpCustomField(env, taskId, fieldId, value) {
+  await clickupFetchJson(env, `/task/${encodeURIComponent(taskId)}/field/${encodeURIComponent(fieldId)}`, {
+    method: "POST",
+    body: JSON.stringify({ value }),
+  });
+}
+
+async function listClickUpTasksByList(env, listId, page = 0) {
+  const qs = new URLSearchParams();
+  qs.set("include_closed", "true");
+  qs.set("page", String(page));
+  qs.set("subtasks", "true");
+  return await clickupFetchJson(env, `/list/${encodeURIComponent(listId)}/task?${qs.toString()}`, {
+    method: "GET",
+    headers: { "content-type": "application/json" },
+  });
+}
+
+async function findSupportTaskBySupportId(env, supportId) {
+  const wanted = normalizeSupportId(supportId);
+  if (!wanted) return null;
+
+  for (let page = 0; page < 20; page++) {
+    const data = await listClickUpTasksByList(env, CLICKUP_TRANSCRIPT.SUPPORT_LIST_ID, page);
+    const tasks = Array.isArray(data && data.tasks) ? data.tasks : [];
+
+    for (const task of tasks) {
+      const value = normalizeSupportId(getTaskCustomFieldValue(task, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.SUPPORT_ID));
+      if (value && value === wanted) return task;
+    }
+
+    if (tasks.length < 100) break;
+  }
+
+  return null;
+}
+
+async function getClickUpTask(env, taskId) {
+  return await clickupFetchJson(env, `/task/${encodeURIComponent(taskId)}`, {
+    method: "GET",
+    headers: { "content-type": "application/json" },
+  });
+}
+
+async function findAccountTaskByEmail(env, email) {
+  const wanted = normalizeEmail(email);
+  if (!wanted) return null;
+
+  for (let page = 0; page < 20; page++) {
+    const data = await listClickUpTasksByList(env, CLICKUP_TRANSCRIPT.ACCOUNTS_LIST_ID, page);
+    const tasks = Array.isArray(data && data.tasks) ? data.tasks : [];
+
+    for (const task of tasks) {
+      const value = normalizeEmail(getTaskCustomFieldValue(task, CLICKUP_TRANSCRIPT.ACCOUNT_FIELDS.PRIMARY_EMAIL));
+      if (value && value === wanted) return task;
+    }
+
+    if (tasks.length < 100) break;
+  }
+
+  return null;
+}
+
+async function mirrorSupportStatusToAccount(env, supportTask, supportStatus) {
+  try {
+    const supportEmail = normalizeEmail(getTaskCustomFieldValue(supportTask, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.EMAIL));
+    if (!supportEmail) return;
+
+    const accountTask = await findAccountTaskByEmail(env, supportEmail);
+    if (!accountTask || !accountTask.id) return;
+
+    const accountField = getTaskCustomField(accountTask, CLICKUP_TRANSCRIPT.ACCOUNT_FIELDS.SUPPORT_STATUS);
+    const options = accountField && accountField.type_config && Array.isArray(accountField.type_config.options)
+      ? accountField.type_config.options
+      : [];
+    const mappedName = mapSupportStatusToAccountStatus(supportStatus);
+    const optionId = getDropdownOptionIdByName(options, mappedName);
+    if (!optionId) return;
+
+    await setClickUpCustomField(env, accountTask.id, CLICKUP_TRANSCRIPT.ACCOUNT_FIELDS.SUPPORT_STATUS, optionId);
+  } catch (_) {
+    // Projection only. Canonical support state must still update even if this mirror write fails.
+  }
+}
+
+async function upsertCanonicalSupportFromTask(env, task, historyItem = null) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+
+  const supportId = normalizeSupportId(getTaskCustomFieldValue(task, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.SUPPORT_ID));
+  if (!supportId) {
+    return { ok: false, reason: "missing_support_id" };
+  }
+
+  const status = normalizeSupportStatus(task && task.status && task.status.status);
+  const latestUpdate = buildSupportLatestUpdateFromTask(task, historyItem);
+  const updatedAt = task && task.date_updated ? new Date(Number(task.date_updated)).toISOString() : new Date().toISOString();
+  const supportEmail = normalizeEmail(getTaskCustomFieldValue(task, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.EMAIL));
+
+  const record = {
+    latestUpdate,
+    source: "clickup_webhook",
+    status,
+    supportEmail,
+    supportId,
+    taskId: String(task && task.id || "").trim(),
+    taskName: String(task && task.name || "").trim(),
+    updatedAt,
+  };
+
+  await kv.put(getSupportStatusKey(supportId), JSON.stringify(record, null, 2));
+  if (record.taskId) {
+    await kv.put(getSupportTaskKey(record.taskId), JSON.stringify({ supportId }, null, 2));
+  }
+
+  await mirrorSupportStatusToAccount(env, task, status);
+
+  return { ok: true, record };
+}
+
+async function getCanonicalSupportRecord(env, supportId) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+
+  const raw = await kv.get(getSupportStatusKey(supportId));
+  if (!raw) return null;
+
+  const parsed = tryParseJson(raw);
+  if (!parsed.ok || !parsed.value) return null;
+  return parsed.value;
+}
+
+async function syncSupportRecordFromClickUp(env, supportId) {
+  const task = await findSupportTaskBySupportId(env, supportId);
+  if (!task) return null;
+
+  const fullTask = await getClickUpTask(env, task.id);
+  const synced = await upsertCanonicalSupportFromTask(env, fullTask, null);
+  return synced.ok ? synced.record : null;
+}
+
+async function verifyClickUpWebhookSignature(env, request, rawBody) {
+  const secret = String(env.CLICKUP_WEBHOOK_SECRET || "").trim();
+  if (!secret) throw new Error("Missing CLICKUP_WEBHOOK_SECRET");
+
+  const incoming = String(request.headers.get("x-signature") || request.headers.get("X-Signature") || "").trim().toLowerCase();
+  if (!incoming) return false;
+
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(rawBody));
+  const expected = Array.from(new Uint8Array(mac)).map((b) => b.toString(16).padStart(2, "0")).join("");
+
+  return timingSafeEqualHex(expected, incoming);
+}
+
 function buildAppDashboardUrl() {
   return "https://transcript.taxmonitor.pro/app-dashboard.html";
 }
@@ -914,6 +1219,20 @@ async function listUserPurchaseRecords(env, tokenId) {
   out.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
   return out;
 }
+
+/* ------------------------------------------
+ * Transcript: Handlers
+ *
+ * Projection plan now confirmed from ClickUp:
+ * - Accounts list: 901710909567
+ * - Support list: 901710818377
+ * - Use Account Transcript Credits field for transcript balances, not Account Gaming Credits.
+ * - Mirror support status onto Account Support Status.
+ * - Support list now has a dedicated Support ID field: 30fda9ea-12cd-4dc1-a89f-4633f4d06b27.
+ * - Canonical supportId should live in Worker state and be projected into that field.
+ * - Public support lookup should read canonical Worker state, with ClickUp status and latest update projected back into it.
+ * ------------------------------------------
+ */
 
 /* ------------------------------------------
  * Transcript: Handlers
@@ -1784,6 +2103,87 @@ async function handleTranscriptSignOut(request) {
   });
 }
 
+async function handleGetHelpStatus(request, url, env) {
+  const supportId = normalizeSupportId(
+    url.searchParams.get("ticket_id") || url.searchParams.get("supportId") || url.searchParams.get("support_id") || ""
+  );
+
+  if (!supportId) {
+    return json({ error: "missing_ticket_id" }, 400, withCors(request));
+  }
+
+  let record = await getCanonicalSupportRecord(env, supportId);
+  if (!record) {
+    try {
+      record = await syncSupportRecordFromClickUp(env, supportId);
+    } catch (_) {
+      record = null;
+    }
+  }
+
+  if (!record) {
+    return json({ error: "ticket_not_found" }, 404, withCors(request));
+  }
+
+  return json(
+    {
+      latestUpdate: record.latestUpdate || "",
+      ok: true,
+      status: record.status || "open / new",
+      supportId: record.supportId || supportId,
+      taskId: record.taskId || "",
+      updatedAt: record.updatedAt || null,
+    },
+    200,
+    withCors(request)
+  );
+}
+
+async function handleClickUpWebhook(request, env) {
+  const rawBody = await request.text();
+  const verified = await verifyClickUpWebhookSignature(env, request, rawBody);
+  if (!verified) {
+    return json({ error: "invalid_signature" }, 401, withCors(request));
+  }
+
+  const parsed = tryParseJson(rawBody);
+  if (!parsed.ok || !parsed.value) {
+    return json({ error: "invalid_json" }, 400, withCors(request));
+  }
+
+  const payload = parsed.value;
+  const event = String(payload && payload.event || "").trim();
+  const taskId = String(payload && payload.task_id || "").trim();
+  const listId = String(payload && payload.list_id || "").trim();
+
+  if (event !== "taskUpdated") {
+    return json({ ignored: true, ok: true, reason: "unsupported_event" }, 200, withCors(request));
+  }
+
+  if (!taskId) {
+    return json({ ignored: true, ok: true, reason: "missing_task_id" }, 200, withCors(request));
+  }
+
+  if (listId && listId !== CLICKUP_TRANSCRIPT.SUPPORT_LIST_ID) {
+    return json({ ignored: true, ok: true, reason: "wrong_list" }, 200, withCors(request));
+  }
+
+  const fullTask = await getClickUpTask(env, taskId);
+  const taskListId = String(fullTask && fullTask.list && fullTask.list.id || "").trim();
+  if (taskListId && taskListId !== CLICKUP_TRANSCRIPT.SUPPORT_LIST_ID) {
+    return json({ ignored: true, ok: true, reason: "wrong_task_list" }, 200, withCors(request));
+  }
+
+  const historyItem = Array.isArray(payload && payload.history_items) && payload.history_items.length ? payload.history_items[0] : null;
+  const synced = await upsertCanonicalSupportFromTask(env, fullTask, historyItem);
+
+  if (!synced.ok) {
+    return json({ ignored: true, ok: true, reason: synced.reason || "not_projectable" }, 200, withCors(request));
+  }
+
+  return json({ ok: true, supportId: synced.record.supportId, status: synced.record.status }, 200, withCors(request));
+}
+
 async function handleAssetReportRedirect(request, url, env) {
   const reportId = (url.searchParams.get("r") || "").trim();
   if (!reportId) return null;
@@ -1927,6 +2327,26 @@ export default {
 
     if (request.method === "GET" && isPath(url, "/health")) {
       return jsonResponse({ ok: true, service: "transcript-tax-monitor-pro-api" }, { status: 200 });
+    }
+
+    if (request.method === "GET" && isPath(url, "/v1/help/status")) {
+      try {
+        return await handleGetHelpStatus(request, url, env);
+      } catch (err) {
+        return jsonError(request, 500, "internal_error", String(err?.message || err));
+      }
+    }
+
+    if (request.method === "OPTIONS" && isPath(url, CLICKUP_TRANSCRIPT.WEBHOOK_ROUTE)) {
+      return new Response(null, { status: 204, headers: withCors(request) });
+    }
+
+    if (request.method === "POST" && isPath(url, CLICKUP_TRANSCRIPT.WEBHOOK_ROUTE)) {
+      try {
+        return await handleClickUpWebhook(request, env);
+      } catch (err) {
+        return jsonError(request, 500, "internal_error", String(err?.message || err));
+      }
     }
 
     if (request.method === "OPTIONS" && isPath(url, "/forms/transcript/report-email")) {
