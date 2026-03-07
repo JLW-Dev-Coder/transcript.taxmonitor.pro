@@ -1,0 +1,827 @@
+<!-- app-dashboard.html -->
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transcript.Tax Monitor Pro — App Dashboard</title>
+
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['DM Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial']
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles/site.css?v=1" />
+  <link rel="apple-touch-icon" href="/assets/favicon.ico" />
+  <link rel="icon" href="/assets/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="/assets/logo.svg" />
+
+  <style>
+    :root {
+      --tm-bg: #070d18;
+      --tm-bg-soft: #0b1220;
+      --tm-line: rgba(148, 163, 184, 0.14);
+      --tm-panel: rgba(15, 23, 42, 0.92);
+      --tm-panel-soft: rgba(15, 23, 42, 0.72);
+      --tm-purple: #a855f7;
+      --tm-purple-soft: rgba(168, 85, 247, 0.12);
+      --tm-text: #f8fafc;
+      --tm-text-muted: rgba(255, 255, 255, 0.64);
+      --tm-text-soft: rgba(255, 255, 255, 0.82);
+      --tm-green: #22c55e;
+      --tm-red: #ef4444;
+      --tm-yellow: #f59e0b;
+      --tm-shadow: 0 24px 64px rgba(2, 8, 23, 0.34);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      background:
+        radial-gradient(circle at 20% 18%, rgba(168, 85, 247, 0.22), transparent 28%),
+        radial-gradient(circle at 82% 20%, rgba(99, 102, 241, 0.18), transparent 24%),
+        linear-gradient(180deg, #2a0447 0%, #13163a 45%, #020617 100%);
+      color: var(--tm-text);
+      font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+    }
+
+    .shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(16px);
+      background: rgba(7, 13, 24, 0.74);
+      border-bottom: 1px solid var(--tm-line);
+    }
+
+    .topbar-inner,
+    .content,
+    .footer-inner {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .topbar-inner {
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: white;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+      color: #020617;
+      font-size: 14px;
+      font-weight: 800;
+      box-shadow: 0 14px 32px rgba(168, 85, 247, 0.28);
+    }
+
+    .brand-copy strong {
+      display: block;
+      font-size: 15px;
+      line-height: 1.15;
+    }
+
+    .brand-copy span {
+      color: var(--tm-text-muted);
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    .topbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .content {
+      padding: 28px 24px 48px;
+      display: grid;
+      gap: 24px;
+      grid-template-columns: minmax(0, 1.5fr) minmax(320px, 0.9fr);
+    }
+
+    .stack {
+      display: grid;
+      gap: 24px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(8, 14, 26, 0.98) 100%);
+      border: 1px solid var(--tm-line);
+      border-radius: 20px;
+      box-shadow: var(--tm-shadow);
+      overflow: hidden;
+    }
+
+    .card-body {
+      padding: 24px;
+    }
+
+    .card-title {
+      color: white;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 8px;
+    }
+
+    .card-desc {
+      color: var(--tm-text-muted);
+      font-size: 14px;
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    .hero-card {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.16) 0%, rgba(99, 102, 241, 0.10) 100%);
+      border: 1px solid rgba(168, 85, 247, 0.24);
+    }
+
+    .hero-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 20px;
+    }
+
+    .metric {
+      background: rgba(2, 6, 23, 0.36);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .metric-label {
+      color: var(--tm-text-muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      color: white;
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 1.1;
+      word-break: break-word;
+    }
+
+    .metric-subcopy {
+      color: var(--tm-text-muted);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    .section-header {
+      align-items: flex-start;
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: 14px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: 180ms ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+      color: white;
+      box-shadow: 0 14px 32px rgba(99, 102, 241, 0.22);
+    }
+
+    .btn-secondary {
+      background: rgba(168, 85, 247, 0.08);
+      border-color: rgba(168, 85, 247, 0.22);
+      color: #eadcff;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.08);
+      border-color: rgba(239, 68, 68, 0.22);
+      color: #fecaca;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      background: rgba(2, 6, 23, 0.28);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--tm-text-muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      white-space: nowrap;
+    }
+
+    td {
+      color: var(--tm-text-soft);
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    .empty-state {
+      color: var(--tm-text-muted);
+      font-size: 14px;
+      line-height: 1.7;
+      padding: 18px;
+      border: 1px dashed rgba(168, 85, 247, 0.22);
+      border-radius: 16px;
+      background: rgba(168, 85, 247, 0.04);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .pill-printed {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      color: #9ff0be;
+    }
+
+    .pill-pending {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      color: #ffd58d;
+    }
+
+    .muted {
+      color: var(--tm-text-muted);
+    }
+
+    .loading-row {
+      color: var(--tm-text-muted);
+    }
+
+    .right-card-grid {
+      display: grid;
+      gap: 24px;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .info-label {
+      color: var(--tm-text-muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .info-value {
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .support-links {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .support-link {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(168, 85, 247, 0.14);
+      background: rgba(168, 85, 247, 0.05);
+      color: #eadcff;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .footer-inner {
+      padding: 8px 24px 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-inner p,
+    .footer-inner a {
+      color: #94a3b8;
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1080px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .content,
+      .footer-inner,
+      .topbar-inner {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .topbar-inner,
+      .section-header,
+      .footer-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar-actions {
+        width: 100%;
+      }
+
+      .topbar-actions .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="h-full">
+  <div class="shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a href="/index.html" class="brand">
+          <span class="brand-mark">TM</span>
+          <span class="brand-copy">
+            <strong>Transcript.Tax Monitor Pro</strong>
+            <span>Authenticated App Dashboard</span>
+          </span>
+        </a>
+
+        <div class="topbar-actions">
+          <a href="/contact.html" class="btn btn-secondary">Support</a>
+          <button id="signOutBtn" type="button" class="btn btn-danger">Log Out</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="stack">
+        <div class="card hero-card">
+          <div class="card-body">
+            <div class="section-header">
+              <div>
+                <h1 class="card-title">Transcript app dashboard</h1>
+                <p class="card-desc">This page proves the session is real, shows the account state, and loads report and purchase history without dragging upload or parser logic into every corner of the app like a bad habit.</p>
+              </div>
+            </div>
+
+            <div class="hero-grid">
+              <div class="metric">
+                <div class="metric-label">Email</div>
+                <div id="heroEmail" class="metric-value" style="font-size:18px;">Loading...</div>
+                <div class="metric-subcopy">Authenticated account</div>
+              </div>
+              <div class="metric">
+                <div class="metric-label">Token Balance</div>
+                <div id="heroTokens" class="metric-value">—</div>
+                <div class="metric-subcopy">Available transcript credits</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="section-header">
+              <div>
+                <h2 class="card-title">Report history</h2>
+                <p class="card-desc">Each row shows the minimum contract fields your Worker returns. Miracles remain optional.</p>
+              </div>
+            </div>
+
+            <div id="reportsEmpty" class="empty-state hidden">No reports found yet.</div>
+
+            <div id="reportsTableWrap" class="table-wrap hidden">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Created At</th>
+                    <th>Printed At</th>
+                    <th>Report ID</th>
+                    <th>Status</th>
+                    <th>Open</th>
+                  </tr>
+                </thead>
+                <tbody id="reportsTbody">
+                  <tr>
+                    <td colspan="5" class="loading-row">Loading reports...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="section-header">
+              <div>
+                <h2 class="card-title">Purchase history</h2>
+                <p class="card-desc">This stays focused on receipt-level account history. No parser drama, no checkout flow on this page.</p>
+              </div>
+            </div>
+
+            <div id="purchasesEmpty" class="empty-state hidden">No purchases found yet.</div>
+
+            <div id="purchasesTableWrap" class="table-wrap hidden">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Created At</th>
+                    <th>Credits</th>
+                    <th>Price ID</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="purchasesTbody">
+                  <tr>
+                    <td colspan="4" class="loading-row">Loading purchases...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="right-card-grid">
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title">Account summary</h2>
+            <p class="card-desc">Session-backed account info from <code>/api/transcripts/me</code>.</p>
+
+            <div class="info-list">
+              <div class="info-row">
+                <div class="info-label">Email</div>
+                <div id="accountEmail" class="info-value">Loading...</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">Account status</div>
+                <div class="info-value">Signed in</div>
+              </div>
+              <div class="info-row">
+                <div class="info-label">Token balance</div>
+                <div id="accountTokens" class="info-value">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title">Token balance</h2>
+            <p class="card-desc">Pulled from the authenticated app state so the user can see whether they still have room to do useful work.</p>
+
+            <div class="metric" style="margin-top:18px;">
+              <div class="metric-label">Available Tokens</div>
+              <div id="sideTokens" class="metric-value">—</div>
+              <div class="metric-subcopy">Updates when account state loads</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title">Sign-out</h2>
+            <p class="card-desc">Ends the authenticated session and sends the user back to the sign-in page, as civilized software should.</p>
+            <button id="signOutBtnSecondary" type="button" class="btn btn-danger" style="margin-top:18px; width:100%;">Log Out</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h2 class="card-title">Support</h2>
+            <p class="card-desc">Useful links without stuffing a whole second product into the dashboard.</p>
+            <div class="support-links">
+              <a href="/contact.html" class="support-link"><span>Contact support</span><span>→</span></a>
+              <a href="/legal/privacy.html" class="support-link"><span>Privacy policy</span><span>→</span></a>
+              <a href="/legal/terms.html" class="support-link"><span>Terms of service</span><span>→</span></a>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      <div class="footer-inner">
+        <p>© <span id="footerYear"></span> Transcript.Tax Monitor Pro. All rights reserved.</p>
+        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+          <a href="/legal/privacy.html">Privacy Policy</a>
+          <a href="/legal/terms.html">Terms of Service</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatDate(value) {
+      const raw = String(value || '').trim();
+      if (!raw) return '—';
+      const d = new Date(raw);
+      if (Number.isNaN(d.getTime())) return raw;
+      return d.toLocaleString();
+    }
+
+    function getStatusBadge(status) {
+      const text = String(status || '').trim() || 'pending';
+      const lower = text.toLowerCase();
+      const cls = lower === 'completed' || lower === 'printed' ? 'pill pill-printed' : 'pill pill-pending';
+      return '<span class="' + cls + '">' + escapeHtml(text) + '</span>';
+    }
+
+    function firstDefined() {
+      for (let i = 0; i < arguments.length; i++) {
+        const value = arguments[i];
+        if (value !== undefined && value !== null && String(value).trim() !== '') return value;
+      }
+      return '';
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url, {
+        credentials: 'include',
+        method: 'GET'
+      });
+
+      if (response.status === 401) {
+        window.location.href = '/sign-in.html';
+        throw new Error('unauthorized');
+      }
+
+      const text = await response.text().catch(() => '');
+      let data = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch (_) {
+        data = null;
+      }
+
+      if (!response.ok) {
+        const message = data && (data.error || data.message) ? String(data.error || data.message) : (text || response.statusText || 'request_failed');
+        throw new Error(message);
+      }
+
+      return data;
+    }
+
+    function setAccountState(me) {
+      const email = firstDefined(me && me.email, me && me.user && me.user.email, 'Unknown');
+      const tokens = firstDefined(
+        me && me.tokenBalance,
+        me && me.tokens,
+        me && me.balance,
+        me && me.availableTokens,
+        me && me.user && me.user.balance,
+        me && me.user && me.user.tokenBalance,
+        '0'
+      );
+
+      document.getElementById('accountEmail').textContent = String(email);
+      document.getElementById('accountTokens').textContent = String(tokens);
+      document.getElementById('heroEmail').textContent = String(email);
+      document.getElementById('heroTokens').textContent = String(tokens);
+      document.getElementById('sideTokens').textContent = String(tokens);
+    }
+
+    function normalizeReports(data) {
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.reports)) return data.reports;
+      if (data && Array.isArray(data.items)) return data.items;
+      return [];
+    }
+
+    function normalizePurchases(data) {
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.purchases)) return data.purchases;
+      if (data && Array.isArray(data.items)) return data.items;
+      return [];
+    }
+
+    function renderReports(data) {
+      const reports = normalizeReports(data);
+      const empty = document.getElementById('reportsEmpty');
+      const tableWrap = document.getElementById('reportsTableWrap');
+      const tbody = document.getElementById('reportsTbody');
+
+      if (!reports.length) {
+        empty.classList.remove('hidden');
+        tableWrap.classList.add('hidden');
+        tbody.innerHTML = '';
+        return;
+      }
+
+      empty.classList.add('hidden');
+      tableWrap.classList.remove('hidden');
+      tbody.innerHTML = reports.map(function (item) {
+        const createdAt = firstDefined(item.createdAt, item.created_at, item.insertedAt);
+        const printedAt = firstDefined(item.printedAt, item.printed_at);
+        const reportId = firstDefined(item.reportId, item.report_id, item.id);
+        const reportUrl = firstDefined(item.reportUrl, item.report_url, reportId ? '/assets/report.html?reportId=' + encodeURIComponent(reportId) : '');
+        const status = firstDefined(item.status, printedAt ? 'printed' : 'pending');
+
+        return '' +
+          '<tr>' +
+            '<td>' + escapeHtml(formatDate(createdAt)) + '</td>' +
+            '<td>' + escapeHtml(formatDate(printedAt)) + '</td>' +
+            '<td>' + escapeHtml(reportId || '—') + '</td>' +
+            '<td>' + getStatusBadge(status) + '</td>' +
+            '<td>' + (reportUrl ? '<a class="btn btn-secondary" style="min-height:36px; padding:0 12px;" href="' + escapeHtml(reportUrl) + '">Open report</a>' : '—') + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function renderPurchases(data) {
+      const purchases = normalizePurchases(data);
+      const empty = document.getElementById('purchasesEmpty');
+      const tableWrap = document.getElementById('purchasesTableWrap');
+      const tbody = document.getElementById('purchasesTbody');
+
+      if (!purchases.length) {
+        empty.classList.remove('hidden');
+        tableWrap.classList.add('hidden');
+        tbody.innerHTML = '';
+        return;
+      }
+
+      empty.classList.add('hidden');
+      tableWrap.classList.remove('hidden');
+      tbody.innerHTML = purchases.map(function (item) {
+        const createdAt = firstDefined(item.createdAt, item.created_at, item.at);
+        const credits = firstDefined(item.credits, item.creditAmount, item.amountCredits, '—');
+        const priceId = firstDefined(item.priceId, item.price_id, '—');
+        const status = firstDefined(item.status, item.paymentStatus, 'completed');
+
+        return '' +
+          '<tr>' +
+            '<td>' + escapeHtml(formatDate(createdAt)) + '</td>' +
+            '<td>' + escapeHtml(String(credits)) + '</td>' +
+            '<td>' + escapeHtml(String(priceId)) + '</td>' +
+            '<td>' + getStatusBadge(status) + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    async function signOut() {
+      try {
+        await fetch('/api/transcripts/sign-out', {
+          credentials: 'include',
+          method: 'POST'
+        });
+      } catch (_) {
+      }
+      window.location.href = '/sign-in.html';
+    }
+
+    async function boot() {
+      document.getElementById('footerYear').textContent = String(new Date().getFullYear());
+      document.getElementById('signOutBtn').addEventListener('click', signOut);
+      document.getElementById('signOutBtnSecondary').addEventListener('click', signOut);
+
+      const me = await fetchJson('/api/transcripts/me');
+      setAccountState(me || {});
+
+      const purchasesPromise = fetchJson('/api/transcripts/purchases');
+      const reportsPromise = fetchJson('/api/transcripts/reports');
+
+      const purchases = await purchasesPromise;
+      renderPurchases(purchases);
+
+      const reports = await reportsPromise;
+      renderReports(reports);
+    }
+
+    boot().catch(function (error) {
+      if (String(error && error.message || error) === 'unauthorized') return;
+
+      const message = 'Dashboard failed to load. ' + String(error && error.message || error || 'unknown_error');
+      document.getElementById('reportsEmpty').classList.remove('hidden');
+      document.getElementById('purchasesEmpty').classList.remove('hidden');
+      document.getElementById('reportsEmpty').textContent = message;
+      document.getElementById('purchasesEmpty').textContent = message;
+      document.getElementById('reportsTableWrap').classList.add('hidden');
+      document.getElementById('purchasesTableWrap').classList.add('hidden');
+    });
+  </script>
+</body>
+</html>
