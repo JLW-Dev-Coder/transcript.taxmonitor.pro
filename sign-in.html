@@ -45,11 +45,10 @@
     body { box-sizing: border-box; }
 
     .hero-grid {
-      background-color: #070d18;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-      background-size: 40px 40px;
+      background:
+        radial-gradient(circle at 20% 18%, rgba(168, 85, 247, 0.28), transparent 28%),
+        radial-gradient(circle at 82% 20%, rgba(99, 102, 241, 0.18), transparent 24%),
+        linear-gradient(180deg, #2a0447 0%, #13163a 45%, #020617 100%);
       position: relative;
       overflow: hidden;
     }
@@ -58,9 +57,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background:
-        radial-gradient(circle at 22% 20%, rgba(168,85,247,0.30) 0%, rgba(168,85,247,0.12) 22%, rgba(7,13,24,0) 44%),
-        radial-gradient(circle at 80% 18%, rgba(99,102,241,0.20) 0%, rgba(99,102,241,0.10) 18%, rgba(7,13,24,0) 38%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
       pointer-events: none;
       z-index: 0;
     }
@@ -109,7 +106,7 @@
   </style>
 </head>
 
-<body class="h-full bg-navy text-charcoal overflow-auto">
+<body class="h-full text-charcoal overflow-auto bg-slate-950">
   <div id="app" class="w-full min-h-full hero-grid hero-glow">
     <div class="hero-content min-h-screen flex flex-col">
       <main class="relative flex-1">
@@ -119,7 +116,7 @@
               <div class="flex flex-col items-center justify-center mb-6">
                 <a href="/index.html" class="flex flex-col items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-300/60 rounded-xl">
                   <div class="w-[54px] h-[54px] rounded-xl flex items-center justify-center shadow-md bg-action">
-                    <span class="text-white font-bold text-xl tracking-tight">TM</span>
+                    <span class="text-black font-bold text-xl tracking-tight">TM</span>
                   </div>
                   <span class="mt-4 text-white font-semibold text-[1.6rem] tracking-tight">Transcript.Tax Monitor Pro</span>
                 </a>
