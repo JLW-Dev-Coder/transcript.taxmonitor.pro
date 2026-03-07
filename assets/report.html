@@ -1293,9 +1293,33 @@
           } catch (_) {}
         }
 
+        function isDevMode() {
+          const host = String(window.location.hostname || '').toLowerCase();
+          return host === 'localhost' || host === '127.0.0.1' || host.endsWith('.local') || urlHasDebugFlag();
+        }
+
+        function urlHasDebugFlag() {
+          const url = new URL(window.location.href);
+          const hashParams = readHashParams();
+          const values = [
+            url.searchParams.get('debug'),
+            url.searchParams.get('dev'),
+            hashParams.get('debug'),
+            hashParams.get('dev')
+          ].map((value) => String(value || '').toLowerCase());
+          return values.includes('1') || values.includes('true') || values.includes('yes');
+        }
+
+        function debugLog(label, detail) {
+          try {
+            console.warn(`[TM Report] ${label}`, detail);
+          } catch (_) {}
+        }
+
         function renderState(type, payload) {
           const wrap = document.getElementById('stateWrap');
           if (!wrap) return;
+          const debugEnabled = isDevMode();
           const configs = {
             malformed: {
               title: 'Malformed report payload',
@@ -1314,6 +1338,14 @@
             }
           };
           const view = configs[type];
+          const debugBlock = debugEnabled
+            ? `
+              <div style="margin-top:18px;">
+                <div style="color:#111827;font-size:12px;font-weight:800;letter-spacing:.05em;margin-bottom:8px;text-transform:uppercase;">Debug</div>
+                <div class="inline-code">${escapeHtml(typeof payload === 'string' ? payload : JSON.stringify(payload, null, 2) || '')}</div>
+              </div>
+            `
+            : '';
           wrap.innerHTML = `
             <div class="state-card">
               <div class="state-top">
@@ -1323,6 +1355,7 @@
               <div class="state-body">
                 <p>This report page is the finished destination for printable output and emailed links. It is intentionally not showing parser, token, or checkout UI here.</p>
                 <div class="inline-code">${escapeHtml(view.detail || '')}</div>
+                ${debugBlock}
                 <div class="state-actions">
                   <button type="button" class="btn btn-primary" id="statePrintBtn">Print Report</button>
                   <a href="/" class="btn btn-ghost">Back to App</a>
@@ -1345,6 +1378,9 @@
 
         async function getPayloadResult() {
           const encryptedPayload = await readEncryptedPayload().catch((err) => ({ __decryptError: String(err && err.message || err || 'decrypt_failed') }));
+          if (encryptedPayload && encryptedPayload.__decryptError) {
+            debugLog('Encrypted payload decryption failed', encryptedPayload.__decryptError);
+          }
           const paramsPayload = readParamsPayload();
           const hashPayload = readHashPayload();
           const winPayload = readWindowPayload();
@@ -1359,19 +1395,44 @@
             return { status: 'malformed', payload: encryptedPayload.__decryptError };
           }
 
+          const payloadSource = encryptedPayload
+            ? 'encrypted'
+            : paramsPayload
+            ? 'query'
+            : hashPayload
+            ? 'hash'
+            : winPayload
+            ? 'window'
+            : storagePayload
+            ? 'storage'
+            : null;
+
           const payload = encryptedPayload || paramsPayload || hashPayload || winPayload || storagePayload;
           if (!payload) {
-            if (hasRawParam || hasRawHash) return { status: 'malformed', payload: String(hasRawParam || hasRawHash).slice(0, 500) };
+            if (hasRawParam || hasRawHash) {
+              const malformedHint = String(hasRawParam || hasRawHash).slice(0, 500);
+              debugLog('Raw payload detected but parsing failed', { hasRawHash: Boolean(hasRawHash), hasRawParam: Boolean(hasRawParam), malformedHint });
+              return { status: 'malformed', payload: malformedHint };
+            }
+            debugLog('No report payload found', {
+              hash: String(window.location.hash || '').slice(0, 240),
+              search: String(window.location.search || '').slice(0, 240)
+            });
             return { status: 'missing', payload: null };
           }
           try {
+            debugLog('Using payload source', payloadSource);
             const report = normalizeReport(payload);
             if (!report || !report.summary || !report.metadata || !Array.isArray(report.rows)) {
-              return { status: 'invalid', payload: JSON.stringify(payload).slice(0, 500) };
+              const invalidPreview = JSON.stringify(payload).slice(0, 500);
+              debugLog('Payload normalized into invalid report shape', invalidPreview);
+              return { status: 'invalid', payload: invalidPreview };
             }
             return { status: 'ok', payload: report };
           } catch (err) {
-            return { status: 'invalid', payload: String(err && err.message || err || 'Unknown error') };
+            const errorMessage = String(err && err.message || err || 'Unknown error');
+            debugLog('Report normalization failed', errorMessage);
+            return { status: 'invalid', payload: errorMessage };
           }
         }
 
