@@ -651,6 +651,270 @@ function getLedgerStub(env, tokenId) {
   return env.TOKEN_LEDGER.get(id);
 }
 
+const TRANSCRIPT_SESSION_COOKIE = "tm_transcript_session";
+
+function buildAppDashboardUrl() {
+  return "https://transcript.taxmonitor.pro/app-dashboard.html";
+}
+
+function buildMagicVerifyUrl(token) {
+  return `https://transcript.taxmonitor.pro/api/transcripts/magic-link/verify?token=${encodeURIComponent(token)}`;
+}
+
+function buildReportPageUrl(reportId) {
+  return `https://transcript.taxmonitor.pro/assets/report.html?reportId=${encodeURIComponent(reportId)}`;
+}
+
+function buildSessionCookie(sessionId, maxAgeSeconds = 60 * 60 * 24 * 30) {
+  return [
+    `${TRANSCRIPT_SESSION_COOKIE}=${encodeURIComponent(sessionId)}`,
+    "HttpOnly",
+    `Max-Age=${maxAgeSeconds}`,
+    "Path=/",
+    "SameSite=Lax",
+    "Secure",
+  ].join("; ");
+}
+
+function buildSessionCookieClear() {
+  return [
+    `${TRANSCRIPT_SESSION_COOKIE}=`,
+    "HttpOnly",
+    "Max-Age=0",
+    "Path=/",
+    "SameSite=Lax",
+    "Secure",
+  ].join("; ");
+}
+
+function getCookieValue(request, name) {
+  const raw = String(request.headers.get("cookie") || "");
+  if (!raw) return "";
+  const parts = raw.split(";").map((x) => x.trim());
+  for (const part of parts) {
+    const idx = part.indexOf("=");
+    if (idx === -1) continue;
+    const key = part.slice(0, idx).trim();
+    const value = part.slice(idx + 1).trim();
+    if (key === name) return decodeURIComponent(value);
+  }
+  return "";
+}
+
+function getMagicLinkKey(token) {
+  return `magic-link:${String(token || "").trim()}`;
+}
+
+function getSessionKey(sessionId) {
+  return `session:${String(sessionId || "").trim()}`;
+}
+
+function getUserAccountKey(email) {
+  return `user-account:${String(email || "").trim().toLowerCase()}`;
+}
+
+function getReportIndexKey(email, createdAt, reportId) {
+  return `report-index:${String(email || "").trim().toLowerCase()}:${String(createdAt || "").trim()}:${String(reportId || "").trim()}`;
+}
+
+function getReportMetaKey(reportId) {
+  return `report-meta:${String(reportId || "").trim()}`;
+}
+
+function normalizeEmail(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+async function sha256Hex(input) {
+  const bytes = new TextEncoder().encode(String(input || ""));
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function getOrCreateUserAccount(env, email) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+
+  const normalizedEmail = normalizeEmail(email);
+  const key = getUserAccountKey(normalizedEmail);
+  const raw = await kv.get(key);
+
+  if (raw) {
+    const parsed = tryParseJson(raw);
+    if (parsed.ok && parsed.value && parsed.value.email && parsed.value.tokenId) {
+      return parsed.value;
+    }
+  }
+
+  const tokenHash = await sha256Hex(`transcript-account:${normalizedEmail}`);
+  const tokenId = `acct_${tokenHash.slice(0, 24)}`;
+
+  const account = {
+    createdAt: new Date().toISOString(),
+    email: normalizedEmail,
+    tokenId,
+  };
+
+  await kv.put(key, JSON.stringify(account, null, 2));
+  return account;
+}
+
+async function createMagicLinkRecord(env, email, redirect) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+
+  const account = await getOrCreateUserAccount(env, email);
+  const token = randomShortId(24);
+
+  const record = {
+    accountEmail: account.email,
+    createdAt: new Date().toISOString(),
+    redirect: redirect || "/app-dashboard.html",
+    tokenId: account.tokenId,
+  };
+
+  await kv.put(getMagicLinkKey(token), JSON.stringify(record, null, 2), {
+    expirationTtl: 60 * 30,
+  });
+
+  return {
+    account,
+    token,
+  };
+}
+
+async function consumeMagicLinkRecord(env, token) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+
+  const key = getMagicLinkKey(token);
+  const raw = await kv.get(key);
+  if (!raw) return null;
+
+  await kv.delete(key);
+
+  const parsed = tryParseJson(raw);
+  if (!parsed.ok || !parsed.value) return null;
+  return parsed.value;
+}
+
+async function createSessionRecord(env, email, tokenId) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+
+  const sessionId = randomShortId(24);
+  const session = {
+    createdAt: new Date().toISOString(),
+    email: normalizeEmail(email),
+    tokenId: String(tokenId || "").trim(),
+  };
+
+  await kv.put(getSessionKey(sessionId), JSON.stringify(session, null, 2), {
+    expirationTtl: 60 * 60 * 24 * 30,
+  });
+
+  return {
+    session,
+    sessionId,
+  };
+}
+
+async function getSessionFromRequest(request, env) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+
+  const sessionId = getCookieValue(request, TRANSCRIPT_SESSION_COOKIE);
+  if (!sessionId) return null;
+
+  const raw = await kv.get(getSessionKey(sessionId));
+  if (!raw) return null;
+
+  const parsed = tryParseJson(raw);
+  if (!parsed.ok || !parsed.value) return null;
+
+  return {
+    session: parsed.value,
+    sessionId,
+  };
+}
+
+async function requireTranscriptSession(request, env) {
+  const current = await getSessionFromRequest(request, env);
+  if (!current || !current.session || !current.session.email || !current.session.tokenId) {
+    return null;
+  }
+  return current;
+}
+
+async function listUserReportRecords(env, email, limit = 50, cursor = undefined) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+
+  const prefix = `report-index:${normalizeEmail(email)}:`;
+  const listed = await kv.list({ cursor, limit, prefix });
+
+  const records = [];
+  for (const key of listed.keys || []) {
+    const raw = await kv.get(key.name);
+    const parsed = tryParseJson(raw || "");
+    if (!parsed.ok || !parsed.value || !parsed.value.reportId) continue;
+
+    const metaRaw = await kv.get(getReportMetaKey(parsed.value.reportId));
+    const metaParsed = tryParseJson(metaRaw || "");
+    if (!metaParsed.ok || !metaParsed.value) continue;
+
+    records.push(metaParsed.value);
+  }
+
+  records.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+
+  return {
+    cursor: listed.list_complete ? null : listed.cursor,
+    records,
+  };
+}
+
+async function listUserPurchaseRecords(env, tokenId) {
+  if (!env.R2_TRANSCRIPT) return [];
+
+  const out = [];
+  let cursor = undefined;
+
+  do {
+    const page = await env.R2_TRANSCRIPT.list({
+      cursor,
+      limit: 100,
+      prefix: "receipts/stripe/",
+    });
+
+    for (const obj of page.objects || []) {
+      const body = await env.R2_TRANSCRIPT.get(obj.key);
+      if (!body) continue;
+
+      const text = await body.text();
+      const parsed = tryParseJson(text);
+      if (!parsed.ok || !parsed.value) continue;
+
+      if (String(parsed.value.tokenId || "") !== String(tokenId || "")) continue;
+
+      out.push({
+        amount: null,
+        createdAt: parsed.value.at || null,
+        credits: parsed.value.credits || null,
+        priceId: parsed.value.priceId || "",
+        sessionId: parsed.value.sessionId || "",
+        status: "completed",
+        tokenId: parsed.value.tokenId || "",
+      });
+    }
+
+    cursor = page.truncated ? page.cursor : undefined;
+  } while (cursor);
+
+  out.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+  return out;
+}
+
 /* ------------------------------------------
  * Transcript: Handlers
  * ------------------------------------------ */
@@ -1223,6 +1487,302 @@ async function handleGetTranscriptReportData(request, url, env) {
   );
 }
 
+async function handleTranscriptMagicLinkRequest(request, env) {
+  const body = await request.json().catch(() => ({}));
+  const email = normalizeEmail(body?.email);
+  const redirectRaw = String(body?.redirect || "").trim();
+  const redirect = redirectRaw && redirectRaw.startsWith("/") ? redirectRaw : "/app-dashboard.html";
+
+  if (!isLikelyEmail(email)) {
+    return json({ error: "invalid_email" }, 400, withCors(request));
+  }
+
+  const created = await createMagicLinkRecord(env, email, redirect);
+  const verifyUrl = buildMagicVerifyUrl(created.token);
+
+  const fromUser =
+    env.GOOGLE_WORKSPACE_USER_SUPPORT ||
+    env.GOOGLE_WORKSPACE_USER_NOREPLY ||
+    env.GOOGLE_WORKSPACE_USER_DEFAULT;
+
+  const from = "Transcript Tax Monitor Pro <" + String(fromUser || "support@taxmonitor.pro") + ">";
+  const subject = "Your Transcript Tax Monitor sign-in link";
+  const text = `Use this secure sign-in link to open your Transcript Tax Monitor account.
+
+Sign in:
+${verifyUrl}
+
+This link expires in 30 minutes.
+
+Transcript Tax Monitor Pro`;
+
+  await gmailSendMessage(env, { from, subject, text, to: email });
+
+  return json({ ok: true }, 200, withCors(request));
+}
+
+async function handleTranscriptMagicLinkVerify(request, url, env) {
+  const token = String(url.searchParams.get("token") || "").trim();
+  if (!token) {
+    return new Response("Missing magic link token.", {
+      headers: { "content-type": "text/plain; charset=utf-8" },
+      status: 400,
+    });
+  }
+
+  const record = await consumeMagicLinkRecord(env, token);
+  if (!record || !record.accountEmail || !record.tokenId) {
+    return new Response("This magic link is invalid or expired.", {
+      headers: { "content-type": "text/plain; charset=utf-8" },
+      status: 400,
+    });
+  }
+
+  const created = await createSessionRecord(env, record.accountEmail, record.tokenId);
+  const redirect = String(record.redirect || "/app-dashboard.html").trim();
+  const target = new URL(redirect.startsWith("/") ? `https://transcript.taxmonitor.pro${redirect}` : buildAppDashboardUrl());
+
+  return new Response(null, {
+    headers: {
+      "cache-control": "no-store",
+      Location: target.toString(),
+      "Set-Cookie": buildSessionCookie(created.sessionId),
+    },
+    status: 302,
+  });
+}
+
+async function handleGetTranscriptMe(request, env) {
+  const current = await requireTranscriptSession(request, env);
+  if (!current) {
+    return json({ error: "unauthorized" }, 401, withCors(request));
+  }
+
+  const stub = getLedgerStub(env, current.session.tokenId);
+  const res = await stub.fetch("https://ledger/balance", { method: "GET" });
+  const out = await res.json().catch(() => ({}));
+
+  return json(
+    {
+      ok: true,
+      user: {
+        balance: out.balance ?? 0,
+        email: current.session.email,
+        tokenId: current.session.tokenId,
+      },
+    },
+    200,
+    withCors(request)
+  );
+}
+
+async function handleGetTranscriptPurchases(request, url, env) {
+  const current = await requireTranscriptSession(request, env);
+  if (!current) {
+    return json({ error: "unauthorized" }, 401, withCors(request));
+  }
+
+  const limitRaw = Number(url.searchParams.get("limit") || 25);
+  const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 100) : 25;
+
+  const purchases = await listUserPurchaseRecords(env, current.session.tokenId);
+
+  return json(
+    {
+      ok: true,
+      purchases: purchases.slice(0, limit),
+    },
+    200,
+    withCors(request)
+  );
+}
+
+async function handleGetTranscriptReports(request, url, env) {
+  const current = await requireTranscriptSession(request, env);
+  if (!current) {
+    return json({ error: "unauthorized" }, 401, withCors(request));
+  }
+
+  const cursor = String(url.searchParams.get("cursor") || "").trim() || undefined;
+  const limitRaw = Number(url.searchParams.get("limit") || 25);
+  const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 100) : 25;
+
+  const listed = await listUserReportRecords(env, current.session.email, limit, cursor);
+
+  return json(
+    {
+      cursor: listed.cursor,
+      ok: true,
+      reports: listed.records,
+    },
+    200,
+    withCors(request)
+  );
+}
+
+async function handleCreateTranscriptPreview(request, env, ctx) {
+  const current = await requireTranscriptSession(request, env);
+  if (!current) {
+    return json({ error: "unauthorized" }, 401, withCors(request));
+  }
+
+  const body = await request.json().catch(() => ({}));
+  const reportData = body?.reportData;
+
+  if (!reportData || typeof reportData !== "object") {
+    return json({ error: "missing_reportData" }, 400, withCors(request));
+  }
+
+  const requestId = crypto.randomUUID();
+  const consumeRes = await getLedgerStub(env, current.session.tokenId).fetch("https://ledger/consume", {
+    body: JSON.stringify({ amount: 1, requestId }),
+    headers: { "content-type": "application/json" },
+    method: "POST",
+  });
+
+  const consumeOut = await consumeRes.json().catch(() => ({}));
+  if (!consumeRes.ok) {
+    return json(
+      {
+        balance: consumeOut.balance ?? 0,
+        error: consumeOut.error || "token_consume_failed",
+        needed: consumeOut.needed ?? 1,
+      },
+      consumeRes.status,
+      withCors(request)
+    );
+  }
+
+  const payload = JSON.stringify(reportData);
+  const shortLink = await storeShortReportPayload(env, payload, {
+    payloadTransport: "query",
+    sourcePath: "/assets/report.html",
+  });
+
+  const createdAt = new Date().toISOString();
+  const reportMeta = {
+    accountEmail: current.session.email,
+    balanceAfter: consumeOut.balance ?? 0,
+    createdAt,
+    printedAt: null,
+    reportId: shortLink.reportId,
+    reportUrl: buildReportPageUrl(shortLink.reportId),
+    status: "pending",
+    tokenId: current.session.tokenId,
+  };
+
+  const kv = getReportKv(env);
+  await kv.put(getReportMetaKey(shortLink.reportId), JSON.stringify(reportMeta, null, 2));
+  await kv.put(
+    getReportIndexKey(current.session.email, createdAt, shortLink.reportId),
+    JSON.stringify({ createdAt, reportId: shortLink.reportId }, null, 2)
+  );
+  await kv.put(
+    getReportUnlockKey(requestId),
+    JSON.stringify(
+      {
+        amount: 1,
+        balanceAfter: consumeOut.balance ?? 0,
+        createdAt,
+        reportId: shortLink.reportId,
+        tokenId: current.session.tokenId,
+        type: "preview_unlock",
+      },
+      null,
+      2
+    )
+  );
+
+  if (env.R2_TRANSCRIPT) {
+    ctx.waitUntil(
+      env.R2_TRANSCRIPT.put(
+        `receipts/consume/${requestId}.json`,
+        JSON.stringify(
+          {
+            amount: 1,
+            at: createdAt,
+            balance: consumeOut.balance ?? 0,
+            reportId: shortLink.reportId,
+            tokenId: current.session.tokenId,
+            type: "preview",
+          },
+          null,
+          2
+        ),
+        { httpMetadata: { contentType: "application/json" } }
+      )
+    );
+  }
+
+  return json(
+    {
+      ok: true,
+      balance: consumeOut.balance ?? 0,
+      reportId: shortLink.reportId,
+      reportUrl: buildReportPageUrl(shortLink.reportId),
+    },
+    200,
+    withCors(request)
+  );
+}
+
+async function handleTranscriptPrintComplete(request, url, env) {
+  const current = await requireTranscriptSession(request, env);
+  if (!current) {
+    return json({ error: "unauthorized" }, 401, withCors(request));
+  }
+
+  const match = url.pathname.match(/^\/api\/transcripts\/report\/([^/]+)\/print-complete$/);
+  const reportId = String(match && match[1] ? match[1] : "").trim();
+  if (!reportId) {
+    return json({ error: "missing_reportId" }, 400, withCors(request));
+  }
+
+  const kv = getReportKv(env);
+  const raw = await kv.get(getReportMetaKey(reportId));
+  if (!raw) {
+    return json({ error: "report_not_found" }, 404, withCors(request));
+  }
+
+  const parsed = tryParseJson(raw);
+  if (!parsed.ok || !parsed.value) {
+    return json({ error: "invalid_report_meta" }, 500, withCors(request));
+  }
+
+  const meta = parsed.value;
+  if (String(meta.accountEmail || "") !== String(current.session.email || "")) {
+    return json({ error: "forbidden" }, 403, withCors(request));
+  }
+
+  meta.printedAt = new Date().toISOString();
+  meta.status = "printed";
+
+  await kv.put(getReportMetaKey(reportId), JSON.stringify(meta, null, 2));
+
+  return json(
+    {
+      ok: true,
+      printedAt: meta.printedAt,
+      reportId,
+      status: meta.status,
+    },
+    200,
+    withCors(request)
+  );
+}
+
+async function handleTranscriptSignOut(request) {
+  return new Response(JSON.stringify({ ok: true }), {
+    headers: {
+      ...withCors(request),
+      "cache-control": "no-store",
+      "content-type": "application/json; charset=utf-8",
+      "Set-Cookie": buildSessionCookieClear(),
+    },
+    status: 200,
+  });
+}
+
 async function handleAssetReportRedirect(request, url, env) {
   const reportId = (url.searchParams.get("r") || "").trim();
   if (!reportId) return null;
@@ -1245,6 +1805,52 @@ async function handleAssetReportRedirect(request, url, env) {
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    if (url.pathname.startsWith("/api/transcripts/")) {
+      const pre = handleCorsPreflight(request);
+      if (pre) return pre;
+
+      try {
+        if (request.method === "POST" && isPath(url, "/api/transcripts/magic-link/request")) {
+          return await handleTranscriptMagicLinkRequest(request, env);
+        }
+
+        if (request.method === "GET" && isPath(url, "/api/transcripts/magic-link/verify")) {
+          return await handleTranscriptMagicLinkVerify(request, url, env);
+        }
+
+        if (request.method === "GET" && isPath(url, "/api/transcripts/me")) {
+          return await handleGetTranscriptMe(request, env);
+        }
+
+        if (request.method === "GET" && isPath(url, "/api/transcripts/purchases")) {
+          return await handleGetTranscriptPurchases(request, url, env);
+        }
+
+        if (request.method === "POST" && isPath(url, "/api/transcripts/preview")) {
+          return await handleCreateTranscriptPreview(request, env, ctx);
+        }
+
+        if (request.method === "GET" && isPath(url, "/api/transcripts/reports")) {
+          return await handleGetTranscriptReports(request, url, env);
+        }
+
+        if (
+          request.method === "POST" &&
+          /^\/api\/transcripts\/report\/[^/]+\/print-complete$/.test(url.pathname)
+        ) {
+          return await handleTranscriptPrintComplete(request, url, env);
+        }
+
+        if (request.method === "POST" && isPath(url, "/api/transcripts/sign-out")) {
+          return await handleTranscriptSignOut(request);
+        }
+
+        return jsonError(request, 404, "not_found");
+      } catch (err) {
+        return jsonError(request, 500, "internal_error", String(err?.message || err));
+      }
+    }
 
     if (url.pathname.startsWith("/transcript/")) {
       const pre = handleCorsPreflight(request);
