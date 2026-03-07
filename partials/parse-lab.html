@@ -739,12 +739,38 @@
   return transport === "query" ? (base + "?" + payload) : (base + "#" + payload);
 }
 
+    async function createNormalizedReportLink(reportUrl) {
+      const out = await fetchJson("/transcript/report-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reportUrl }),
+      });
+
+      if (!out.ok) {
+        const msg = out.json && out.json.error ? String(out.json.error) : (out.text || out.res.statusText);
+        throw new Error("Report link normalization failed (" + String(out.res.status) + "): " + msg);
+      }
+
+      const normalizedUrl = String(
+        (out.json && (out.json.reportUrl || out.json.url || out.json.normalizedReportUrl)) || ""
+      ).trim();
+
+      if (!normalizedUrl) {
+        throw new Error("Report link normalization returned no report URL.");
+      }
+
+      return normalizedUrl;
+    }
+
     async function openOverlayWithReport() {
       if (!miniReportOverlay || !miniReportIframe || !state.structured) return;
 
       const reportUrl = await buildEncryptedReportLink(state.structured, "hash", "/assets/report");
+      const normalizedReportUrl = await createNormalizedReportLink(reportUrl);
+
+      state.lastReportLink = normalizedReportUrl;
       miniReportIframe.src = "";
-      miniReportIframe.src = reportUrl;
+      miniReportIframe.src = normalizedReportUrl;
 
       miniReportOverlay.classList.remove("hidden");
       miniReportOverlay.setAttribute("aria-hidden", "false");
@@ -947,7 +973,8 @@
 
       try {
         const reportUrl = await buildEncryptedReportLink(state.structured, "hash", "/assets/report");
-        state.lastReportLink = reportUrl;
+        const normalizedReportUrl = await createNormalizedReportLink(reportUrl);
+        state.lastReportLink = normalizedReportUrl;
 
         if (!state.eventId) {
           state.eventId = crypto.randomUUID();
@@ -963,7 +990,7 @@
           body: JSON.stringify({
             email,
             eventId: state.eventId,
-            reportUrl,
+            reportUrl: normalizedReportUrl,
             tokenId: state.tokenId,
           }),
         });
