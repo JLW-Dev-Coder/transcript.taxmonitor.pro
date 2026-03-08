@@ -1522,11 +1522,16 @@ async function handleCreateTranscriptCheckout(request, env) {
   const missing = envMissing(env, required);
   if (missing.length) return jsonError(request, 503, "checkout_temporarily_unavailable", { missing: missing.sort() });
 
+  const current = await requireTranscriptSession(request, env);
+  if (!current || !current.session) {
+    return json({ error: "unauthorized", ok: false }, 401, withCors(request));
+  }
+
   const body = await request.json().catch(() => ({}));
   const priceId = typeof body?.priceId === "string" ? body.priceId.trim() : "";
-  const tokenId = typeof body?.tokenId === "string" ? body.tokenId.trim() : "";
   const returnUrlBaseRaw = typeof body?.returnUrlBase === "string" ? body.returnUrlBase.trim() : "";
   const successPathRaw = typeof body?.successPath === "string" ? body.successPath.trim() : "";
+  const tokenId = String(current.session.tokenId || "").trim();
 
   if (!priceId) return jsonError(request, 400, "missing_priceId");
   if (!tokenId) return jsonError(request, 400, "missing_tokenId");
@@ -1562,7 +1567,7 @@ async function handleCreateTranscriptCheckout(request, env) {
       "metadata[tokenId]": tokenId,
     });
 
-    return json({ id: session.id, url: session.url }, 200, withCors(request));
+    return json({ id: session.id, tokenId, url: session.url }, 200, withCors(request));
   } catch (err) {
     return jsonError(request, 502, "checkout_temporarily_unavailable", String(err?.message || err));
   }
@@ -2195,22 +2200,64 @@ async function handleTranscriptMagicLinkVerify(request, url, env) {
 }
 
 async function handleGetTranscriptMe(request, env) {
+  const headerEmail = normalizeEmail(
+    request.headers.get("x-user-email") ||
+    request.headers.get("cf-access-authenticated-user-email") ||
+    ""
+  );
+  const headerTokenId = String(
+    request.headers.get("x-user-token") ||
+    request.headers.get("x-token-id") ||
+    ""
+  ).trim();
+
+  let email = "";
+  let tokenId = "";
+
   const current = await requireTranscriptSession(request, env);
-  if (!current) {
-    return json({ error: "unauthorized" }, 401, withCors(request));
+  if (current && current.session) {
+    email = normalizeEmail(current.session.email);
+    tokenId = String(current.session.tokenId || "").trim();
   }
 
-  const stub = getLedgerStub(env, current.session.tokenId);
-  const res = await stub.fetch("https://ledger/balance", { method: "GET" });
-  const out = await res.json().catch(() => ({}));
+  if (!email && headerEmail) {
+    email = headerEmail;
+  }
+
+  if (!tokenId && headerTokenId) {
+    tokenId = headerTokenId;
+  }
+
+  if (!tokenId && email) {
+    const account = await getOrCreateUserAccount(env, email);
+    tokenId = String(account && account.tokenId || "").trim();
+    email = normalizeEmail(account && account.email || email);
+  }
+
+  if (!email && !tokenId) {
+    return json({ error: "unauthorized", ok: false }, 401, withCors(request));
+  }
+
+  let balance = 0;
+
+  if (tokenId) {
+    try {
+      const stub = getLedgerStub(env, tokenId);
+      const res = await stub.fetch("https://ledger/balance", { method: "GET" });
+      const out = await res.json().catch(() => ({}));
+      balance = Number(out.balance ?? 0) || 0;
+    } catch (_) {
+      balance = 0;
+    }
+  }
 
   return json(
     {
       ok: true,
       user: {
-        balance: out.balance ?? 0,
-        email: current.session.email,
-        tokenId: current.session.tokenId,
+        balance,
+        email: email || null,
+        tokenId: tokenId || null,
       },
     },
     200,
