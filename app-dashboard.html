@@ -1299,6 +1299,108 @@
       }
     }
 
+    function setPdfUploadState(file) {
+      const statusEl = document.getElementById('preview-action-status');
+      const uploadTitleEl = document.querySelector('#pdf-drop-zone .parser-upload-title');
+      const uploadCopyEl = document.querySelector('#pdf-drop-zone .parser-upload-copy');
+      const extractBtn = document.getElementById('extract-raw-btn');
+      const parseBtn = document.getElementById('parse-structured-btn');
+
+      if (!file) {
+        if (statusEl) statusEl.textContent = 'Runs in your browser. Your PDF is not uploaded or stored.';
+        if (uploadTitleEl) uploadTitleEl.textContent = 'Drop PDF here or click to browse';
+        if (uploadCopyEl) uploadCopyEl.textContent = 'Accepts IRS transcripts (Account, Return, Wage & Income)';
+        if (extractBtn) extractBtn.disabled = true;
+        if (parseBtn) parseBtn.disabled = true;
+        if (extractBtn) extractBtn.className = 'btn btn-secondary opacity-50 cursor-not-allowed';
+        if (parseBtn) parseBtn.className = 'btn btn-primary opacity-50 cursor-not-allowed';
+        return;
+      }
+
+      if (statusEl) statusEl.textContent = 'PDF selected: ' + (file.name || 'transcript.pdf') + '. Ready for local parsing.';
+      if (uploadTitleEl) uploadTitleEl.textContent = file.name || 'PDF selected';
+      if (uploadCopyEl) uploadCopyEl.textContent = 'File size: ' + (bytesToReadable(file.size) || 'Unknown size');
+      if (extractBtn) extractBtn.disabled = false;
+      if (parseBtn) parseBtn.disabled = false;
+      if (extractBtn) extractBtn.className = 'btn btn-secondary';
+      if (parseBtn) parseBtn.className = 'btn btn-primary';
+    }
+
+    function handlePdfSelection(file) {
+      const input = document.getElementById('pdf-upload');
+      if (!file) {
+        setPdfUploadState(null);
+        return;
+      }
+
+      const isPdf = String(file.type || '').toLowerCase() === 'application/pdf' || /\.pdf$/i.test(String(file.name || ''));
+      if (!isPdf) {
+        if (input) input.value = '';
+        setPdfUploadState(null);
+        showToast('Please choose a PDF file.');
+        return;
+      }
+
+      setPdfUploadState(file);
+    }
+
+    function wirePdfUpload() {
+      const dropZone = document.getElementById('pdf-drop-zone');
+      const input = document.getElementById('pdf-upload');
+      if (!dropZone || !input) return;
+
+      setPdfUploadState(null);
+
+      dropZone.addEventListener('click', function () {
+        input.click();
+      });
+
+      dropZone.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          input.click();
+        }
+      });
+
+      input.addEventListener('change', function () {
+        const file = input.files && input.files[0] ? input.files[0] : null;
+        handlePdfSelection(file);
+      });
+
+      ['dragenter', 'dragover'].forEach(function (eventName) {
+        dropZone.addEventListener(eventName, function (event) {
+          event.preventDefault();
+          dropZone.classList.add('is-dragover');
+        });
+      });
+
+      ['dragleave', 'dragend'].forEach(function (eventName) {
+        dropZone.addEventListener(eventName, function () {
+          dropZone.classList.remove('is-dragover');
+        });
+      });
+
+      dropZone.addEventListener('drop', function (event) {
+        event.preventDefault();
+        dropZone.classList.remove('is-dragover');
+
+        const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]
+          ? event.dataTransfer.files[0]
+          : null;
+
+        if (!file) return;
+
+        try {
+          const transfer = new DataTransfer();
+          transfer.items.add(file);
+          input.files = transfer.files;
+        } catch (_) {
+        }
+
+        handlePdfSelection(file);
+      });
+    }
+
     async function fetchJson(url, options) {
       const response = await fetch(url, Object.assign({
         credentials: 'include',
@@ -1543,6 +1645,7 @@
 
     function wireStaticButtons() {
       wireBrandLogo();
+      wirePdfUpload();
       document.querySelectorAll('[data-toast]').forEach(function (btn) {
         btn.addEventListener('click', function () {
           showToast(btn.getAttribute('data-toast'));
