@@ -248,6 +248,50 @@
       hide("success-alert");
     }
 
+    function formatBackendDetail(detail) {
+      const text = String(detail || "").trim();
+      if (!text) return "";
+
+      if (text.includes("Missing Google env vars")) {
+        return "Email delivery is not configured on the Worker yet. Add the Google mail env vars and try again.";
+      }
+
+      if (text.includes("Missing Workspace user env var")) {
+        return "The Worker is missing the Google Workspace sender user configuration for magic-link emails.";
+      }
+
+      if (text.includes("Missing KV binding: KV_TRANSCRIPT")) {
+        return "The Worker is missing the KV_TRANSCRIPT binding required for sign-in sessions.";
+      }
+
+      if (text.includes("Gmail send failed")) {
+        return "The sign-in email could not be sent from the Worker. Check the Gmail service account setup and sender permissions.";
+      }
+
+      if (text.includes("Google token exchange failed")) {
+        return "The Google service account token exchange failed. Check the service account credentials, domain-wide delegation, and token URI config.";
+      }
+
+      return text;
+    }
+
+    function getApiErrorMessage(data, status) {
+      const message = data && typeof data.message === "string" ? data.message.trim() : "";
+      const error = data && typeof data.error === "string" ? data.error.trim() : "";
+      const details = formatBackendDetail(data && data.details);
+      const raw = data && typeof data.raw === "string" ? data.raw.trim() : "";
+
+      if (message) return message;
+      if (details) return details;
+      if (error && error !== "internal_error") return error.replace(/_/g, " ");
+      if (raw) return raw;
+      if (status === 400) return "The sign-in request was invalid.";
+      if (status === 401) return "You are not authorized to do that.";
+      if (status === 404) return "The sign-in endpoint was not found.";
+      if (status >= 500) return "The sign-in service is misconfigured right now. Check the Worker logs and env bindings.";
+      return "Request failed.";
+    }
+
     async function startMagicLink(email, redirect) {
       const res = await fetch(API_BASE + "/api/transcripts/magic-link/request", {
         method: "POST",
@@ -256,13 +300,20 @@
         body: JSON.stringify({ email, redirect })
       });
 
-      const data = await res.json().catch(() => null);
+      const rawText = await res.text().catch(() => "");
+      let data = null;
+
+      if (rawText) {
+        try {
+          data = JSON.parse(rawText);
+        } catch {
+          data = { raw: rawText };
+        }
+      }
 
       if (!res.ok) {
-        const msg = data && (data.message || data.error)
-          ? String(data.message || data.error)
-          : "Request failed.";
-        throw new Error(msg);
+        const message = getApiErrorMessage(data, res.status);
+        throw new Error(message);
       }
 
       return data;
