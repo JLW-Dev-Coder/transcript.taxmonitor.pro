@@ -701,242 +701,166 @@
 
       <main class="workspace">
         <section id="dashboardPage" class="page active">
-          <div class="dashboard-grid">
-            <div class="stack">
-              <div class="parser-card-shell">
-                <div class="parser-card-body">
-                  <div class="parser-hero">
-                    <h2>Try the Transcript Parser</h2>
-                    <p>Upload a transcript PDF. It parses in your browser. No uploads. No risk.</p>
-                    <p>Optional: add your firm logo so the preview report looks like your deliverable.</p>
-                  </div>
+          <div class="stack">
+            <div class="parser-card-shell">
+              <div class="parser-card-body">
+                <div class="parser-hero">
+                  <h2>Ready to use the Transcript Parser?</h2>
+                  <p>Upload a transcript PDF. Parsing runs locally in your browser so the file never leaves your device.</p>
+                  <p>Optional: add your firm logo so the preview report looks like your deliverable.</p>
+                </div>
 
-                  <div class="parser-steps">
-                    <div class="parser-step">
-                      <span class="parser-step-badge">1</span>
-                      <div>
-                        <div class="parser-step-title">Check App Balance</div>
-                        <p class="parser-step-copy">Use your signed-in account</p>
-                      </div>
-                    </div>
-                    <div class="parser-step">
-                      <span class="parser-step-badge">2</span>
-                      <div>
-                        <div class="parser-step-title">Upload Transcript PDF</div>
-                        <p class="parser-step-copy">Choose your transcript</p>
-                      </div>
-                    </div>
-                    <div class="parser-step">
-                      <span class="parser-step-badge">3</span>
-                      <div>
-                        <div class="parser-step-title">Outputs</div>
-                        <p class="parser-step-copy">Preview and email</p>
-                      </div>
+                <div class="parser-steps">
+                  <div class="parser-step">
+                    <span class="parser-step-badge">1</span>
+                    <div>
+                      <div class="parser-step-title">Check App Balance</div>
+                      <p class="parser-step-copy">Use your signed-in account</p>
                     </div>
                   </div>
+                  <div class="parser-step">
+                    <span class="parser-step-badge">2</span>
+                    <div>
+                      <div class="parser-step-title">Upload Transcript PDF</div>
+                      <p class="parser-step-copy">Choose your transcript</p>
+                    </div>
+                  </div>
+                  <div class="parser-step">
+                    <span class="parser-step-badge">3</span>
+                    <div>
+                      <div class="parser-step-title">Outputs</div>
+                      <p class="parser-step-copy">Preview and email</p>
+                    </div>
+                  </div>
+                </div>
 
-                  <div class="parser-section">
-                    <div class="parser-section-head">
-                      <span class="section-badge">1</span>
-                      <div>
-                        <div class="parser-section-title">Check App Balance</div>
-                        <p class="parser-section-copy">Use your signed-in account</p>
-                      </div>
+                <div class="parser-section">
+                  <div class="parser-section-head">
+                    <span class="section-badge">1</span>
+                    <div>
+                      <div class="parser-section-title">Check App Balance</div>
+                      <p class="parser-section-copy">Use your signed-in account</p>
+                    </div>
+                  </div>
+
+                  <div style="display:grid; gap:14px;">
+                    <div>
+                      <label for="parser-token-id" class="parser-form-label">Signed-in Account</label>
+                      <input id="parser-token-id" type="text" placeholder="Signed in session required" class="parser-input" autocomplete="off" disabled />
+                      <p class="parser-note">Preview uses your authenticated app session and consumes 1 credit when saved.</p>
                     </div>
 
-                    <div style="display:grid; gap:14px;">
-                      <div>
-                        <label for="parser-token-id" class="parser-form-label">Signed-in Account</label>
-                        <input id="parser-token-id" type="text" placeholder="Signed in session required" class="parser-input" autocomplete="off" disabled />
-                        <p class="parser-note">Preview uses your authenticated app session and consumes 1 credit when saved.</p>
+                    <div class="parser-balance-row">
+                      <div class="parser-status-box">
+                        <span style="color: var(--tm-text-soft); font-size: 13px;">Available balance:</span>
+                        <span id="parser-token-available" class="parser-balance-value">-</span>
                       </div>
+                      <button id="parser-save-token" type="button" class="btn btn-secondary">Refresh Balance</button>
+                    </div>
 
-                      <div class="parser-balance-row">
-                        <div class="parser-status-box">
-                          <span style="color: var(--tm-text-soft); font-size: 13px;">Available balance:</span>
-                          <span id="parser-token-available" class="parser-balance-value">-</span>
+                    <div id="parser-token-status" class="parser-status-box">Refresh balance → upload PDF → extract → parse → save preview. Preview consumes 1 credit.</div>
+
+                    <div class="parser-info-box">
+                      <div class="parser-balance-row" style="align-items:center;">
+                        <div>
+                          <div class="parser-form-label" style="margin-bottom:8px;">Need more credits?</div>
+                          <div class="parser-status-box" style="margin:0;">Buy more credits from your dashboard after preview flow is confirmed.</div>
+                          <p class="parser-note">This page saves previews through the signed-in app session.</p>
                         </div>
-                        <button id="parser-save-token" type="button" class="btn btn-secondary">Refresh Balance</button>
-                      </div>
-
-                      <div id="parser-token-status" class="parser-status-box">Refresh balance → upload PDF → extract → parse → save preview. Preview consumes 1 credit.</div>
-
-                      <div class="parser-info-box">
-                        <div class="parser-balance-row" style="align-items:center;">
-                          <div>
-                            <div class="parser-form-label" style="margin-bottom:8px;">Need more credits?</div>
-                            <div class="parser-status-box" style="margin:0;">Buy more credits from your dashboard after preview flow is confirmed.</div>
-                            <p class="parser-note">This page saves previews through the signed-in app session.</p>
-                          </div>
-                          <div style="display:grid; gap:8px;">
-                            <a id="parser-buy-credits" href="/app-dashboard.html" class="btn btn-primary">Buy Credits</a>
-                            <div id="parser-checkout-status" class="parser-note" style="margin-top:0; text-align:center;">Open dashboard to buy more credits.</div>
-                          </div>
+                        <div style="display:grid; gap:8px;">
+                          <a id="parser-buy-credits" href="/app-dashboard.html" class="btn btn-primary">Buy Credits</a>
+                          <div id="parser-checkout-status" class="parser-note" style="margin-top:0; text-align:center;">Open dashboard to buy more credits.</div>
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div class="parser-section">
-                    <div class="parser-section-head">
-                      <span class="section-badge">2</span>
-                      <div>
-                        <div class="parser-section-title">Upload Transcript PDF</div>
-                        <p class="parser-section-copy">Choose your transcript</p>
-                      </div>
+                <div class="parser-section">
+                  <div class="parser-section-head">
+                    <span class="section-badge">2</span>
+                    <div>
+                      <div class="parser-section-title">Upload Transcript PDF</div>
+                      <p class="parser-section-copy">Choose your transcript</p>
                     </div>
+                  </div>
 
-                    <div style="margin-bottom:20px;">
-                      <label class="parser-form-label">Firm Logo (Optional)</label>
-                      <label for="brand-logo" class="btn btn-secondary" style="display:inline-flex;">
-                        <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        <span>Choose File</span>
-                      </label>
-                      <input id="brand-logo" type="file" accept="image/*" class="hidden" />
-                      <span id="brand-logo-file-name" class="parser-note" style="margin-left:10px; display:inline-block;">No file chosen</span>
-                      <p class="parser-note">For best results upload a 600×600 PNG (SVG/JPG ok).</p>
-                    </div>
-
-                    <div id="pdf-drop-zone" class="parser-upload-zone" role="button" tabindex="0" aria-label="Upload transcript PDF">
-                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                  <div style="margin-bottom:20px;">
+                    <label class="parser-form-label">Firm Logo (Optional)</label>
+                    <label for="brand-logo" class="btn btn-secondary" style="display:inline-flex;">
+                      <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                       </svg>
-                      <div class="parser-upload-title">Drop PDF here or click to browse</div>
-                      <p class="parser-upload-copy">Accepts IRS transcripts (Account, Return, Wage &amp; Income)</p>
-                    </div>
-
-                    <input id="pdf-upload" type="file" accept="application/pdf,.pdf" class="hidden" />
+                      <span>Choose File</span>
+                    </label>
+                    <input id="brand-logo" type="file" accept="image/*" class="hidden" />
+                    <span id="brand-logo-file-name" class="parser-note" style="margin-left:10px; display:inline-block;">No file chosen</span>
+                    <p class="parser-note">For best results upload a 600×600 PNG (SVG/JPG ok).</p>
                   </div>
 
-                  <div class="parser-section">
-                    <div class="parser-section-head">
-                      <span class="section-badge">3</span>
-                      <div>
-                        <div class="parser-section-title">Outputs</div>
-                        <p class="parser-section-copy">Preview and email</p>
-                      </div>
+                  <div id="pdf-drop-zone" class="parser-upload-zone" role="button" tabindex="0" aria-label="Upload transcript PDF">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    <div class="parser-upload-title">Drop PDF here or click to browse</div>
+                    <p class="parser-upload-copy">Accepts IRS transcripts (Account, Return, Wage &amp; Income)</p>
+                  </div>
+
+                  <input id="pdf-upload" type="file" accept="application/pdf,.pdf" class="hidden" />
+                </div>
+
+                <div class="parser-section">
+                  <div class="parser-section-head">
+                    <span class="section-badge">3</span>
+                    <div>
+                      <div class="parser-section-title">Outputs</div>
+                      <p class="parser-section-copy">Preview and email</p>
                     </div>
+                  </div>
 
-                    <div class="parser-action-row" style="margin-bottom:16px;">
-                      <button id="extract-raw-btn" type="button" class="btn btn-secondary opacity-50 cursor-not-allowed" disabled>Extract Raw Text</button>
-                      <button id="parse-structured-btn" type="button" class="btn btn-primary opacity-50 cursor-not-allowed" disabled>Parse Structured JSON</button>
-                      <a id="preview-report-btn" href="#" class="btn btn-secondary opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true">Save Preview Report</a>
-                    </div>
+                  <div class="parser-action-row" style="margin-bottom:16px;">
+                    <button id="extract-raw-btn" type="button" class="btn btn-secondary opacity-50 cursor-not-allowed" disabled>Extract Raw Text</button>
+                    <button id="parse-structured-btn" type="button" class="btn btn-primary opacity-50 cursor-not-allowed" disabled>Parse Structured JSON</button>
+                    <a id="preview-report-btn" href="#" class="btn btn-secondary opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true">Save Preview Report</a>
+                  </div>
 
-                    <div id="preview-action-status" class="parser-status-box" style="margin-bottom:16px;">Runs in your browser. Your PDF is not uploaded or stored.</div>
+                  <div id="preview-action-status" class="parser-status-box" style="margin-bottom:16px;">Runs in your browser. Your PDF is not uploaded or stored.</div>
 
-                    <div class="parser-output-grid" style="margin-bottom:16px;">
-                      <div class="parser-output-box">
-                        <div class="parser-output-head">
-                          <div class="parser-output-title">Raw Text Output</div>
-                          <button id="copy-raw" type="button" class="parser-copy-btn">Copy</button>
-                        </div>
-                        <pre id="raw-output" class="parser-output-pre">(no text yet)</pre>
+                  <div class="parser-output-grid" style="margin-bottom:16px;">
+                    <div class="parser-output-box">
+                      <div class="parser-output-head">
+                        <div class="parser-output-title">Raw Text Output</div>
+                        <button id="copy-raw" type="button" class="parser-copy-btn">Copy</button>
                       </div>
-
-                      <div class="parser-output-box">
-                        <div class="parser-output-head">
-                          <div class="parser-output-title">Structured JSON Output</div>
-                          <button id="copy-json" type="button" class="parser-copy-btn">Copy</button>
-                        </div>
-                        <pre id="json-output" class="parser-output-pre">(no json yet)</pre>
-                      </div>
+                      <pre id="raw-output" class="parser-output-pre">(no text yet)</pre>
                     </div>
 
                     <div class="parser-output-box">
-                      <div class="parser-output-head" style="align-items:flex-start; flex-direction:column;">
-                        <div class="parser-output-title">Email report link</div>
-                        <div class="parser-note" style="margin-top:0;">A short secure report link is generated for email delivery.</div>
+                      <div class="parser-output-head">
+                        <div class="parser-output-title">Structured JSON Output</div>
+                        <button id="copy-json" type="button" class="parser-copy-btn">Copy</button>
                       </div>
-
-                      <div class="parser-email-grid">
-                        <div>
-                          <label for="report-email" class="parser-form-label">Email</label>
-                          <input id="report-email" type="email" placeholder="client@firm.com" class="parser-input" autocomplete="email" />
-                          <p class="parser-note">Requires parsed JSON and a saved preview report.</p>
-                        </div>
-                        <div style="display:grid; gap:8px;">
-                          <button id="report-email-btn" type="button" class="btn btn-primary opacity-50 cursor-not-allowed" disabled>Email report link</button>
-                          <div id="report-email-status" class="parser-note" style="margin-top:0; text-align:center;">Not ready.</div>
-                        </div>
-                      </div>
+                      <pre id="json-output" class="parser-output-pre">(no json yet)</pre>
                     </div>
                   </div>
-                </div>
-              </div>
 
-              <div class="card">
-                <div class="card-body">
-                  <div class="section-header">
-                    <div>
-                      <h2 class="card-title">Recent report history</h2>
-                      <p class="card-desc">Open saved reports, review print status, and return to recent client work quickly.</p>
+                  <div class="parser-output-box">
+                    <div class="parser-output-head" style="align-items:flex-start; flex-direction:column;">
+                      <div class="parser-output-title">Email report link</div>
+                      <div class="parser-note" style="margin-top:0;">A short secure report link is generated for email delivery.</div>
                     </div>
-                    <button type="button" class="btn btn-secondary" data-page-jump="reports">View all</button>
-                  </div>
 
-                  <div id="reportsEmpty" class="empty-state hidden">No reports found yet.</div>
-
-                  <div id="reportsTableWrap" class="table-wrap hidden">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Created At</th>
-                          <th>Printed At</th>
-                          <th>Report ID</th>
-                          <th>Status</th>
-                          <th>Open</th>
-                        </tr>
-                      </thead>
-                      <tbody id="reportsTbody">
-                        <tr>
-                          <td colspan="5">Loading reports...</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="stack">
-              <div class="card">
-                <div class="card-body">
-                  <h2 class="card-title">Credit purchase history</h2>
-                  <p class="card-desc" style="margin-bottom:16px;">Review completed credit purchases and confirm that new credits were applied to your account.</p>
-
-                  <div id="purchasesEmpty" class="empty-state hidden">No purchases found yet.</div>
-
-                  <div id="purchasesTableWrap" class="table-wrap hidden">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Created At</th>
-                          <th>Credits</th>
-                          <th>Price ID</th>
-                          <th>Status</th>
-                        </tr>
-                      </thead>
-                      <tbody id="purchasesTbody">
-                        <tr>
-                          <td colspan="4">Loading purchases...</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              <div class="card">
-                <div class="card-body">
-                  <h2 class="card-title">Help and support</h2>
-                  <p class="card-desc">Need help with transcript reports, purchases, or account access? Start with the right support path below.</p>
-                  <div class="support-links">
-                    <a href="/contact.html" class="support-link"><span>Contact support</span><span>→</span></a>
-                    <a href="/legal/privacy.html" class="support-link"><span>Privacy policy</span><span>→</span></a>
-                    <a href="/legal/terms.html" class="support-link"><span>Terms of service</span><span>→</span></a>
+                    <div class="parser-email-grid">
+                      <div>
+                        <label for="report-email" class="parser-form-label">Email</label>
+                        <input id="report-email" type="email" placeholder="client@firm.com" class="parser-input" autocomplete="email" />
+                        <p class="parser-note">Requires parsed JSON and a saved preview report.</p>
+                      </div>
+                      <div style="display:grid; gap:8px;">
+                        <button id="report-email-btn" type="button" class="btn btn-primary opacity-50 cursor-not-allowed" disabled>Email report link</button>
+                        <div id="report-email-status" class="parser-note" style="margin-top:0; text-align:center;">Not ready.</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
