@@ -13,6 +13,13 @@
  * - POST /forms/transcript/report-email
  * - GET  /transcript/report-link?reportId=...
  * - GET  /transcript/report?r=...
+ * - GET  /api/transcripts/checkout/status?session_id=...
+ * - GET  /api/transcripts/me
+ * - GET  /api/transcripts/purchases
+ * - POST /api/transcripts/preview
+ * - GET  /api/transcripts/reports
+ * - POST /api/transcripts/report/:reportId/print-complete
+ * - POST /api/transcripts/sign-out
  * - GET  /v1/help/status?ticket_id=...
  * - POST /v1/help/tickets
  * - POST /v1/clickup/webhook
