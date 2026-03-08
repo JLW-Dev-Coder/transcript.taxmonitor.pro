@@ -72,7 +72,8 @@
           <button
             id="parser-save-token"
             type="button"
-            class="px-4 py-2 rounded-lg border border-purple-500/25 bg-purple-500/10 text-purple-200 text-sm font-semibold hover:bg-purple-500/15 transition"
+            class="px-4 py-2 rounded-lg border border-purple-500/20 bg-purple-500/5 text-purple-200/60 text-sm font-semibold opacity-50 cursor-not-allowed"
+            disabled
           >
             Refresh Balance
           </button>
@@ -95,7 +96,7 @@
               <p class="text-xs text-slate-300 mt-2">This page now saves previews through the signed-in app session.</p>
             </div>
             <div class="grid gap-2">
-              <a id="parser-buy-credits" href="/app-dashboard.html" class="btn-secondary px-5 py-3 text-center">Buy Credits</a>
+              <a id="parser-buy-credits" href="https://transcript.taxmonitor.pro/index.html#pricing" class="btn-secondary px-5 py-3 text-center">Buy Credits</a>
               <div id="parser-checkout-status" class="text-xs text-slate-400">Open dashboard to buy more credits.</div>
             </div>
           </div>
@@ -149,7 +150,7 @@
         <button id="extract-raw-btn" type="button" class="btn-secondary flex-1 opacity-50 cursor-not-allowed" disabled>Extract Raw Text</button>
         <button id="parse-structured-btn" type="button" class="btn-primary flex-1 opacity-50 cursor-not-allowed" disabled>Parse Structured JSON</button>
         <a id="preview-report-btn" href="#" class="btn-secondary flex-1 text-center opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true">
-          Save Preview Report
+          Preview Report
         </a>
       </div>
 
@@ -318,7 +319,7 @@
       setPreviewEnabled(canPreviewUse);
 
       if (previewReportBtn) {
-        setText(previewReportBtn, state.tokenConsumed && state.lastReportLink ? "Open Saved Preview" : "Save Preview Report");
+        setText(previewReportBtn, state.tokenConsumed && state.lastReportLink ? "Open Saved Preview" : "Preview Report");
         previewReportBtn.href = state.tokenConsumed && state.lastReportLink ? state.lastReportLink : "#";
       }
 
@@ -815,7 +816,7 @@
     }
 
     async function beginCheckout() {
-      window.location.href = "/app-dashboard.html";
+      window.location.href = "https://transcript.taxmonitor.pro/index.html#pricing";
     }
 
     async function emailReportLink() {
