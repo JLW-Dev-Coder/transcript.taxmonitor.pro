@@ -20,16 +20,96 @@
     };
   </script>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>
-    window.pdfjsLib = window.pdfjsLib || window["pdfjs-dist/build/pdf"];
+    (function () {
+      const PDFJS_CDN = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+      const PDFJS_WORKER_CDN = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-    if (window.pdfjsLib) {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-    } else {
-      console.error("PDF.js failed to load. window.pdfjsLib is undefined.");
-    }
+      window.__pdfjsState = {
+        error: null,
+        loaded: false,
+        loading: false,
+        workerSrc: PDFJS_WORKER_CDN,
+      };
+
+      function resolvePdfjsLib() {
+        return window.pdfjsLib || window["pdfjs-dist/build/pdf"] || null;
+      }
+
+      function applyPdfjsConfig(lib) {
+        if (!lib || !lib.GlobalWorkerOptions) return false;
+        lib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER_CDN;
+        window.pdfjsLib = lib;
+        window.__pdfjsState.loaded = true;
+        window.__pdfjsState.error = null;
+        return true;
+      }
+
+      window.ensurePdfJs = function ensurePdfJs() {
+        const existing = resolvePdfjsLib();
+        if (applyPdfjsConfig(existing)) {
+          return Promise.resolve(existing);
+        }
+
+        if (window.__pdfjsState.loading && window.__pdfjsState.promise) {
+          return window.__pdfjsState.promise;
+        }
+
+        window.__pdfjsState.loading = true;
+        window.__pdfjsState.promise = new Promise((resolve, reject) => {
+          const alreadyOnPage = document.querySelector('script[data-pdfjs-loader="true"]');
+          const script = alreadyOnPage || document.createElement("script");
+
+          function handleLoad() {
+            const lib = resolvePdfjsLib();
+            if (applyPdfjsConfig(lib)) {
+              resolve(lib);
+              return;
+            }
+
+            const err = new Error("PDF.js loaded but window.pdfjsLib is unavailable.");
+            window.__pdfjsState.error = err;
+            reject(err);
+          }
+
+          function handleError() {
+            const err = new Error("PDF.js failed to load from CDN.");
+            window.__pdfjsState.error = err;
+            reject(err);
+          }
+
+          if (alreadyOnPage) {
+            alreadyOnPage.addEventListener("load", handleLoad, { once: true });
+            alreadyOnPage.addEventListener("error", handleError, { once: true });
+            return;
+          }
+
+          script.src = PDFJS_CDN;
+          script.async = true;
+          script.defer = true;
+          script.dataset.pdfjsLoader = "true";
+          script.addEventListener("load", handleLoad, { once: true });
+          script.addEventListener("error", handleError, { once: true });
+          document.head.appendChild(script);
+        }).catch((error) => {
+          window.__pdfjsState.loaded = false;
+          window.__pdfjsState.loading = false;
+          console.warn("PDF.js unavailable on marketing page:", error.message);
+          return null;
+        }).finally(() => {
+          window.__pdfjsState.loading = false;
+        });
+
+        return window.__pdfjsState.promise;
+      };
+
+      const existing = resolvePdfjsLib();
+      if (existing) {
+        applyPdfjsConfig(existing);
+      } else {
+        window.ensurePdfJs();
+      }
+    })();
   </script>
 
   <script src="/_sdk/element_sdk.js"></script>
@@ -354,8 +434,7 @@
           <div class="feature-icon mb-6">
            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
           </div>
-          <h3 class="font-bold text-xl text-midnight mb-3">Simple, One-Time Purchase
-Buy once and generate transcript reports as needed. No recurring billing. No surprise charges.</h3>
+          <h3 class="font-bold text-xl text-midnight mb-3">Simple, One-Time Purchase Buy once and generate transcript reports as needed. No recurring billing. No surprise charges.</h3>
           <p class="text-gray-600">Purchase credits once and use them when you need them. No subscriptions. No recurring billing. No surprise charges.</p>
          </div>
          <div class="card-elevated p-8">
@@ -680,6 +759,17 @@ Buy once and generate transcript reports as needed. No recurring billing. No sur
               );
               assert("render_pricing_exists", typeof renderPricing === "function");
               assert("cal_namespace_exists", typeof window.Cal === "function");
+              assert("marketing_override_exists", typeof initMarketingPreviewOverrides === "function");
+              assert("pdf_loader_exists", typeof window.ensurePdfJs === "function");
+              assert("pdf_loader_state_exists", typeof window.__pdfjsState === "object" && window.__pdfjsState !== null);
+              assert(
+                "pdf_loader_worker_defined",
+                typeof window.__pdfjsState.workerSrc === "string" && window.__pdfjsState.workerSrc.includes("pdf.worker.min.js")
+              );
+              assert(
+                "report_preview_path",
+                ["/assets/report-preview.html"].every((path) => typeof path === "string" && path.endsWith("report-preview.html"))
+              );
             }
 
             function renderPricing() {
@@ -775,6 +865,9 @@ Buy once and generate transcript reports as needed. No recurring billing. No sur
                 document.body.style.overflow = "hidden";
               }
 
+              window.openMarketingReportPreview = openOverlay;
+              window.closeMarketingReportPreview = closeOverlay;
+
               closeBtn.addEventListener("click", (e) => {
                 e.preventDefault();
                 closeOverlay();
@@ -836,21 +929,24 @@ Buy once and generate transcript reports as needed. No recurring billing. No sur
                       <div class="text-sm uppercase tracking-[0.18em] text-purple-300 mb-2">Sample parse ready</div>
                       <h3 class="text-2xl font-bold mb-3">Preview the client-ready output</h3>
                       <p class="text-white/70 mb-5">This sample mode shows the report experience without using credits or saving anything. Open the sample report preview to see the finished deliverable.</p>
-                      <button id="free-report-open-inline" type="button" class="btn-primary inline-flex items-center justify-center">Open Sample Report</button>
+                      <button id="free-report-open-inline" type="button" class="btn-primary inline-flex items-center justify-center">Preview Report</button>
                     </div>
                   `;
 
                   const inlineBtn = document.getElementById("free-report-open-inline");
                   if (inlineBtn) {
                     inlineBtn.addEventListener("click", () => {
-                      const trigger = document.getElementById("sample-report-btn");
-                      if (trigger) trigger.click();
+                      if (typeof window.openMarketingReportPreview === "function") {
+                        window.openMarketingReportPreview();
+                      }
                     });
                   }
                 }
               }
 
-              button.addEventListener("click", () => {
+              button.addEventListener("click", async () => {
+                await window.ensurePdfJs();
+
                 setControlValue('input[name="clientName"], input[id*="client" i], input[placeholder*="client" i]', samplePayload.clientName);
                 setControlValue('input[name="ein"], input[id*="ein" i], input[placeholder*="ein" i]', samplePayload.ein);
                 setControlValue('input[name="taxPeriod"], input[id*="tax" i], input[placeholder*="tax year" i]', samplePayload.taxPeriod);
@@ -879,6 +975,117 @@ Buy once and generate transcript reports as needed. No recurring billing. No sur
               });
             }
 
+            function initMarketingPreviewOverrides() {
+              const previewPath = "/assets/report-preview.html";
+              const parseRoot = document.getElementById("parser-preview-root");
+              if (!parseRoot) return;
+
+              const buttonTextMatchers = [
+                "save preview report",
+                "save report preview",
+              ].slice().sort((a, b) => String(a).localeCompare(String(b)));
+
+              const buttonSelectors = [
+                '[data-action="save-preview-report"]',
+                '[data-preview-report-save]',
+                '#save-preview-report',
+                'button[id*="preview"][id*="save"]',
+                'button[id*="save"][id*="report"]',
+                'button[data-save-preview]',
+              ].slice().sort((a, b) => String(a).localeCompare(String(b)));
+
+              const fileSelectors = [
+                'input[type="file"][accept*="pdf" i]',
+                'input[type="file"][name*="transcript" i]',
+                'input[type="file"][id*="transcript" i]',
+                'input[type="file"]',
+              ].slice().sort((a, b) => String(a).localeCompare(String(b)));
+
+              const logoSelectors = [
+                'input[type="file"][name*="logo" i]',
+                'input[type="file"][id*="logo" i]',
+                '#brand-logo',
+              ].slice().sort((a, b) => String(a).localeCompare(String(b)));
+
+              function enableInput(el) {
+                if (!el) return;
+                el.disabled = false;
+                el.removeAttribute("disabled");
+                el.removeAttribute("aria-disabled");
+              }
+
+              function wirePreviewButton(button) {
+                if (!button || button.dataset.marketingPreviewBound === "true") return false;
+                button.dataset.marketingPreviewBound = "true";
+                button.textContent = "Preview Report";
+                button.disabled = false;
+                button.removeAttribute("disabled");
+                button.setAttribute("type", "button");
+
+                const form = button.closest("form");
+                if (form) {
+                  form.addEventListener("submit", (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (typeof window.openMarketingReportPreview === "function") {
+                      window.openMarketingReportPreview();
+                    }
+                  });
+                }
+
+                button.addEventListener("click", (event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  if (typeof window.openMarketingReportPreview === "function") {
+                    window.openMarketingReportPreview();
+                  } else {
+                    window.location.href = previewPath;
+                  }
+                });
+
+                return true;
+              }
+
+              function findButtons() {
+                const found = new Set();
+
+                buttonSelectors.forEach((selector) => {
+                  parseRoot.querySelectorAll(selector).forEach((el) => found.add(el));
+                });
+
+                parseRoot.querySelectorAll("button, a, input[type='button'], input[type='submit']").forEach((el) => {
+                  const label = String(el.textContent || el.value || "").trim().toLowerCase();
+                  if (buttonTextMatchers.includes(label)) found.add(el);
+                });
+
+                return Array.from(found);
+              }
+
+              function applyOverrides() {
+                logoSelectors.forEach((selector) => {
+                  parseRoot.querySelectorAll(selector).forEach(enableInput);
+                });
+
+                fileSelectors.forEach((selector) => {
+                  parseRoot.querySelectorAll(selector).forEach(enableInput);
+                });
+
+                findButtons().forEach(wirePreviewButton);
+              }
+
+              applyOverrides();
+
+              const observer = new MutationObserver(() => {
+                applyOverrides();
+              });
+
+              observer.observe(parseRoot, {
+                attributes: true,
+                childList: true,
+                subtree: true,
+              });
+            }
+
             function initAll() {
               const url = new URL(window.location.href);
               const run = String(url.searchParams.get("runTests") || "").trim().toLowerCase();
@@ -886,6 +1093,7 @@ Buy once and generate transcript reports as needed. No recurring billing. No sur
 
               initBrandLogoPicker();
               initMiniReportOverlay();
+              initMarketingPreviewOverrides();
               initSampleParse();
               renderPricing();
             }
