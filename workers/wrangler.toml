@@ -3,23 +3,23 @@ main = "src/index.js"
 compatibility_date = "2026-03-06"
 
 routes = [
-  { pattern = "api-transcript.taxmonitor.pro/*", zone_name = "taxmonitor.pro" }
+  { pattern = "transcript.taxmonitor.pro/*", zone_name = "taxmonitor.pro" }
 ]
 
 [observability.logs]
 enabled = true
 
-[[r2_buckets]]
-binding = "R2_TRANSCRIPT"
-bucket_name = "transcript-taxmonitor-pro"
-
 [[durable_objects.bindings]]
-name = "TOKEN_LEDGER"
 class_name = "TokenLedger"
+name = "TOKEN_LEDGER"
 
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["TokenLedger"]
+
+[[r2_buckets]]
+binding = "R2_TRANSCRIPT"
+bucket_name = "transcript-taxmonitor-pro"
 
 [vars]
 CREDIT_MAP_JSON = "{\"price_1T83KXQEa4WBi79g8sD2NI7c\":10,\"price_1T84hAQEa4WBi79gCziLGXUD\":25,\"price_1T88lHQEa4WBi79gRkhxn2mv\":100}"
@@ -33,7 +33,7 @@ PRICE_100 = "price_1T88lHQEa4WBi79gRkhxn2mv"
 PRICE_25 = "price_1T84hAQEa4WBi79gCziLGXUD"
 TRANSCRIPT_RETURN_ORIGINS_JSON = "[\"https://transcript.taxmonitor.pro\"]"
 
-# Secrets (set in Cloudflare / wrangler secret put)
+# Secrets (set using `wrangler secret put`)
 # GOOGLE_PRIVATE_KEY
 # STRIPE_SECRET_KEY
 # STRIPE_WEBHOOK_SECRET
