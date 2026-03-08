@@ -20,6 +20,11 @@ name = "TOKEN_LEDGER"
 tag = "v1"
 new_sqlite_classes = ["TokenLedger"]
 
+[[kv_namespaces]]
+binding = "KV_TRANSCRIPT"
+id = "YOUR_PRODUCTION_KV_NAMESPACE_ID"
+preview_id = "YOUR_PREVIEW_KV_NAMESPACE_ID"
+
 [[r2_buckets]]
 binding = "R2_TRANSCRIPT"
 bucket_name = "transcript-taxmonitor-pro"
