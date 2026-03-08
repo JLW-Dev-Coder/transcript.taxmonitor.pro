@@ -1591,7 +1591,7 @@ async function handleGetTranscriptCheckoutStatus(request, url, env) {
     ).trim();
     const tokenId = String(metadata.tokenId || tokenIdFromQuery || "").trim();
     const creditsAdded = priceId ? getCreditsForPriceId(env, priceId) : null;
-    const amountPaid = Number(session && (session.amount_total ?? session.amount_subtotal) ?? 0);
+    const amountPaid = Number(session ? (session.amount_total ?? session.amount_subtotal ?? 0) : 0);
     const currency = String(session && session.currency || "usd").trim();
     const quantityRaw = session && session.line_items && session.line_items.data && session.line_items.data[0] ? session.line_items.data[0].quantity : 1;
     const quantity = Number.isFinite(Number(quantityRaw)) ? Number(quantityRaw) : 1;
