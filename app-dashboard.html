@@ -1037,6 +1037,29 @@
     let latestPurchases = [];
     let latestReports = [];
 
+    const PAGE_META = {
+      account: {
+        desc: 'Review your signed-in account details, token balance, and core session-backed actions.',
+        title: 'Account'
+      },
+      dashboard: {
+        desc: 'Create transcript reports, review recent activity, and manage your account from one workspace.',
+        title: 'Dashboard'
+      },
+      receipts: {
+        desc: 'Review completed credit purchases and confirm receipt history tied to this account.',
+        title: 'Receipts'
+      },
+      reports: {
+        desc: 'Open saved reports, review print status, and return to recent client work quickly.',
+        title: 'Reports History'
+      },
+      support: {
+        desc: 'Get help with transcript reports, purchase questions, and account access.',
+        title: 'Support'
+      }
+    };
+
     function escapeHtml(value) {
       return String(value == null ? '' : value)
         .replace(/&/g, '&amp;')
@@ -1248,7 +1271,7 @@
     }
 
     function switchPage(page) {
-      const key = String(page || 'dashboard');
+      const key = String(page || 'dashboard').trim().toLowerCase();
       const config = PAGE_META[key] || PAGE_META.dashboard;
 
       document.querySelectorAll('.page').forEach(function (el) {
@@ -1256,13 +1279,17 @@
       });
 
       document.querySelectorAll('.nav-item').forEach(function (el) {
-        el.classList.toggle('active', el.getAttribute('data-page') === key);
+        el.classList.toggle('active', String(el.getAttribute('data-page') || '').trim().toLowerCase() === key);
       });
 
       const title = document.getElementById('pageTitle');
       const desc = document.getElementById('pageDesc');
       if (title) title.textContent = config.title;
       if (desc) desc.textContent = config.desc;
+
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
     }
 
     async function signOut() {
@@ -1277,16 +1304,19 @@
     }
 
     function wireNavigation() {
-      document.querySelectorAll('[data-page]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          switchPage(btn.getAttribute('data-page'));
-        });
-      });
+      document.addEventListener('click', function (event) {
+        const pageButton = event.target.closest('[data-page]');
+        if (pageButton) {
+          event.preventDefault();
+          switchPage(pageButton.getAttribute('data-page'));
+          return;
+        }
 
-      document.querySelectorAll('[data-page-jump]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          switchPage(btn.getAttribute('data-page-jump'));
-        });
+        const jumpButton = event.target.closest('[data-page-jump]');
+        if (jumpButton) {
+          event.preventDefault();
+          switchPage(jumpButton.getAttribute('data-page-jump'));
+        }
       });
     }
 
