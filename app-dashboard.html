@@ -1554,6 +1554,16 @@
       return String(raw);
     }
 
+    async function fetchLedgerBalance(tokenId) {
+      const cleanTokenId = String(tokenId || '').trim();
+      if (!cleanTokenId) return null;
+
+      const data = await fetchJson('/transcript/tokens?tokenId=' + encodeURIComponent(cleanTokenId));
+      if (!data || typeof data.balance === 'undefined' || data.balance === null) return null;
+
+      return String(data.balance);
+    }
+
     function setText(id, value) {
       const el = document.getElementById(id);
       if (el) el.textContent = String(value == null ? '' : value);
@@ -1564,12 +1574,12 @@
       if (el) el.value = String(value == null ? '' : value);
     }
 
-    function setAccountState(me) {
+    function setAccountState(me, tokenBalanceOverride) {
       latestMe = me || {};
 
       const email = getMeEmail(latestMe);
       const tokenId = getMeTokenId(latestMe);
-      const tokens = getMeTokens(latestMe);
+      const tokens = tokenBalanceOverride != null ? String(tokenBalanceOverride) : getMeTokens(latestMe);
 
       [
         ['accountEmail', email],
@@ -1762,7 +1772,9 @@
 
           try {
             const me = await fetchJson('/api/transcripts/me');
-            setAccountState(me || {});
+            const tokenId = getMeTokenId(me || {});
+            const ledgerBalance = await fetchLedgerBalance(tokenId);
+            setAccountState(me || {}, ledgerBalance);
           } catch (error) {
             if (String(error && error.message || error) !== 'unauthorized') {
               showToast('Failed to refresh balance. ' + String(error && error.message || error || 'unknown_error'));
@@ -1784,7 +1796,9 @@
       switchPage('dashboard');
 
       const me = await fetchJson('/api/transcripts/me');
-      setAccountState(me || {});
+      const tokenId = getMeTokenId(me || {});
+      const ledgerBalance = await fetchLedgerBalance(tokenId);
+      setAccountState(me || {}, ledgerBalance);
 
       const purchasesPromise = fetchJson('/api/transcripts/purchases');
       const reportsPromise = fetchJson('/api/transcripts/reports');
@@ -1823,3 +1837,4 @@
   </script>
 </body>
 </html>
+
