@@ -1538,7 +1538,20 @@
     }
 
     function getMeTokenId(me) {
-      return firstDefined(me && me.tokenId, me && me.user && me.user.tokenId, me && me.ledgerId, me && me.user && me.user.ledgerId, '');
+      const raw = firstDefined(
+        me && me.tokenId,
+        me && me.transcriptTokenId,
+        me && me.ledgerTokenId,
+        me && me.user && me.user.tokenId,
+        me && me.user && me.user.transcriptTokenId,
+        me && me.user && me.user.ledgerTokenId,
+        window.localStorage && window.localStorage.getItem('transcriptTokenId'),
+        window.localStorage && window.localStorage.getItem('tokenId'),
+        window.sessionStorage && window.sessionStorage.getItem('transcriptTokenId'),
+        window.sessionStorage && window.sessionStorage.getItem('tokenId'),
+        ''
+      );
+      return String(raw || '').trim();
     }
 
     function getMeTokens(me) {
@@ -1595,7 +1608,7 @@
         setText(entry[0], entry[1]);
       });
 
-      setValue('parser-token-id', tokenId || email);
+      setValue('parser-token-id', tokenId || '');
     }
 
     function renderReportRows(tbodyId, reports) {
@@ -1773,7 +1786,7 @@
           try {
             const me = await fetchJson('/api/transcripts/me');
             const tokenId = getMeTokenId(me || {});
-            const ledgerBalance = await fetchLedgerBalance(tokenId);
+            const ledgerBalance = tokenId ? await fetchLedgerBalance(tokenId) : null;
             setAccountState(me || {}, ledgerBalance);
           } catch (error) {
             if (String(error && error.message || error) !== 'unauthorized') {
@@ -1797,7 +1810,7 @@
 
       const me = await fetchJson('/api/transcripts/me');
       const tokenId = getMeTokenId(me || {});
-      const ledgerBalance = await fetchLedgerBalance(tokenId);
+      const ledgerBalance = tokenId ? await fetchLedgerBalance(tokenId) : null;
       setAccountState(me || {}, ledgerBalance);
 
       const purchasesPromise = fetchJson('/api/transcripts/purchases');
