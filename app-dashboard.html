@@ -1037,28 +1037,7 @@
     let latestPurchases = [];
     let latestReports = [];
 
-    const PAGE_META = {
-      account: {
-        desc: 'Review your signed-in account details, token balance, and core session-backed actions.',
-        title: 'Account'
-      },
-      dashboard: {
-        desc: 'Create transcript reports, review recent activity, and manage your account from one workspace.',
-        title: 'Dashboard'
-      },
-      receipts: {
-        desc: 'Review completed credit purchases and confirm receipt history tied to this account.',
-        title: 'Receipts'
-      },
-      reports: {
-        desc: 'Open saved reports, review print status, and return to recent client work quickly.',
-        title: 'Reports History'
-      },
-      support: {
-        desc: 'Get help with transcript reports, purchase questions, and account access.',
-        title: 'Support'
-      }
-    };
+    
 
     function escapeHtml(value) {
       return String(value == null ? '' : value)
@@ -1272,7 +1251,7 @@
 
     function switchPage(page) {
       const key = String(page || 'dashboard').trim().toLowerCase();
-      const config = PAGE_META[key] || PAGE_META.dashboard;
+      
 
       document.querySelectorAll('.page').forEach(function (el) {
         el.classList.toggle('active', el.id === key + 'Page');
@@ -1282,10 +1261,7 @@
         el.classList.toggle('active', String(el.getAttribute('data-page') || '').trim().toLowerCase() === key);
       });
 
-      const title = document.getElementById('pageTitle');
-      const desc = document.getElementById('pageDesc');
-      if (title) title.textContent = config.title;
-      if (desc) desc.textContent = config.desc;
+      
 
       if (window.lucide && typeof window.lucide.createIcons === 'function') {
         window.lucide.createIcons();
