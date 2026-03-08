@@ -38,6 +38,8 @@ Components:
 * Report print completion tracking
 * Session-based authenticated transcript workspace
 * Stripe checkout for transcript credits
+* Stripe checkout status retrieval for receipt and success pages
+* Support ticket creation backed by canonical Worker state and ClickUp projection
 * Support ticket public status lookup
 
 ---
@@ -102,18 +104,19 @@ The Worker now exposes three main groups of routes.
 
 ### Authenticated App API
 
-| Method | Endpoint                                           | Description                                                            |
-| ------ | -------------------------------------------------- | ---------------------------------------------------------------------- |
-| GET    | `/api/transcripts/me`                              | Return the signed-in user state with `email`, `tokenId`, and `balance` |
-| GET    | `/api/transcripts/magic-link/verify?token=...`     | Verify a magic link, create a session, set cookie, and redirect        |
-| GET    | `/api/transcripts/purchases`                       | Return signed-in purchase history                                      |
-| GET    | `/api/transcripts/reports`                         | Return signed-in report history                                        |
-| POST   | `/api/transcripts/magic-link/request`              | Create and email a magic link                                          |
-| POST   | `/api/transcripts/preview`                         | Create a preview and spend 1 token                                     |
-| POST   | `/api/transcripts/report/:reportId/print-complete` | Mark a report as printed                                               |
-| POST   | `/api/transcripts/sign-out`                        | Clear the transcript session cookie                                    |
+| Method | Endpoint                                           | Description                                                                |
+| ------ | -------------------------------------------------- | -------------------------------------------------------------------------- |
+| GET    | `/api/transcripts/checkout/status?session_id=...`  | Return finalized Stripe checkout details for the success page and receipts |
+| GET    | `/api/transcripts/me`                              | Return the signed-in user state with `email`, `tokenId`, and `balance`     |
+| GET    | `/api/transcripts/magic-link/verify?token=...`     | Verify a magic link, create a session, set cookie, and redirect            |
+| GET    | `/api/transcripts/purchases`                       | Return signed-in purchase history                                          |
+| GET    | `/api/transcripts/reports`                         | Return signed-in report history                                            |
+| POST   | `/api/transcripts/magic-link/request`              | Create and email a magic link                                              |
+| POST   | `/api/transcripts/preview`                         | Create a preview and spend 1 token                                         |
+| POST   | `/api/transcripts/report/:reportId/print-complete` | Mark a report as printed                                                   |
+| POST   | `/api/transcripts/sign-out`                        | Clear the transcript session cookie                                        |
 
-### Public Transcript API
+### Public Transcript
 
 | Method | Endpoint                               | Description                                                     |
 | ------ | -------------------------------------- | --------------------------------------------------------------- |
