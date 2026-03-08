@@ -548,6 +548,60 @@
       margin-top: 10px;
     }
 
+    .logo-actions {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .logo-preview {
+      align-items: center;
+      background: rgba(15, 23, 42, 0.58);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 16px;
+      display: flex;
+      gap: 14px;
+      margin-top: 14px;
+      min-height: 88px;
+      padding: 12px 14px;
+    }
+
+    .logo-preview.hidden {
+      display: none !important;
+    }
+
+    .logo-preview-image {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 14px;
+      flex-shrink: 0;
+      height: 60px;
+      object-fit: contain;
+      padding: 6px;
+      width: 60px;
+    }
+
+    .logo-preview-copy {
+      min-width: 0;
+    }
+
+    .logo-preview-title {
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+
+    .logo-preview-meta {
+      color: var(--tm-text-muted);
+      font-size: 12px;
+      line-height: 1.6;
+      margin: 0;
+      word-break: break-word;
+    }
+
     .parser-balance-row,
     .parser-email-grid {
       display: grid;
@@ -826,15 +880,31 @@
 
                   <div style="margin-bottom:20px;">
                     <label class="parser-form-label">Firm Logo (Optional)</label>
-                    <label for="brand-logo" class="btn btn-secondary" style="display:inline-flex;">
-                      <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                      </svg>
-                      <span>Choose File</span>
-                    </label>
+
+                    <div class="logo-actions">
+                      <label for="brand-logo" class="btn btn-secondary" style="display:inline-flex;">
+                        <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Choose File</span>
+                      </label>
+
+                      <button id="remove-brand-logo" type="button" class="btn btn-danger hidden">Remove Logo</button>
+                    </div>
+
                     <input id="brand-logo" type="file" accept="image/*" class="hidden" />
-                    <span id="brand-logo-file-name" class="parser-note" style="margin-left:10px; display:inline-block;">No file chosen</span>
-                    <p class="parser-note">For best results upload a 600×600 PNG (SVG/JPG ok).</p>
+
+                    <span id="brand-logo-file-name" class="parser-note" style="display:inline-block; margin-top:10px;">No file chosen</span>
+
+                    <div id="brand-logo-preview" class="logo-preview hidden">
+                      <img id="brand-logo-preview-image" class="logo-preview-image" alt="Saved firm logo preview" />
+                      <div class="logo-preview-copy">
+                        <div class="logo-preview-title">Saved logo</div>
+                        <p id="brand-logo-preview-meta" class="logo-preview-meta">This logo will stay available on this device until you remove it.</p>
+                      </div>
+                    </div>
+
+                    <p class="parser-note">For best results upload a 600×600 PNG (SVG/JPG ok). Your logo can stay saved on this device until you remove it.</p>
                   </div>
 
                   <div id="pdf-drop-zone" class="parser-upload-zone" role="button" tabindex="0" aria-label="Upload transcript PDF">
@@ -1060,6 +1130,9 @@
     let latestMe = null;
     let latestPurchases = [];
     let latestReports = [];
+    let savedBrandLogo = null;
+
+    const BRAND_LOGO_STORAGE_KEY = "tm_brand_logo_v1";
 
     function escapeHtml(value) {
       return String(value == null ? '' : value)
@@ -1095,6 +1168,135 @@
 
     function showToast(message) {
       window.alert(String(message || 'Not wired yet.'));
+    }
+
+    function bytesToReadable(value) {
+      const size = Number(value || 0);
+      if (!Number.isFinite(size) || size <= 0) return '';
+      if (size < 1024) return size + ' B';
+      if (size < 1024 * 1024) return (size / 1024).toFixed(1).replace(/\.0$/, '') + ' KB';
+      return (size / (1024 * 1024)).toFixed(1).replace(/\.0$/, '') + ' MB';
+    }
+
+    function updateBrandLogoUi() {
+      const fileNameEl = document.getElementById('brand-logo-file-name');
+      const previewEl = document.getElementById('brand-logo-preview');
+      const previewImageEl = document.getElementById('brand-logo-preview-image');
+      const previewMetaEl = document.getElementById('brand-logo-preview-meta');
+      const removeBtn = document.getElementById('remove-brand-logo');
+
+      if (!savedBrandLogo) {
+        if (fileNameEl) fileNameEl.textContent = 'No file chosen';
+        if (previewEl) previewEl.classList.add('hidden');
+        if (previewImageEl) previewImageEl.removeAttribute('src');
+        if (previewMetaEl) previewMetaEl.textContent = 'This logo will stay available on this device until you remove it.';
+        if (removeBtn) removeBtn.classList.add('hidden');
+        return;
+      }
+
+      const metaParts = [savedBrandLogo.name || 'Saved logo'];
+      if (savedBrandLogo.size) metaParts.push(bytesToReadable(savedBrandLogo.size));
+
+      if (fileNameEl) fileNameEl.textContent = savedBrandLogo.name || 'Saved logo';
+      if (previewImageEl) previewImageEl.src = savedBrandLogo.dataUrl || '';
+      if (previewMetaEl) previewMetaEl.textContent = metaParts.join(' • ');
+      if (previewEl) previewEl.classList.remove('hidden');
+      if (removeBtn) removeBtn.classList.remove('hidden');
+    }
+
+    function loadSavedBrandLogo() {
+      try {
+        const raw = window.localStorage.getItem(BRAND_LOGO_STORAGE_KEY);
+        if (!raw) {
+          savedBrandLogo = null;
+          return;
+        }
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed.dataUrl !== 'string' || !parsed.dataUrl.trim()) {
+          savedBrandLogo = null;
+          window.localStorage.removeItem(BRAND_LOGO_STORAGE_KEY);
+          return;
+        }
+
+        savedBrandLogo = parsed;
+      } catch (_) {
+        savedBrandLogo = null;
+      }
+    }
+
+    function saveBrandLogo(payload) {
+      savedBrandLogo = payload;
+      try {
+        window.localStorage.setItem(BRAND_LOGO_STORAGE_KEY, JSON.stringify(payload));
+      } catch (_) {
+        showToast('Logo could not be saved on this device. The file may be too large.');
+      }
+      updateBrandLogoUi();
+    }
+
+    function removeBrandLogo() {
+      savedBrandLogo = null;
+      try {
+        window.localStorage.removeItem(BRAND_LOGO_STORAGE_KEY);
+      } catch (_) {
+      }
+
+      const input = document.getElementById('brand-logo');
+      if (input) input.value = '';
+      updateBrandLogoUi();
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise(function (resolve, reject) {
+        const reader = new FileReader();
+        reader.onload = function () {
+          resolve(String(reader.result || ''));
+        };
+        reader.onerror = function () {
+          reject(new Error('Failed to read file.'));
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function wireBrandLogo() {
+      const input = document.getElementById('brand-logo');
+      const removeBtn = document.getElementById('remove-brand-logo');
+
+      loadSavedBrandLogo();
+      updateBrandLogoUi();
+
+      if (input) {
+        input.addEventListener('change', async function () {
+          const file = input.files && input.files[0] ? input.files[0] : null;
+          if (!file) return;
+
+          if (!String(file.type || '').startsWith('image/')) {
+            showToast('Please choose an image file for the logo.');
+            input.value = '';
+            return;
+          }
+
+          try {
+            const dataUrl = await readFileAsDataUrl(file);
+            saveBrandLogo({
+              dataUrl: dataUrl,
+              name: file.name || 'Saved logo',
+              size: Number(file.size || 0),
+              type: file.type || ''
+            });
+          } catch (error) {
+            showToast(String(error && error.message || error || 'Failed to save logo.'));
+          }
+        });
+      }
+
+      if (removeBtn) {
+        removeBtn.addEventListener('click', function () {
+          removeBrandLogo();
+        });
+      }
     }
 
     async function fetchJson(url, options) {
@@ -1340,6 +1542,7 @@
     }
 
     function wireStaticButtons() {
+      wireBrandLogo();
       document.querySelectorAll('[data-toast]').forEach(function (btn) {
         btn.addEventListener('click', function () {
           showToast(btn.getAttribute('data-toast'));
