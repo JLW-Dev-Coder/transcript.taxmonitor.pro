@@ -8,6 +8,13 @@
 
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    window.pdfjsLib = window.pdfjsLib || window["pdfjs-dist/build/pdf"];
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+  </script>
   <script>
     tailwind.config = {
       theme: {
@@ -47,6 +54,7 @@
 
     * { box-sizing: border-box; }
     html, body { height: 100%; }
+
     body {
       margin: 0;
       color: var(--tm-text);
@@ -68,11 +76,11 @@
       border-right: 1px solid var(--tm-line);
       display: flex;
       flex-direction: column;
+      height: 100vh;
+      overflow-y: auto;
       padding: 22px 0;
       position: sticky;
       top: 0;
-      height: 100vh;
-      overflow-y: auto;
     }
 
     .sidebar-inner {
@@ -82,28 +90,28 @@
     }
 
     .brand {
-      display: flex;
       align-items: center;
-      gap: 12px;
-      text-decoration: none;
       color: white;
-      padding: 0 22px 22px;
-      border-bottom: 1px solid var(--tm-line);
+      display: flex;
+      gap: 12px;
       margin-bottom: 20px;
+      padding: 0 22px 22px;
+      text-decoration: none;
+      border-bottom: 1px solid var(--tm-line);
     }
 
     .brand-mark {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: inline-flex;
       align-items: center;
-      justify-content: center;
       background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+      border-radius: 12px;
+      box-shadow: 0 14px 30px rgba(99, 102, 241, 0.22);
       color: #020617;
+      display: inline-flex;
       font-size: 14px;
       font-weight: 800;
-      box-shadow: 0 14px 30px rgba(99, 102, 241, 0.22);
+      height: 40px;
+      justify-content: center;
+      width: 40px;
     }
 
     .brand-copy strong {
@@ -136,21 +144,21 @@
     }
 
     .nav-item {
-      width: 100%;
-      display: flex;
       align-items: center;
-      gap: 12px;
       background: transparent;
       border: 0;
       border-radius: 12px;
       color: var(--tm-text-soft);
       cursor: pointer;
+      display: flex;
       font-family: inherit;
       font-size: 14px;
       font-weight: 600;
+      gap: 12px;
       padding: 12px 12px;
       text-align: left;
       transition: 180ms ease;
+      width: 100%;
     }
 
     .nav-item:hover {
@@ -160,21 +168,21 @@
 
     .nav-item.active {
       background: linear-gradient(90deg, rgba(139, 92, 246, 0.22) 0%, rgba(59, 130, 246, 0.10) 100%);
-      color: #ddd6fe;
       box-shadow: inset 3px 0 0 #8b5cf6;
+      color: #ddd6fe;
     }
 
     .nav-item svg {
-      width: 18px;
-      height: 18px;
       flex-shrink: 0;
+      height: 18px;
+      width: 18px;
     }
 
     .sidebar-card {
-      margin: auto 12px 0;
       background: rgba(139, 92, 246, 0.10);
       border: 1px solid rgba(139, 92, 246, 0.22);
       border-radius: 16px;
+      margin: auto 12px 0;
       padding: 16px;
     }
 
@@ -191,6 +199,12 @@
       text-transform: uppercase;
     }
 
+    .sidebar-subcopy {
+      color: #86efac;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
     .sidebar-value {
       color: white;
       font-size: 14px;
@@ -198,78 +212,58 @@
       word-break: break-word;
     }
 
-    .sidebar-subcopy {
-      color: #86efac;
-      font-size: 12px;
-      margin-top: 8px;
-    }
-
     .main-shell {
-      flex: 1;
-      min-width: 0;
       display: flex;
+      flex: 1;
       flex-direction: column;
+      min-width: 0;
     }
 
     .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 10;
       backdrop-filter: blur(16px);
       background: rgba(15, 23, 42, 0.78);
       border-bottom: 1px solid var(--tm-line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     .topbar-inner,
     .workspace,
     .footer-inner {
-      width: 100%;
-      max-width: 1440px;
       margin: 0 auto;
+      max-width: 1440px;
+      width: 100%;
     }
 
     .topbar-inner {
-      display: flex;
       align-items: center;
-      justify-content: space-between;
+      display: flex;
       gap: 16px;
+      justify-content: flex-end;
       padding: 20px 28px;
     }
 
-    .topbar-title {
-      color: white;
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin: 0 0 4px;
-    }
-
-    .topbar-desc {
-      color: var(--tm-text-muted);
-      font-size: 13px;
-      margin: 0;
-    }
-
     .topbar-actions {
+      align-items: center;
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
       gap: 10px;
     }
 
     .btn {
-      display: inline-flex;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 42px;
-      padding: 0 16px;
-      border-radius: 12px;
       border: 1px solid transparent;
+      border-radius: 12px;
       cursor: pointer;
+      display: inline-flex;
       font-family: inherit;
       font-size: 13px;
       font-weight: 700;
+      gap: 8px;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 16px;
       text-decoration: none;
       transition: 180ms ease;
       white-space: nowrap;
@@ -279,15 +273,15 @@
 
     .btn-primary {
       background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
-      color: white;
       box-shadow: 0 16px 34px rgba(99, 102, 241, 0.22);
+      color: white;
     }
 
     .btn-secondary {
       background: rgba(15, 23, 42, 0.66);
       border-color: rgba(168, 85, 247, 0.22);
-      color: #ede9fe;
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+      color: #ede9fe;
     }
 
     .btn-danger {
@@ -297,8 +291,8 @@
     }
 
     .workspace {
-      padding: 28px;
       flex: 1;
+      padding: 28px;
     }
 
     .page { display: none; }
@@ -306,8 +300,8 @@
 
     .dashboard-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.85fr);
       gap: 24px;
+      grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.85fr);
     }
 
     .stack {
@@ -342,212 +336,276 @@
       margin: 0;
     }
 
-    .hero-card {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.16) 0%, rgba(59, 130, 246, 0.10) 100%);
-      border-color: rgba(139, 92, 246, 0.22);
+    .parser-card-shell {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(2, 6, 23, 0.92) 100%);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 28px;
+      box-shadow: 0 28px 80px rgba(2, 8, 23, 0.34);
+      overflow: hidden;
+      position: relative;
     }
 
-    .workflow-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-      margin: 22px 0;
+    .parser-card-shell::before {
+      background:
+        radial-gradient(circle at 18% 14%, rgba(168, 85, 247, 0.12), transparent 24%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.20) 100%);
+      content: "";
+      inset: 0;
+      pointer-events: none;
+      position: absolute;
+      z-index: 1;
     }
 
-    .workflow-step {
-      background: rgba(2, 6, 23, 0.34);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: 18px;
-      padding: 16px;
-      text-align: center;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
-    }
-
-    .workflow-step .icon-wrap {
-      width: 44px;
-      height: 44px;
-      margin: 0 auto 10px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, rgba(168, 85, 247, 0.22) 0%, rgba(124, 58, 237, 0.14) 100%);
-      color: #c4b5fd;
-      border: 1px solid rgba(168, 85, 247, 0.24);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 10px 24px rgba(124, 58, 237, 0.14);
-    }
-
-    .workflow-step .label {
-      color: var(--tm-text-soft);
-      font-size: 12px;
-      font-weight: 600;
-      line-height: 1.5;
-    }
-
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 18px;
-    }
-
-    .metric {
-      background: rgba(2, 6, 23, 0.34);
-      border: 1px solid rgba(255, 255, 255, 0.07);
-      border-radius: 18px;
-      padding: 16px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
-    }
-
-    .metric-label {
-      color: var(--tm-text-muted);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-    }
-
-    .metric-value {
-      color: white;
-      font-size: 24px;
-      font-weight: 800;
-      line-height: 1.1;
-      word-break: break-word;
-    }
-
-    .metric-copy {
-      color: var(--tm-text-muted);
-      font-size: 12px;
-      margin-top: 6px;
-    }
-
-    .upload-area {
-      border: 2px dashed rgba(139, 92, 246, 0.34);
-      border-radius: 16px;
+    .parser-card-body {
       padding: 28px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .parser-hero {
+      margin: 0 auto 26px;
+      max-width: 720px;
       text-align: center;
-      background: rgba(139, 92, 246, 0.05);
-      margin-top: 18px;
     }
 
-    .upload-area svg {
-      width: 46px;
-      height: 46px;
-      color: #c4b5fd;
-      margin-bottom: 12px;
-    }
-
-    .upload-title {
+    .parser-hero h2 {
       color: white;
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 6px;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin: 0 0 12px;
     }
 
-    .upload-copy {
+    .parser-hero p {
+      color: var(--tm-text-soft);
+      font-size: 15px;
+      line-height: 1.75;
+      margin: 0;
+    }
+
+    .parser-hero p + p {
+      color: var(--tm-text-muted);
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    .parser-steps {
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-bottom: 28px;
+      padding-bottom: 26px;
+    }
+
+    .parser-step {
+      align-items: center;
+      display: flex;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .parser-step-badge,
+    .section-badge {
+      align-items: center;
+      background: rgba(139, 92, 246, 0.14);
+      border: 1px solid rgba(168, 85, 247, 0.24);
+      border-radius: 999px;
+      color: #ddd6fe;
+      display: inline-flex;
+      flex-shrink: 0;
+      font-size: 14px;
+      font-weight: 800;
+      height: 36px;
+      justify-content: center;
+      width: 36px;
+    }
+
+    .parser-step-title,
+    .parser-section-title {
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+
+    .parser-step-copy,
+    .parser-section-copy {
       color: var(--tm-text-muted);
       font-size: 12px;
       line-height: 1.6;
+      margin: 0;
     }
 
-    .button-row {
+    .parser-section {
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 28px;
+      padding: 0 0 28px;
+    }
+
+    .parser-section:last-of-type {
+      border-bottom: 0;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .parser-section-head {
+      align-items: center;
       display: flex;
-      flex-wrap: wrap;
       gap: 12px;
-      margin-top: 18px;
-    }
-
-    .button-row .btn {
-      flex: 1 1 180px;
-    }
-
-    .info-box {
-      margin-top: 16px;
-      background: rgba(59, 130, 246, 0.10);
-      border: 1px solid rgba(59, 130, 246, 0.22);
-      border-radius: 14px;
-      padding: 14px 16px;
-      color: #bfdbfe;
-      font-size: 12px;
-      line-height: 1.7;
-    }
-
-    .section-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
       margin-bottom: 18px;
     }
 
-    .table-wrap {
-      overflow-x: auto;
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      border-radius: 16px;
-      background: rgba(2, 6, 23, 0.28);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
+    .parser-input {
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(148, 163, 184, 0.20);
+      border-radius: 14px;
+      color: white;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.5;
+      outline: none;
       padding: 14px 16px;
-      text-align: left;
-      vertical-align: top;
+      width: 100%;
     }
 
-    th {
-      color: var(--tm-text-muted);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      white-space: nowrap;
+    .parser-input::placeholder {
+      color: rgba(255,255,255,0.34);
     }
 
-    td {
+    .parser-form-label {
       color: var(--tm-text-soft);
-      font-size: 14px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 10px;
     }
 
-    tr:last-child td { border-bottom: none; }
-
-    .empty-state {
+    .parser-note {
       color: var(--tm-text-muted);
-      font-size: 14px;
+      font-size: 12px;
       line-height: 1.7;
-      padding: 18px;
-      border: 1px dashed rgba(139, 92, 246, 0.24);
-      border-radius: 16px;
-      background: rgba(139, 92, 246, 0.05);
+      margin-top: 10px;
     }
 
-    .pill {
-      display: inline-flex;
+    .parser-balance-row,
+    .parser-email-grid {
+      align-items: end;
+      display: grid;
+      gap: 14px;
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .parser-status-box,
+    .parser-info-box,
+    .parser-output-box {
+      background: rgba(15, 23, 42, 0.58);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 18px;
+      padding: 16px 18px;
+    }
+
+    .parser-info-box {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.84) 0%, rgba(76, 29, 149, 0.14) 100%);
+      border-color: rgba(168, 85, 247, 0.18);
+    }
+
+    .parser-balance-value {
+      color: #d8b4fe;
+      font-size: 18px;
+      font-weight: 800;
+      margin-left: 8px;
+    }
+
+    .parser-upload-zone {
+      background: rgba(139, 92, 246, 0.06);
+      border: 2px dashed rgba(168, 85, 247, 0.34);
+      border-radius: 22px;
+      cursor: pointer;
+      padding: 34px 24px;
+      text-align: center;
+      transition: 180ms ease;
+    }
+
+    .parser-upload-zone:hover,
+    .parser-upload-zone.is-dragover {
+      background: rgba(139, 92, 246, 0.10);
+      border-color: rgba(168, 85, 247, 0.56);
+    }
+
+    .parser-upload-zone svg {
+      color: #d8b4fe;
+      display: block;
+      height: 56px;
+      margin: 0 auto 14px;
+      opacity: 0.86;
+      width: 56px;
+    }
+
+    .parser-upload-title {
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .parser-upload-copy {
+      color: var(--tm-text-muted);
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .parser-action-row {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .parser-output-grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .parser-output-head {
       align-items: center;
-      border-radius: 999px;
-      padding: 4px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+    }
+
+    .parser-output-title {
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .parser-copy-btn {
+      background: transparent;
+      border: 0;
+      color: #ddd6fe;
+      cursor: pointer;
+      font-family: inherit;
       font-size: 12px;
       font-weight: 700;
-      letter-spacing: 0.02em;
-      white-space: nowrap;
+      padding: 0;
     }
 
-    .pill-printed {
-      background: rgba(16, 185, 129, 0.12);
-      border: 1px solid rgba(16, 185, 129, 0.22);
-      color: #86efac;
-    }
-
-    .pill-pending {
-      background: rgba(245, 158, 11, 0.12);
-      border: 1px solid rgba(245, 158, 11, 0.22);
-      color: #fcd34d;
+    .parser-output-pre {
+      color: #e2e8f0;
+      font-size: 12px;
+      line-height: 1.7;
+      margin: 0;
+      max-height: 320px;
+      min-height: 160px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .detail-list {
@@ -557,16 +615,14 @@
     }
 
     .detail-row {
+      align-items: center;
+      background: rgba(15, 23, 42, 0.36);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      border-radius: 14px;
       display: flex;
       justify-content: space-between;
       gap: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      padding-bottom: 14px;
-    }
-
-    .detail-row:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
+      padding: 14px 16px;
     }
 
     .detail-label {
@@ -583,6 +639,64 @@
       word-break: break-word;
     }
 
+    .metrics-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 18px;
+    }
+
+    .metric {
+      background: rgba(15, 23, 42, 0.36);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .metric-label {
+      color: var(--tm-text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      color: white;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .metric-copy {
+      color: var(--tm-text-muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .panel-grid {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .section-header {
+      align-items: center;
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
     .support-links {
       display: grid;
       gap: 12px;
@@ -590,38 +704,91 @@
     }
 
     .support-link {
+      align-items: center;
+      background: rgba(15, 23, 42, 0.36);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      border-radius: 14px;
+      color: white;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      gap: 12px;
       padding: 14px 16px;
-      border-radius: 14px;
-      border: 1px solid rgba(139, 92, 246, 0.16);
-      background: rgba(139, 92, 246, 0.05);
-      color: #e9d5ff;
       text-decoration: none;
-      font-size: 14px;
-      font-weight: 600;
+      transition: 180ms ease;
     }
 
-    .panel-grid {
-      display: grid;
-      gap: 24px;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    .support-link:hover {
+      background: rgba(139, 92, 246, 0.10);
+      border-color: rgba(168, 85, 247, 0.22);
+    }
+
+    .table-wrap {
+      margin-top: 18px;
+      overflow-x: auto;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+      padding: 14px 12px;
+      text-align: left;
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--tm-text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    td {
+      color: white;
+      font-size: 14px;
+    }
+
+    .pill {
+      border-radius: 999px;
+      display: inline-flex;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 10px;
+    }
+
+    .pill-pending {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fcd34d;
+    }
+
+    .pill-printed {
+      background: rgba(16, 185, 129, 0.12);
+      color: #86efac;
+    }
+
+    .empty-state {
+      color: var(--tm-text-muted);
+      margin-top: 18px;
     }
 
     .footer-inner {
+      align-items: center;
+      border-top: 1px solid rgba(148, 163, 184, 0.12);
       display: flex;
       justify-content: space-between;
       gap: 16px;
-      flex-wrap: wrap;
-      padding: 10px 28px 24px;
+      padding: 20px 28px;
     }
 
-    .footer-inner p,
-    .footer-inner a {
+    .footer-inner a,
+    .footer-inner p {
       color: var(--tm-text-muted);
       font-size: 14px;
+      margin: 0;
       text-decoration: none;
     }
 
@@ -629,6 +796,10 @@
 
     @media (max-width: 1180px) {
       .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -639,10 +810,9 @@
       }
 
       .sidebar {
-        width: 100%;
         height: auto;
         position: relative;
-        padding-bottom: 16px;
+        width: 100%;
       }
 
       .sidebar-card {
@@ -651,16 +821,21 @@
     }
 
     @media (max-width: 720px) {
-      .workflow-grid,
-      .metrics-grid {
+      .metrics-grid,
+      .panel-grid,
+      .parser-action-row,
+      .parser-balance-row,
+      .parser-email-grid,
+      .parser-output-grid,
+      .parser-steps {
         grid-template-columns: 1fr;
       }
 
-      .topbar-inner,
       .section-header,
+      .topbar-inner,
       .footer-inner {
-        flex-direction: column;
         align-items: flex-start;
+        flex-direction: column;
       }
 
       .workspace,
@@ -695,81 +870,166 @@
         <section id="dashboardPage" class="page active">
           <div class="dashboard-grid">
             <div class="stack">
-              <div class="card hero-card">
-                <div class="card-body">
-                  <h2 class="card-title">Create a new transcript report</h2>
-                  
+              <div class="parser-card-shell">
+                <div class="parser-card-body">
+                  <div class="parser-hero">
+                    <h2>Try the Transcript Parser</h2>
+                    <p>Upload a transcript PDF. It parses in your browser. No uploads. No risk.</p>
+                    <p>Optional: add your firm logo so the preview report looks like your deliverable.</p>
+                  </div>
 
-                  <div class="workflow-grid">
-                    <div class="workflow-step">
-                      <div class="icon-wrap">
-                        <svg class="w-7 h-7 block" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet" style="width:22px;height:22px;">
-                          <path d="M8 6h10" />
-                          <path d="M8 10h10" />
-                          <path d="M8 14h6" />
-                          <path d="M6 6v12a2 2 0 0 0 2 2h10" />
-                          <path d="M16 18l2 2 4-4" />
-                        </svg>
+                  <div class="parser-steps">
+                    <div class="parser-step">
+                      <span class="parser-step-badge">1</span>
+                      <div>
+                        <div class="parser-step-title">Check App Balance</div>
+                        <p class="parser-step-copy">Use your signed-in account</p>
                       </div>
-                      <div class="label">Upload<br />IRS Transcript</div>
                     </div>
-                    <div class="workflow-step">
-                      <div class="icon-wrap">
-                        <svg class="w-7 h-7 block" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet" style="width:22px;height:22px;">
-                          <path d="M7 8h10" />
-                          <path d="M7 12h6" />
-                          <path d="M7 16h8" />
-                          <path d="M5 4h14a2 2 0 0 1 2 2v13a1 1 0 0 1-1 1H7l-4 3V6a2 2 0 0 1 2-2Z" />
-                        </svg>
+                    <div class="parser-step">
+                      <span class="parser-step-badge">2</span>
+                      <div>
+                        <div class="parser-step-title">Upload Transcript PDF</div>
+                        <p class="parser-step-copy">Choose your transcript</p>
                       </div>
-                      <div class="label">Review<br />Parsed Data</div>
                     </div>
-                    <div class="workflow-step">
-                      <div class="icon-wrap">
-                        <svg class="w-7 h-7 block" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet" style="width:22px;height:22px;">
-                          <path d="M8 10h8" />
-                          <path d="M8 14h5" />
-                          <path d="M21 12a8.5 8.5 0 0 1-8.5 8.5c-1.7 0-3.3-.5-4.7-1.3L3 21l1.8-4.8A8.5 8.5 0 1 1 21 12Z" />
-                        </svg>
+                    <div class="parser-step">
+                      <span class="parser-step-badge">3</span>
+                      <div>
+                        <div class="parser-step-title">Outputs</div>
+                        <p class="parser-step-copy">Preview and email</p>
                       </div>
-                      <div class="label">Preview<br />Client Report</div>
-                    </div>
-                    <div class="workflow-step">
-                      <div class="icon-wrap">
-                        <svg class="w-7 h-7 block" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" preserveAspectRatio="xMidYMid meet" style="width:22px;height:22px;">
-                          <path d="M6 18h12" />
-                          <path d="M8 22h8" />
-                          <path d="M12 2a7 7 0 0 1 7 7c0 2.2-1 3.7-2.2 5.1-.6.7-.9 1.4-1.1 2.2H8.3c-.2-.8-.5-1.5-1.1-2.2C6 12.7 5 11.2 5 9a7 7 0 0 1 7-7Z" />
-                        </svg>
-                      </div>
-                      <div class="label">Print &amp;<br />Save History</div>
                     </div>
                   </div>
 
-                  <div class="button-row">
-                    <a href="/index.html#how-it-works" class="btn btn-primary">Open Transcript Parser</a>
-                    <a href="/assets/report.html" class="btn btn-secondary">Open Report Layout</a>
+                  <div class="parser-section">
+                    <div class="parser-section-head">
+                      <span class="section-badge">1</span>
+                      <div>
+                        <div class="parser-section-title">Check App Balance</div>
+                        <p class="parser-section-copy">Use your signed-in account</p>
+                      </div>
+                    </div>
+
+                    <div style="display:grid; gap:14px;">
+                      <div>
+                        <label for="parser-token-id" class="parser-form-label">Signed-in Account</label>
+                        <input id="parser-token-id" type="text" placeholder="Signed in session required" class="parser-input" autocomplete="off" disabled />
+                        <p class="parser-note">Preview uses your authenticated app session and consumes 1 credit when saved.</p>
+                      </div>
+
+                      <div class="parser-balance-row">
+                        <div class="parser-status-box">
+                          <span style="color: var(--tm-text-soft); font-size: 13px;">Available balance:</span>
+                          <span id="parser-token-available" class="parser-balance-value">-</span>
+                        </div>
+                        <button id="parser-save-token" type="button" class="btn btn-secondary">Refresh Balance</button>
+                      </div>
+
+                      <div id="parser-token-status" class="parser-status-box">Refresh balance → upload PDF → extract → parse → save preview. Preview consumes 1 credit.</div>
+
+                      <div class="parser-info-box">
+                        <div class="parser-balance-row" style="align-items:center;">
+                          <div>
+                            <div class="parser-form-label" style="margin-bottom:8px;">Need more credits?</div>
+                            <div class="parser-status-box" style="margin:0;">Buy more credits from your dashboard after preview flow is confirmed.</div>
+                            <p class="parser-note">This page saves previews through the signed-in app session.</p>
+                          </div>
+                          <div style="display:grid; gap:8px;">
+                            <a id="parser-buy-credits" href="/index.html#pricing" class="btn btn-primary">Buy Credits</a>
+                            <div id="parser-checkout-status" class="parser-note" style="margin-top:0; text-align:center;">Open pricing to buy more credits.</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
-                  
-                </div>
-              </div>
+                  <div class="parser-section">
+                    <div class="parser-section-head">
+                      <span class="section-badge">2</span>
+                      <div>
+                        <div class="parser-section-title">Upload Transcript PDF</div>
+                        <p class="parser-section-copy">Choose your transcript</p>
+                      </div>
+                    </div>
 
-              <div class="card">
-                <div class="card-body">
-                  <h2 class="card-title">Upload transcript</h2>
-                  <p class="card-desc">Use this workspace to begin a new report. The live parser flow can stay local, then hand the normalized report object to the Worker when preview is ready.</p>
+                    <div style="margin-bottom:20px;">
+                      <label class="parser-form-label">Firm Logo (Optional)</label>
+                      <label for="brand-logo" class="btn btn-secondary" style="display:inline-flex;">
+                        <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Choose File</span>
+                      </label>
+                      <input id="brand-logo" type="file" accept="image/*" class="hidden" />
+                      <span id="brand-logo-file-name" class="parser-note" style="display:inline-block; margin-left:10px;">No file chosen</span>
+                      <p class="parser-note">For best results upload a 600×600 PNG (SVG/JPG ok).</p>
+                    </div>
 
-                  <div class="upload-area">
-                    <i data-lucide="file-up"></i>
-                    <div class="upload-title">Upload IRS transcript PDF</div>
-                    <div class="upload-copy">PDF only. Once parsed, the report preview should open in the canonical report page and stay available from your report history.</div>
+                    <div id="pdf-drop-zone" class="parser-upload-zone" role="button" tabindex="0" aria-label="Upload transcript PDF">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                      </svg>
+                      <div class="parser-upload-title">Drop PDF here or click to browse</div>
+                      <p class="parser-upload-copy">Accepts IRS transcripts (Account, Return, Wage &amp; Income)</p>
+                    </div>
+
+                    <input id="pdf-upload" type="file" accept="application/pdf,.pdf" class="hidden" />
                   </div>
 
-                  <div class="button-row">
-                    <button type="button" class="btn btn-secondary" data-toast="Extract raw text will connect to your local transcript parser.">Extract Raw Text</button>
-                    <button type="button" class="btn btn-secondary" data-toast="Parse structured data will connect to your local transcript parser.">Parse Structured Data</button>
-                    <button type="button" class="btn btn-secondary" data-toast="Preview report should POST normalized report data to /api/transcripts/preview.">Preview Report</button>
+                  <div class="parser-section">
+                    <div class="parser-section-head">
+                      <span class="section-badge">3</span>
+                      <div>
+                        <div class="parser-section-title">Outputs</div>
+                        <p class="parser-section-copy">Preview and email</p>
+                      </div>
+                    </div>
+
+                    <div class="parser-action-row" style="margin-bottom:16px;">
+                      <button id="extract-raw-btn" type="button" class="btn btn-secondary opacity-50 cursor-not-allowed" disabled>Extract Raw Text</button>
+                      <button id="parse-structured-btn" type="button" class="btn btn-primary opacity-50 cursor-not-allowed" disabled>Parse Structured JSON</button>
+                      <a id="preview-report-btn" href="#" class="btn btn-secondary opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true">Save Preview Report</a>
+                    </div>
+
+                    <div id="preview-action-status" class="parser-status-box" style="margin-bottom:16px;">Runs in your browser. Your PDF is not uploaded or stored.</div>
+
+                    <div class="parser-output-grid" style="margin-bottom:16px;">
+                      <div class="parser-output-box">
+                        <div class="parser-output-head">
+                          <div class="parser-output-title">Raw Text Output</div>
+                          <button id="copy-raw" type="button" class="parser-copy-btn">Copy</button>
+                        </div>
+                        <pre id="raw-output" class="parser-output-pre">(no text yet)</pre>
+                      </div>
+
+                      <div class="parser-output-box">
+                        <div class="parser-output-head">
+                          <div class="parser-output-title">Structured JSON Output</div>
+                          <button id="copy-json" type="button" class="parser-copy-btn">Copy</button>
+                        </div>
+                        <pre id="json-output" class="parser-output-pre">(no json yet)</pre>
+                      </div>
+                    </div>
+
+                    <div class="parser-output-box">
+                      <div class="parser-output-head" style="align-items:flex-start; flex-direction:column;">
+                        <div class="parser-output-title">Email report link</div>
+                        <div class="parser-note" style="margin-top:0;">A short secure report link is generated for email delivery.</div>
+                      </div>
+
+                      <div class="parser-email-grid">
+                        <div>
+                          <label for="report-email" class="parser-form-label">Email</label>
+                          <input id="report-email" type="email" placeholder="client@firm.com" class="parser-input" autocomplete="email" />
+                          <p class="parser-note">Requires parsed JSON and a saved preview report.</p>
+                        </div>
+                        <div style="display:grid; gap:8px;">
+                          <button id="report-email-btn" type="button" class="btn btn-primary opacity-50 cursor-not-allowed" disabled>Email report link</button>
+                          <div id="report-email-status" class="parser-note" style="margin-top:0; text-align:center;">Not ready.</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -812,17 +1072,17 @@
               <div class="card">
                 <div class="card-body">
                   <h2 class="card-title">Your account</h2>
-                <p class="card-desc">Review your signed-in details, token balance, and core account information.</p>
+                  <p class="card-desc">Review your signed-in details, token balance, and core account information.</p>
 
                   <div class="metrics-grid">
                     <div class="metric">
                       <div class="metric-label">Email</div>
-                      <div id="heroEmail" class="metric-value" style="font-size:18px;">Loading...</div>
+                      <div id="accountSummaryEmail" class="metric-value" style="font-size:18px;">Loading...</div>
                       <div class="metric-copy">Signed-in account</div>
                     </div>
                     <div class="metric">
                       <div class="metric-label">Token Balance</div>
-                      <div id="heroTokens" class="metric-value">—</div>
+                      <div id="accountSummaryTokens" class="metric-value">—</div>
                       <div class="metric-copy">Available credits</div>
                     </div>
                   </div>
@@ -832,7 +1092,7 @@
               <div class="card">
                 <div class="card-body">
                   <h2 class="card-title">Credit purchase history</h2>
-                  <p class="card-desc">Review completed credit purchases and confirm that new credits were applied to your account.</p>
+                  <p class="card-desc" style="margin-bottom:16px;">Review completed credit purchases and confirm that new credits were applied to your account.</p>
 
                   <div id="purchasesEmpty" class="empty-state hidden">No purchases found yet.</div>
 
@@ -914,16 +1174,16 @@
 
                 <div class="detail-list">
                   <div class="detail-row">
+                    <div class="detail-label">Latest purchase status</div>
+                    <div id="receiptSummaryStatus" class="detail-value">—</div>
+                  </div>
+                  <div class="detail-row">
                     <div class="detail-label">Signed-in email</div>
                     <div id="receiptSummaryEmail" class="detail-value">Loading...</div>
                   </div>
                   <div class="detail-row">
                     <div class="detail-label">Current tokens</div>
                     <div id="receiptSummaryTokens" class="detail-value">—</div>
-                  </div>
-                  <div class="detail-row">
-                    <div class="detail-label">Latest purchase status</div>
-                    <div id="receiptSummaryStatus" class="detail-value">—</div>
                   </div>
                 </div>
               </div>
@@ -1021,7 +1281,7 @@
       <footer>
         <div class="footer-inner">
           <p>© <span id="footerYear"></span> Transcript.Tax Monitor Pro. All rights reserved.</p>
-          <div style="display:flex; gap:16px; flex-wrap:wrap;">
+          <div style="display:flex; flex-wrap:wrap; gap:16px;">
             <a href="/legal/privacy.html">Privacy Policy</a>
             <a href="/legal/terms.html">Terms of Service</a>
           </div>
@@ -1035,103 +1295,129 @@
     let latestPurchases = [];
     let latestReports = [];
 
-    
+    const parserState = {
+      brandLogoDataUrl: "",
+      eventId: "",
+      lastReportLink: "",
+      pdfFile: null,
+      previewReady: false,
+      rawText: "",
+      structured: null,
+      tokenAvailable: null,
+      tokenConsumed: false,
+      tokenId: "",
+      tokenValid: false
+    };
 
     function escapeHtml(value) {
-      return String(value == null ? '' : value)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     }
 
     function firstDefined() {
       for (let i = 0; i < arguments.length; i++) {
         const value = arguments[i];
-        if (value !== undefined && value !== null && String(value).trim() !== '') return value;
+        if (value !== undefined && value !== null && String(value).trim() !== "") return value;
       }
-      return '';
+      return "";
     }
 
     function formatDate(value) {
-      const raw = String(value || '').trim();
-      if (!raw) return '—';
+      const raw = String(value || "").trim();
+      if (!raw) return "—";
       const d = new Date(raw);
       if (Number.isNaN(d.getTime())) return raw;
       return d.toLocaleString();
     }
 
     function getStatusBadge(status) {
-      const text = String(status || '').trim() || 'pending';
+      const text = String(status || "").trim() || "pending";
       const lower = text.toLowerCase();
-      const cls = lower === 'completed' || lower === 'printed' ? 'pill pill-printed' : 'pill pill-pending';
-      return '<span class="' + cls + '">' + escapeHtml(text) + '</span>';
+      const cls = lower === "completed" || lower === "printed" ? "pill pill-printed" : "pill pill-pending";
+      return '<span class="' + cls + '">' + escapeHtml(text) + "</span>";
     }
 
-    function showToast(message) {
-      window.alert(String(message || 'Not wired yet.'));
-    }
-
-    async function fetchJson(url) {
-      const response = await fetch(url, {
-        credentials: 'include',
-        method: 'GET'
-      });
-
-      if (response.status === 401) {
-        window.location.href = '/sign-in.html';
-        throw new Error('unauthorized');
-      }
-
-      const text = await response.text().catch(() => '');
+    async function apiFetch(url, options) {
+      const response = await fetch(url, options || {});
+      const text = await response.text().catch(() => "");
       let data = null;
+
       try {
         data = text ? JSON.parse(text) : null;
       } catch (_) {
         data = null;
       }
 
+      return { data, response, text };
+    }
+
+    async function fetchJson(url) {
+      const { data, response, text } = await apiFetch(url, {
+        credentials: "include",
+        method: "GET"
+      });
+
+      if (response.status === 401) {
+        window.location.href = "/sign-in.html";
+        throw new Error("unauthorized");
+      }
+
       if (!response.ok) {
-        const message = data && (data.error || data.message) ? String(data.error || data.message) : (text || response.statusText || 'request_failed');
+        const message = data && (data.error || data.message) ? String(data.error || data.message) : (text || response.statusText || "request_failed");
         throw new Error(message);
       }
 
       return data;
     }
 
-    function normalizeReports(data) {
+    function normalizePurchases(data) {
       if (Array.isArray(data)) return data;
-      if (data && Array.isArray(data.reports)) return data.reports;
       if (data && Array.isArray(data.items)) return data.items;
+      if (data && Array.isArray(data.purchases)) return data.purchases;
       return [];
     }
 
-    function normalizePurchases(data) {
+    function normalizeReports(data) {
       if (Array.isArray(data)) return data;
-      if (data && Array.isArray(data.purchases)) return data.purchases;
       if (data && Array.isArray(data.items)) return data.items;
+      if (data && Array.isArray(data.reports)) return data.reports;
       return [];
     }
 
     function setAccountState(me) {
       latestMe = me || {};
-      const email = firstDefined(me && me.email, me && me.user && me.user.email, 'Unknown');
+
+      const email = firstDefined(
+        me && me.email,
+        me && me.user && me.user.email,
+        "Unknown"
+      );
+
+      const tokenId = firstDefined(
+        me && me.tokenId,
+        me && me.user && me.user.tokenId,
+        ""
+      );
+
       const tokens = firstDefined(
+        me && me.availableTokens,
+        me && me.balance,
         me && me.tokenBalance,
         me && me.tokens,
-        me && me.balance,
-        me && me.availableTokens,
         me && me.user && me.user.balance,
         me && me.user && me.user.tokenBalance,
-        '0'
+        "0"
       );
 
       const updates = {
         accountEmail: email,
+        accountSummaryEmail: email,
+        accountSummaryTokens: tokens,
         accountTokens: tokens,
-        heroEmail: email,
-        heroTokens: tokens,
         receiptSummaryEmail: email,
         receiptSummaryTokens: tokens,
         sidebarEmail: email,
@@ -1142,6 +1428,35 @@
         const el = document.getElementById(id);
         if (el) el.textContent = String(updates[id]);
       });
+
+      parserState.tokenAvailable = Number(tokens || 0);
+      parserState.tokenId = String(tokenId || "");
+      parserState.tokenValid = true;
+
+      const parserTokenInput = document.getElementById("parser-token-id");
+      if (parserTokenInput) {
+        parserTokenInput.value = email;
+      }
+    }
+
+    function renderPurchaseRows(tbodyId, purchases) {
+      const tbody = document.getElementById(tbodyId);
+      if (!tbody) return;
+
+      tbody.innerHTML = purchases.map(function (item) {
+        const createdAt = firstDefined(item.createdAt, item.created_at, item.at);
+        const credits = firstDefined(item.amountCredits, item.creditAmount, item.credits, "—");
+        const priceId = firstDefined(item.priceId, item.price_id, "—");
+        const status = firstDefined(item.paymentStatus, item.status, "completed");
+
+        return "" +
+          "<tr>" +
+            "<td>" + escapeHtml(formatDate(createdAt)) + "</td>" +
+            "<td>" + escapeHtml(String(credits)) + "</td>" +
+            "<td>" + escapeHtml(String(priceId)) + "</td>" +
+            "<td>" + getStatusBadge(status) + "</td>" +
+          "</tr>";
+      }).join("");
     }
 
     function renderReportRows(tbodyId, reports) {
@@ -1152,38 +1467,56 @@
         const createdAt = firstDefined(item.createdAt, item.created_at, item.insertedAt);
         const printedAt = firstDefined(item.printedAt, item.printed_at);
         const reportId = firstDefined(item.reportId, item.report_id, item.id);
-        const reportUrl = firstDefined(item.reportUrl, item.report_url, reportId ? '/assets/report.html?reportId=' + encodeURIComponent(reportId) : '');
-        const status = firstDefined(item.status, printedAt ? 'printed' : 'pending');
+        const reportUrl = firstDefined(
+          item.reportUrl,
+          item.report_url,
+          reportId ? "/assets/report.html?reportId=" + encodeURIComponent(reportId) : ""
+        );
+        const status = firstDefined(item.status, printedAt ? "printed" : "pending");
 
-        return '' +
-          '<tr>' +
-            '<td>' + escapeHtml(formatDate(createdAt)) + '</td>' +
-            '<td>' + escapeHtml(formatDate(printedAt)) + '</td>' +
-            '<td>' + escapeHtml(reportId || '—') + '</td>' +
-            '<td>' + getStatusBadge(status) + '</td>' +
-            '<td>' + (reportUrl ? '<a class="btn btn-secondary" style="min-height:36px; padding:0 12px;" href="' + escapeHtml(reportUrl) + '">Open report</a>' : '—') + '</td>' +
-          '</tr>';
-      }).join('');
+        return "" +
+          "<tr>" +
+            "<td>" + escapeHtml(formatDate(createdAt)) + "</td>" +
+            "<td>" + escapeHtml(formatDate(printedAt)) + "</td>" +
+            "<td>" + escapeHtml(reportId || "—") + "</td>" +
+            "<td>" + getStatusBadge(status) + "</td>" +
+            "<td>" + (reportUrl ? '<a class="btn btn-secondary" style="min-height:36px; padding:0 12px;" href="' + escapeHtml(reportUrl) + '">Open report</a>' : "—") + "</td>" +
+          "</tr>";
+      }).join("");
     }
 
-    function renderPurchaseRows(tbodyId, purchases) {
-      const tbody = document.getElementById(tbodyId);
-      if (!tbody) return;
+    function renderPurchases(data) {
+      latestPurchases = normalizePurchases(data);
+      const hasPurchases = latestPurchases.length > 0;
 
-      tbody.innerHTML = purchases.map(function (item) {
-        const createdAt = firstDefined(item.createdAt, item.created_at, item.at);
-        const credits = firstDefined(item.credits, item.creditAmount, item.amountCredits, '—');
-        const priceId = firstDefined(item.priceId, item.price_id, '—');
-        const status = firstDefined(item.status, item.paymentStatus, 'completed');
+      const latest = latestPurchases[0] || null;
+      const latestStatus = latest ? firstDefined(latest.paymentStatus, latest.status, "completed") : "—";
+      const summary = document.getElementById("receiptSummaryStatus");
+      if (summary) summary.textContent = String(latestStatus);
 
-        return '' +
-          '<tr>' +
-            '<td>' + escapeHtml(formatDate(createdAt)) + '</td>' +
-            '<td>' + escapeHtml(String(credits)) + '</td>' +
-            '<td>' + escapeHtml(String(priceId)) + '</td>' +
-            '<td>' + getStatusBadge(status) + '</td>' +
-          '</tr>';
-      }).join('');
+      const pairs = [
+        ["purchasesEmpty", "purchasesTableWrap", "purchasesTbody"],
+        ["receiptsPageEmpty", "receiptsPageTableWrap", "receiptsPageTbody"]
+      ];
+
+      pairs.forEach(function (pair) {
+        const empty = document.getElementById(pair[0]);
+        const wrap = document.getElementById(pair[1]);
+        const tbody = document.getElementById(pair[2]);
+
+        if (!empty || !wrap || !tbody) return;
+
+        if (!hasPurchases) {
+          empty.classList.remove("hidden");
+          wrap.classList.add("hidden");
+          tbody.innerHTML = "";
+          return;
+        }
+
+        empty.classList.add("hidden");
+        wrap.classList.remove("hidden");
+        renderPurchaseRows(pair[2], latestPurchases);
+      });
     }
 
     function renderReports(data) {
@@ -1191,133 +1524,741 @@
       const hasReports = latestReports.length > 0;
 
       const pairs = [
-        ['reportsEmpty', 'reportsTableWrap', 'reportsTbody'],
-        ['reportsPageEmpty', 'reportsPageTableWrap', 'reportsPageTbody']
+        ["reportsEmpty", "reportsTableWrap", "reportsTbody"],
+        ["reportsPageEmpty", "reportsPageTableWrap", "reportsPageTbody"]
       ];
 
       pairs.forEach(function (pair) {
         const empty = document.getElementById(pair[0]);
         const wrap = document.getElementById(pair[1]);
-        if (!empty || !wrap) return;
+        const tbody = document.getElementById(pair[2]);
+
+        if (!empty || !wrap || !tbody) return;
 
         if (!hasReports) {
-          empty.classList.remove('hidden');
-          wrap.classList.add('hidden');
-          const tbody = document.getElementById(pair[2]);
-          if (tbody) tbody.innerHTML = '';
+          empty.classList.remove("hidden");
+          wrap.classList.add("hidden");
+          tbody.innerHTML = "";
           return;
         }
 
-        empty.classList.add('hidden');
-        wrap.classList.remove('hidden');
+        empty.classList.add("hidden");
+        wrap.classList.remove("hidden");
         renderReportRows(pair[2], latestReports);
       });
     }
 
-    function renderPurchases(data) {
-      latestPurchases = normalizePurchases(data);
-      const hasPurchases = latestPurchases.length > 0;
-
-      const pairs = [
-        ['purchasesEmpty', 'purchasesTableWrap', 'purchasesTbody'],
-        ['receiptsPageEmpty', 'receiptsPageTableWrap', 'receiptsPageTbody']
-      ];
-
-      pairs.forEach(function (pair) {
-        const empty = document.getElementById(pair[0]);
-        const wrap = document.getElementById(pair[1]);
-        if (!empty || !wrap) return;
-
-        if (!hasPurchases) {
-          empty.classList.remove('hidden');
-          wrap.classList.add('hidden');
-          const tbody = document.getElementById(pair[2]);
-          if (tbody) tbody.innerHTML = '';
-          return;
-        }
-
-        empty.classList.add('hidden');
-        wrap.classList.remove('hidden');
-        renderPurchaseRows(pair[2], latestPurchases);
-      });
-
-      const latest = latestPurchases[0] || null;
-      const latestStatus = latest ? firstDefined(latest.status, latest.paymentStatus, 'completed') : '—';
-      const summary = document.getElementById('receiptSummaryStatus');
-      if (summary) summary.textContent = String(latestStatus);
-    }
-
     function switchPage(page) {
-      const key = String(page || 'dashboard').trim().toLowerCase();
-      
+      const key = String(page || "dashboard").trim().toLowerCase();
 
-      document.querySelectorAll('.page').forEach(function (el) {
-        el.classList.toggle('active', el.id === key + 'Page');
+      document.querySelectorAll(".page").forEach(function (el) {
+        el.classList.toggle("active", el.id === key + "Page");
       });
 
-      document.querySelectorAll('.nav-item').forEach(function (el) {
-        el.classList.toggle('active', String(el.getAttribute('data-page') || '').trim().toLowerCase() === key);
+      document.querySelectorAll(".nav-item").forEach(function (el) {
+        el.classList.toggle("active", String(el.getAttribute("data-page") || "").trim().toLowerCase() === key);
       });
 
-      
-
-      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
         window.lucide.createIcons();
       }
     }
 
     async function signOut() {
       try {
-        await fetch('/api/transcripts/sign-out', {
-          credentials: 'include',
-          method: 'POST'
+        await fetch("/api/transcripts/sign-out", {
+          credentials: "include",
+          method: "POST"
         });
       } catch (_) {
       }
-      window.location.href = '/sign-in.html';
+
+      window.location.href = "/sign-in.html";
     }
 
     function wireNavigation() {
-      document.addEventListener('click', function (event) {
-        const pageButton = event.target.closest('[data-page]');
+      document.addEventListener("click", function (event) {
+        const pageButton = event.target.closest("[data-page]");
         if (pageButton) {
           event.preventDefault();
-          switchPage(pageButton.getAttribute('data-page'));
+          switchPage(pageButton.getAttribute("data-page"));
           return;
         }
 
-        const jumpButton = event.target.closest('[data-page-jump]');
+        const jumpButton = event.target.closest("[data-page-jump]");
         if (jumpButton) {
           event.preventDefault();
-          switchPage(jumpButton.getAttribute('data-page-jump'));
+          switchPage(jumpButton.getAttribute("data-page-jump"));
         }
       });
     }
 
     function wireStaticButtons() {
-      document.querySelectorAll('[data-toast]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          showToast(btn.getAttribute('data-toast'));
-        });
+      const signOutBtn = document.getElementById("signOutBtn");
+      const signOutBtnSecondary = document.getElementById("signOutBtnSecondary");
+
+      if (signOutBtn) signOutBtn.addEventListener("click", signOut);
+      if (signOutBtnSecondary) signOutBtnSecondary.addEventListener("click", signOut);
+    }
+
+    function parserSetButtonEnabled(btn, enabled) {
+      if (!btn) return;
+      btn.disabled = !enabled;
+      btn.classList.toggle("cursor-not-allowed", !enabled);
+      btn.classList.toggle("opacity-50", !enabled);
+    }
+
+    function parserSetCheckoutStatus(msg, tone) {
+      const el = document.getElementById("parser-checkout-status");
+      if (!el) return;
+
+      const base = "parser-note";
+      const toneClass = tone === "error" ? " text-red-300" : tone === "ok" ? " text-green-300" : "";
+      el.className = base + toneClass;
+      el.textContent = String(msg || "");
+    }
+
+    function parserSetPreviewEnabled(enabled) {
+      const btn = document.getElementById("preview-report-btn");
+      if (!btn) return;
+
+      if (enabled) {
+        btn.classList.remove("cursor-not-allowed", "opacity-50", "pointer-events-none");
+        btn.setAttribute("aria-disabled", "false");
+      } else {
+        btn.classList.add("cursor-not-allowed", "opacity-50", "pointer-events-none");
+        btn.setAttribute("aria-disabled", "true");
+      }
+    }
+
+    function parserSetStatus(id, msg, tone) {
+      const el = document.getElementById(id);
+      if (!el) return;
+
+      let color = "";
+      if (tone === "error") color = " text-red-300";
+      if (tone === "ok") color = " text-green-300";
+
+      if (id === "preview-action-status" || id === "parser-token-status") {
+        el.className = "parser-status-box" + color;
+      } else {
+        el.className = "parser-note" + color;
+      }
+
+      el.textContent = String(msg || "");
+    }
+
+    function parserUpdateBalanceDisplay() {
+      const el = document.getElementById("parser-token-available");
+      if (!el) return;
+      el.textContent = parserState.tokenAvailable == null ? "-" : String(parserState.tokenAvailable);
+    }
+
+    function parserUpdateControls() {
+      const extractRawBtn = document.getElementById("extract-raw-btn");
+      const parseStructuredBtn = document.getElementById("parse-structured-btn");
+      const previewReportBtn = document.getElementById("preview-report-btn");
+      const reportEmailBtn = document.getElementById("report-email-btn");
+
+      const hasBalance = typeof parserState.tokenAvailable === "number";
+      const hasCredits = hasBalance && parserState.tokenAvailable > 0;
+      const hasPdf = !!parserState.pdfFile;
+      const hasRaw = !!parserState.rawText;
+      const hasStructured = !!parserState.structured;
+      const canEmail = parserState.tokenValid && hasStructured && parserState.tokenConsumed && !!parserState.lastReportLink;
+      const canExtract = parserState.tokenValid && hasPdf;
+      const canParse = parserState.tokenValid && hasPdf && hasRaw;
+      const canPreview = parserState.tokenValid && hasStructured && !parserState.tokenConsumed && hasCredits;
+
+      parserSetButtonEnabled(extractRawBtn, canExtract);
+      parserSetButtonEnabled(parseStructuredBtn, canParse);
+      parserSetButtonEnabled(reportEmailBtn, canEmail);
+      parserSetPreviewEnabled(canPreview || (parserState.tokenConsumed && !!parserState.lastReportLink));
+
+      if (previewReportBtn) {
+        previewReportBtn.textContent = parserState.tokenConsumed && parserState.lastReportLink ? "Open Saved Preview" : "Save Preview Report";
+        previewReportBtn.href = parserState.tokenConsumed && parserState.lastReportLink ? parserState.lastReportLink : "#";
+      }
+
+      if (!parserState.tokenValid) {
+        parserSetCheckoutStatus("Sign in to use the parser.", "error");
+        parserSetStatus("preview-action-status", "Runs in your browser. Sign in first, then refresh balance.", "");
+        parserSetStatus("report-email-status", "Not ready.", "");
+        return;
+      }
+
+      if (!hasBalance) {
+        parserSetStatus("preview-action-status", "Refresh balance before saving a preview report.", "");
+      } else if (!hasPdf) {
+        parserSetStatus("preview-action-status", "Runs in your browser. Your PDF is not uploaded or stored.", "");
+      } else if (!hasStructured) {
+        parserSetStatus("preview-action-status", "Extract and parse the PDF before saving a preview report.", "");
+      } else if (!hasCredits && !parserState.tokenConsumed) {
+        parserSetStatus("preview-action-status", "Insufficient balance. Buy more credits before saving a preview report.", "error");
+      } else if (parserState.tokenConsumed && parserState.lastReportLink) {
+        parserSetStatus("preview-action-status", "Preview saved. Open the report or email the saved link.", "ok");
+      } else {
+        parserSetStatus("preview-action-status", "Saving a preview consumes 1 credit only when you click Save Preview Report.", "");
+      }
+
+      if (!canEmail) {
+        if (!hasStructured) parserSetStatus("report-email-status", "Parse JSON to enable emailing.", "");
+        else if (!parserState.tokenConsumed) parserSetStatus("report-email-status", "Save preview report before emailing.", "");
+        else parserSetStatus("report-email-status", "Not ready.", "");
+      }
+
+      parserSetCheckoutStatus("Open pricing to buy more credits.", "");
+      parserUpdateBalanceDisplay();
+    }
+
+    async function parserCopyToClipboard(text) {
+      const value = String(text || "");
+      if (!value) return;
+
+      try {
+        await navigator.clipboard.writeText(value);
+      } catch (_) {
+        const ta = document.createElement("textarea");
+        ta.value = value;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+    }
+
+    function parserEscapeRegexLiteral(s) {
+      return String(s || "").replace(/[\\^$.*+?()[\]{}|]/g, "\\$&");
+    }
+
+    function parserExtractFirstDate(rawLine) {
+      const line = String(rawLine || "");
+      for (let i = 0; i <= line.length - 10; i++) {
+        const candidate = line.slice(i, i + 10);
+        if (/^\d{2}[/-]\d{2}[/-]\d{4}$/.test(candidate)) return candidate;
+      }
+      return "";
+    }
+
+    function parserFirstRegexGroup(text, re) {
+      const m = String(text || "").match(re);
+      return (m && m[1]) ? String(m[1]).trim() : "";
+    }
+
+    function parserDetectTranscriptType(rawText) {
+      const t = String(rawText || "").toLowerCase();
+      if (t.includes("record of account")) return "record_of_account";
+      if (t.includes("account transcript")) return "account";
+      if (t.includes("return transcript")) return "return";
+      if (t.includes("wage") && t.includes("income")) return "wage_income";
+      return "unknown";
+    }
+
+    function parserNormalizeTextForParsing(rawText) {
+      const t = String(rawText || "").replace(/\s+/g, " ").trim();
+
+      const labelStarts = [
+        "Account balance:",
+        "Accrued interest:",
+        "Accrued penalty:",
+        "As of:",
+        "Filing status:",
+        "Form Number:",
+        "Processing date:",
+        "Report for Tax Period Ending:",
+        "Request Date:",
+        "Response Date:",
+        "Return due date or return received date",
+        "Taxpayer Identification Number:",
+        "Tracking Number:"
+      ].slice().sort(function (a, b) {
+        return String(a).localeCompare(String(b));
       });
 
-      const signOutBtn = document.getElementById('signOutBtn');
-      const signOutBtnSecondary = document.getElementById('signOutBtnSecondary');
-      if (signOutBtn) signOutBtn.addEventListener('click', signOut);
-      if (signOutBtnSecondary) signOutBtnSecondary.addEventListener('click', signOut);
+      let out = t;
+
+      labelStarts.forEach(function (lbl) {
+        const safe = parserEscapeRegexLiteral(lbl);
+        out = out.replace(new RegExp("\\s(" + safe + ")", "g"), "\n$1");
+      });
+
+      out = out.replace(/(TRANSACTIONS\s+CODE\s+EXPLANATION\s+OF\s+TRANSACTION\s+CYCLE\s+DATE\s+AMOUNT)\s+/i, "$1\n");
+
+      const marker = out.match(/TRANSACTIONS\s+CODE\s+EXPLANATION\s+OF\s+TRANSACTION\s+CYCLE\s+DATE\s+AMOUNT/i);
+      if (marker) {
+        const idx = out.toLowerCase().indexOf(marker[0].toLowerCase());
+        const head = out.slice(0, idx);
+        let tail = out.slice(idx);
+        tail = tail.replace(/\s(\d{3})\s+([A-Za-z])/g, "\n$1 $2");
+        out = head + tail;
+      }
+
+      return out;
+    }
+
+    function parserParseTransactions(rawText) {
+      const normalized = parserNormalizeTextForParsing(rawText);
+      const lines = String(normalized || "").split("\n").map(function (l) {
+        return String(l).trim();
+      }).filter(Boolean);
+
+      const out = [];
+      const seen = new Set();
+      let startIdx = 0;
+
+      for (let i = 0; i < lines.length; i++) {
+        if (String(lines[i]).toLowerCase().includes("transactions code explanation")) {
+          startIdx = i + 1;
+          break;
+        }
+      }
+
+      const amountRe = /(-?\$?\d{1,3}(?:,\d{3})*(?:\.\d{2})|-?\$?\d+(?:\.\d{2}))/g;
+
+      for (let i = startIdx; i < lines.length; i++) {
+        const line = lines[i];
+        if (seen.has(line)) continue;
+        seen.add(line);
+
+        if (line.length < 4) continue;
+        const code = line.slice(0, 3);
+        if (!/^\d{3}$/.test(code)) continue;
+        if (line[3] !== " ") continue;
+
+        const rest = line.slice(4).trim();
+        const date = parserExtractFirstDate(rest);
+
+        let amount = "";
+        const amts = rest.match(amountRe);
+        if (amts && amts.length) amount = amts[amts.length - 1];
+
+        let cycle = "";
+        const cycle8 = rest.match(/\b(\d{8})\b/);
+        if (cycle8 && cycle8[1]) cycle = cycle8[1];
+
+        let description = rest;
+        if (amount) description = description.replace(new RegExp("\\s+" + parserEscapeRegexLiteral(amount) + "$"), "");
+        if (date) description = description.replace(new RegExp("\\s+" + parserEscapeRegexLiteral(date) + "(\\s+|$)"), " ").trim();
+        if (cycle) description = description.replace(new RegExp("\\s+" + parserEscapeRegexLiteral(cycle) + "(\\s+|$)"), " ").trim();
+
+        out.push({
+          amount: amount,
+          code: code,
+          cycle: cycle,
+          date: date,
+          description: description.trim(),
+          line: line
+        });
+      }
+
+      return out;
+    }
+
+    function parserBuildStructured(rawText) {
+      const normalized = parserNormalizeTextForParsing(rawText);
+      const transcriptType = parserDetectTranscriptType(normalized);
+
+      const requestDate = parserFirstRegexGroup(normalized, /\bRequest Date:\s*(\d{2}[-/]\d{2}[-/]\d{4})/i);
+      const responseDate = parserFirstRegexGroup(normalized, /\bResponse Date:\s*(\d{2}[-/]\d{2}[-/]\d{4})/i);
+      const trackingNumber = parserFirstRegexGroup(normalized, /\bTracking Number:\s*([0-9]{6,})/i);
+      const formNumber = parserFirstRegexGroup(normalized, /\bForm Number:\s*([0-9A-Za-z-]+)/i);
+
+      const taxPeriodEnding =
+        parserFirstRegexGroup(normalized, /\bReport for Tax Period Ending:\s*(\d{2}[-/]\d{2}[-/]\d{4})/i) ||
+        parserFirstRegexGroup(normalized, /\bTax Period Ending:\s*(\d{2}[-/]\d{2}[-/]\d{4})/i);
+
+      const tinMasked =
+        parserFirstRegexGroup(normalized, /\bTaxpayer Identification Number:\s*([X\*0-9]{3}-[X\*0-9]{2}-[0-9]{4})/i) ||
+        parserFirstRegexGroup(normalized, /\b(?:SSN|TIN):\s*([X\*0-9]{3}-[X\*0-9]{2}-[0-9]{4})/i);
+
+      const accountBalance = parserFirstRegexGroup(normalized, /\bAccount balance:\s*(-?\$?\d{1,3}(?:,\d{3})*(?:\.\d{2})|-?\$?\d+(?:\.\d{2}))/i);
+      const transactions = parserParseTransactions(normalized);
+
+      const codesFound = Array.from(new Set(transactions.map(function (t) {
+        return t.code;
+      }))).sort(function (a, b) {
+        return String(a).localeCompare(String(b));
+      });
+
+      return {
+        codesFound: codesFound,
+        header: {
+          formNumber: formNumber,
+          requestDate: requestDate,
+          responseDate: responseDate,
+          trackingNumber: trackingNumber
+        },
+        meta: {
+          accountBalance: accountBalance,
+          brandLogoDataUrl: parserState.brandLogoDataUrl || "",
+          taxPeriodEnding: taxPeriodEnding,
+          tinMasked: tinMasked,
+          transcriptType: transcriptType
+        },
+        transactions: transactions,
+        version: "app_parser_v1"
+      };
+    }
+
+    async function parserExtractTextFromPDF(file) {
+      if (!window.pdfjsLib) throw new Error("PDF.js not found on this page.");
+      if (!file) throw new Error("No PDF selected.");
+
+      const buf = await file.arrayBuffer();
+      const loadingTask = window.pdfjsLib.getDocument({ data: buf });
+      const pdf = await loadingTask.promise;
+
+      let out = "";
+
+      for (let p = 1; p <= pdf.numPages; p++) {
+        const page = await pdf.getPage(p);
+        const content = await page.getTextContent({ disableCombineTextItems: false });
+        const parts = [];
+
+        (content.items || []).forEach(function (it) {
+          if (it && typeof it.str === "string" && it.str.trim()) {
+            parts.push(it.str);
+          }
+        });
+
+        out += parts.join(" ") + "\n";
+      }
+
+      const text = out.trim();
+      if (!text) throw new Error("No selectable text found. Scanned image PDFs need OCR and this page does not do OCR.");
+      return text;
+    }
+
+    async function parserRefreshBalance() {
+      parserSetStatus("parser-token-status", "Checking signed-in balance…", "");
+
+      try {
+        const me = await fetchJson("/api/transcripts/me");
+        setAccountState(me || {});
+        parserSetStatus("parser-token-status", "Session ready. " + String(parserState.tokenAvailable || 0) + " credits available.", "ok");
+      } catch (error) {
+        parserState.tokenAvailable = null;
+        parserState.tokenValid = false;
+        parserState.tokenId = "";
+        parserUpdateBalanceDisplay();
+        parserSetStatus("parser-token-status", String(error && error.message ? error.message : error), "error");
+      }
+
+      parserUpdateControls();
+    }
+
+    function parserHandlePdfSelected(file) {
+      parserState.eventId = "";
+      parserState.lastReportLink = "";
+      parserState.pdfFile = file;
+      parserState.previewReady = false;
+      parserState.rawText = "";
+      parserState.structured = null;
+      parserState.tokenConsumed = false;
+
+      const p = document.querySelector("#pdf-drop-zone .parser-upload-title");
+      if (p && file) {
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+        p.textContent = "Selected: " + file.name + " • " + sizeMb + " MB";
+      }
+
+      const rawOutput = document.getElementById("raw-output");
+      const jsonOutput = document.getElementById("json-output");
+
+      if (rawOutput) rawOutput.textContent = "(ready. click Extract Raw Text)";
+      if (jsonOutput) jsonOutput.textContent = "(no json yet)";
+
+      parserSetStatus("report-email-status", "Not ready.", "");
+      parserUpdateControls();
+    }
+
+    async function parserExtractRaw() {
+      if (!parserState.tokenValid || !parserState.pdfFile) return;
+
+      const rawOutput = document.getElementById("raw-output");
+      if (rawOutput) rawOutput.textContent = "Extracting text…";
+      parserSetButtonEnabled(document.getElementById("extract-raw-btn"), false);
+
+      try {
+        const text = await parserExtractTextFromPDF(parserState.pdfFile);
+        parserState.rawText = text;
+        if (rawOutput) rawOutput.textContent = text;
+      } catch (error) {
+        if (rawOutput) rawOutput.textContent = String(error && error.message ? error.message : error);
+      }
+
+      parserUpdateControls();
+    }
+
+    async function parserParseStructured() {
+      if (!parserState.tokenValid || !parserState.rawText) return;
+
+      const jsonOutput = document.getElementById("json-output");
+      if (jsonOutput) jsonOutput.textContent = "Parsing…";
+      parserSetButtonEnabled(document.getElementById("parse-structured-btn"), false);
+
+      try {
+        const structured = parserBuildStructured(parserState.rawText);
+        parserState.structured = structured;
+        if (jsonOutput) jsonOutput.textContent = JSON.stringify(structured, null, 2);
+      } catch (error) {
+        if (jsonOutput) jsonOutput.textContent = String(error && error.message ? error.message : error);
+      }
+
+      parserUpdateControls();
+    }
+
+    async function parserPreviewAndConsume() {
+      if (!parserState.tokenValid || !parserState.structured) return;
+
+      if (parserState.tokenConsumed && parserState.lastReportLink) {
+        window.location.href = parserState.lastReportLink;
+        return;
+      }
+
+      parserSetPreviewEnabled(false);
+      parserSetStatus("preview-action-status", "Saving preview report…", "");
+
+      try {
+        const { data, response, text } = await apiFetch("/api/transcripts/preview", {
+          body: JSON.stringify({ reportData: parserState.structured }),
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          method: "POST"
+        });
+
+        if (response.status === 401) {
+          window.location.href = "/sign-in.html";
+          return;
+        }
+
+        if (!response.ok) {
+          const errorMsg = data && data.error ? String(data.error) : (text || response.statusText || "Preview save failed.");
+          if (data && typeof data.balance === "number") {
+            parserState.tokenAvailable = data.balance;
+          }
+          parserSetStatus("parser-token-status", errorMsg, "error");
+          parserSetStatus("preview-action-status", errorMsg, "error");
+          parserUpdateControls();
+          return;
+        }
+
+        parserState.eventId = String(firstDefined(data && data.eventId, ""));
+        parserState.lastReportLink = String(firstDefined(data && data.reportUrl, data && data.url, ""));
+        parserState.previewReady = true;
+        parserState.tokenConsumed = true;
+
+        if (data && typeof data.balance === "number") {
+          parserState.tokenAvailable = data.balance;
+        }
+
+        parserSetStatus("parser-token-status", data && data.reportId ? "Preview saved. Report ID: " + String(data.reportId) : "Preview saved.", "ok");
+        parserSetStatus("preview-action-status", "Preview saved successfully. Opening report…", "ok");
+        parserUpdateControls();
+
+        if (parserState.lastReportLink) {
+          window.location.href = parserState.lastReportLink;
+        }
+      } catch (error) {
+        const msg = String(error && error.message ? error.message : error);
+        parserSetStatus("parser-token-status", msg, "error");
+        parserSetStatus("preview-action-status", msg, "error");
+        parserUpdateControls();
+      }
+    }
+
+    async function parserEmailReportLink() {
+      if (!parserState.tokenValid || !parserState.structured || !parserState.tokenConsumed) return;
+
+      const reportEmailInput = document.getElementById("report-email");
+      const email = String((reportEmailInput && reportEmailInput.value) || "").trim().toLowerCase();
+
+      if (!email || !email.includes("@")) {
+        parserSetStatus("report-email-status", "Enter a valid email.", "error");
+        return;
+      }
+
+      parserSetButtonEnabled(document.getElementById("report-email-btn"), false);
+      parserSetStatus("report-email-status", "Sending email…", "");
+
+      try {
+        const { data, response, text } = await apiFetch("/forms/transcript/report-email", {
+          body: JSON.stringify({
+            email: email,
+            eventId: parserState.eventId,
+            reportUrl: parserState.lastReportLink,
+            tokenId: parserState.tokenId
+          }),
+          credentials: "omit",
+          headers: { "Content-Type": "application/json" },
+          method: "POST"
+        });
+
+        if (!response.ok) {
+          const msg = data && data.error ? String(data.error) : (text || response.statusText || "Email failed.");
+          throw new Error(msg);
+        }
+
+        if (data && data.reportUrl) {
+          parserState.lastReportLink = String(data.reportUrl);
+        }
+
+        parserSetStatus(
+          "report-email-status",
+          parserState.lastReportLink
+            ? "Email sent. Secure link created: " + parserState.lastReportLink
+            : "Email sent.",
+          "ok"
+        );
+      } catch (error) {
+        parserSetStatus("report-email-status", String(error && error.message ? error.message : error), "error");
+      }
+
+      parserUpdateControls();
+    }
+
+    function wireParserSection() {
+      const brandLogoInput = document.getElementById("brand-logo");
+      const brandLogoName = document.getElementById("brand-logo-file-name");
+      const copyJsonBtn = document.getElementById("copy-json");
+      const copyRawBtn = document.getElementById("copy-raw");
+      const extractRawBtn = document.getElementById("extract-raw-btn");
+      const parseStructuredBtn = document.getElementById("parse-structured-btn");
+      const parserBuyCreditsBtn = document.getElementById("parser-buy-credits");
+      const parserTokenBtn = document.getElementById("parser-save-token");
+      const pdfDropZone = document.getElementById("pdf-drop-zone");
+      const pdfUpload = document.getElementById("pdf-upload");
+      const previewReportBtn = document.getElementById("preview-report-btn");
+      const reportEmailBtn = document.getElementById("report-email-btn");
+
+      if (brandLogoInput && brandLogoName) {
+        brandLogoInput.addEventListener("change", function () {
+          const file = brandLogoInput.files && brandLogoInput.files[0];
+          brandLogoName.textContent = file ? String(file.name || "") : "No file chosen";
+
+          if (!file) {
+            parserState.brandLogoDataUrl = "";
+            return;
+          }
+
+          const reader = new FileReader();
+          reader.onload = function () {
+            parserState.brandLogoDataUrl = String(reader.result || "");
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (pdfDropZone && pdfUpload) {
+        pdfDropZone.addEventListener("click", function () {
+          pdfUpload.click();
+        });
+
+        pdfDropZone.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            pdfUpload.click();
+          }
+        });
+
+        pdfDropZone.addEventListener("dragover", function (e) {
+          e.preventDefault();
+          pdfDropZone.classList.add("is-dragover");
+        });
+
+        pdfDropZone.addEventListener("dragleave", function () {
+          pdfDropZone.classList.remove("is-dragover");
+        });
+
+        pdfDropZone.addEventListener("drop", function (e) {
+          e.preventDefault();
+          pdfDropZone.classList.remove("is-dragover");
+          const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+          if (f) parserHandlePdfSelected(f);
+        });
+
+        pdfUpload.addEventListener("change", function () {
+          const f = pdfUpload.files && pdfUpload.files[0];
+          if (f) parserHandlePdfSelected(f);
+        });
+      }
+
+      if (copyJsonBtn) {
+        copyJsonBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          const jsonOutput = document.getElementById("json-output");
+          parserCopyToClipboard(jsonOutput ? jsonOutput.textContent : "");
+        });
+      }
+
+      if (copyRawBtn) {
+        copyRawBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          const rawOutput = document.getElementById("raw-output");
+          parserCopyToClipboard(rawOutput ? rawOutput.textContent : "");
+        });
+      }
+
+      if (extractRawBtn) {
+        extractRawBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          parserExtractRaw();
+        });
+      }
+
+      if (parseStructuredBtn) {
+        parseStructuredBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          parserParseStructured();
+        });
+      }
+
+      if (parserBuyCreditsBtn) {
+        parserBuyCreditsBtn.addEventListener("click", function () {
+          parserSetCheckoutStatus("Opening pricing…", "");
+        });
+      }
+
+      if (parserTokenBtn) {
+        parserTokenBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          parserRefreshBalance();
+        });
+      }
+
+      if (previewReportBtn) {
+        previewReportBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          parserPreviewAndConsume();
+        });
+      }
+
+      if (reportEmailBtn) {
+        reportEmailBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          parserEmailReportLink();
+        });
+      }
+
+      parserUpdateControls();
     }
 
     async function boot() {
-      document.getElementById('footerYear').textContent = String(new Date().getFullYear());
+      document.getElementById("footerYear").textContent = String(new Date().getFullYear());
+
       wireNavigation();
       wireStaticButtons();
-      switchPage('dashboard');
+      wireParserSection();
+      switchPage("dashboard");
 
-      const me = await fetchJson('/api/transcripts/me');
+      const me = await fetchJson("/api/transcripts/me");
       setAccountState(me || {});
+      parserUpdateBalanceDisplay();
+      parserSetStatus("parser-token-status", "Session ready. " + String(parserState.tokenAvailable || 0) + " credits available.", "ok");
+      parserUpdateControls();
 
-      const purchasesPromise = fetchJson('/api/transcripts/purchases');
-      const reportsPromise = fetchJson('/api/transcripts/reports');
+      const purchasesPromise = fetchJson("/api/transcripts/purchases");
+      const reportsPromise = fetchJson("/api/transcripts/reports");
 
       const purchases = await purchasesPromise;
       renderPurchases(purchases);
@@ -1325,27 +2266,31 @@
       const reports = await reportsPromise;
       renderReports(reports);
 
-      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      if (window.lucide && typeof window.lucide.createIcons === "function") {
         window.lucide.createIcons();
       }
     }
 
     boot().catch(function (error) {
-      if (String(error && error.message || error) === 'unauthorized') return;
+      if (String(error && error.message || error) === "unauthorized") return;
 
-      const message = 'Dashboard failed to load. ' + String(error && error.message || error || 'unknown_error');
-      ['purchasesEmpty', 'receiptsPageEmpty', 'reportsEmpty', 'reportsPageEmpty'].sort().forEach(function (id) {
+      const message = "Dashboard failed to load. " + String(error && error.message || error || "unknown_error");
+
+      ["purchasesEmpty", "receiptsPageEmpty", "reportsEmpty", "reportsPageEmpty"].sort().forEach(function (id) {
         const el = document.getElementById(id);
         if (el) {
-          el.classList.remove('hidden');
+          el.classList.remove("hidden");
           el.textContent = message;
         }
       });
 
-      ['purchasesTableWrap', 'receiptsPageTableWrap', 'reportsTableWrap', 'reportsPageTableWrap'].sort().forEach(function (id) {
+      ["purchasesTableWrap", "receiptsPageTableWrap", "reportsTableWrap", "reportsPageTableWrap"].sort().forEach(function (id) {
         const el = document.getElementById(id);
-        if (el) el.classList.add('hidden');
+        if (el) el.classList.add("hidden");
       });
+
+      parserSetStatus("parser-token-status", message, "error");
+      parserSetStatus("preview-action-status", message, "error");
     });
   </script>
 </body>
