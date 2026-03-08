@@ -207,7 +207,8 @@
   (function () {
     // DOM (alphabetical)
     const brandLogoInput = document.getElementById("brand-logo");
-    const brandLogoName = document.getElementById("brand-logo-file-name");    const checkoutStatus = document.getElementById("parser-checkout-status");
+    const brandLogoName = document.getElementById("brand-logo-file-name");
+    const checkoutStatus = document.getElementById("parser-checkout-status");
     const copyJsonBtn = document.getElementById("copy-json");
     const copyRawBtn = document.getElementById("copy-raw");
     const extractRawBtn = document.getElementById("extract-raw-btn");
@@ -230,7 +231,8 @@
     const NL = String.fromCharCode(10);
 
     const state = {
-      brandLogoDataUrl: "",      eventId: "",
+      brandLogoDataUrl: "",
+      eventId: "",
       lastReportLink: "",
       pdfFile: null,
       previewReady: false,
@@ -384,8 +386,11 @@
       });
 
       if (out.res && out.res.status === 401) {
-        window.location.href = "/sign-in.html";
-        return null;
+        return {
+          balance: null,
+          tokenId: "",
+          unauthorized: true,
+        };
       }
 
       if (!out.ok) {
@@ -408,7 +413,7 @@
       if (balance === null) throw new Error("Balance lookup returned no usable balance.");
       if (!tokenId) throw new Error("Balance lookup returned no usable tokenId.");
 
-      return { balance, tokenId };
+      return { balance, tokenId, unauthorized: false };
     }
 
     function escapeRegexLiteral(s) {
@@ -687,9 +692,22 @@
 
     async function verifyToken() {
       setTokenStatus("Checking signed-in balance…", "");
+
       try {
         const sessionState = await fetchTokenBalance();
         if (!sessionState) return;
+
+        if (sessionState.unauthorized) {
+          state.tokenAvailable = null;
+          state.tokenValid = false;
+          state.tokenId = "";
+
+          setParserAvailable("-");
+          if (parserTokenInput) parserTokenInput.value = "";
+          setTokenStatus("Not signed in. You can browse this page, then sign in when you're ready.", "");
+          updateControls();
+          return;
+        }
 
         state.tokenValid = true;
         state.tokenId = sessionState.tokenId;
@@ -760,7 +778,14 @@
         });
 
         if (out.res && out.res.status === 401) {
-          window.location.href = "/sign-in.html";
+          state.tokenAvailable = null;
+          state.tokenValid = false;
+          state.tokenId = "";
+          setParserAvailable("-");
+          if (parserTokenInput) parserTokenInput.value = "";
+          setTokenStatus("Session expired. Please sign in again.", "error");
+          setPreviewActionStatus("Please sign in to save a preview report.", "error");
+          updateControls();
           return;
         }
 
@@ -971,7 +996,9 @@
         setCheckoutStatus(String((e && e.message) ? e.message : e), "error");
       }
       updateControls();
-      setTokenStatus("Ready. Signed-in session required.", "");
+      if (!state.tokenValid) {
+        setTokenStatus("Ready. Signed-in session required.", "");
+      }
     })();
   })();
 </script>
