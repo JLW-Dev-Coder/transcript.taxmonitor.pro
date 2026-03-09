@@ -885,21 +885,37 @@
         function extractPayloadCandidate(raw) {
           if (!raw) return null;
           if (typeof raw === 'object') return raw;
-          const attempts = [String(raw).trim()];
-          try {
-            attempts.push(decodeURIComponent(String(raw).trim()));
-          } catch (_) {}
 
-          for (const item of attempts) {
+          const queue = [];
+          const seen = new Set();
+
+          function push(value) {
+            const text = String(value == null ? '' : value).trim();
+            if (!text || seen.has(text)) return;
+            seen.add(text);
+            queue.push(text);
+          }
+
+          push(raw);
+          try { push(decodeURIComponent(String(raw).trim())); } catch (_) {}
+
+          while (queue.length) {
+            const item = queue.shift();
             if (!item) continue;
+
             const parsedJson = tryParseJson(item);
             if (parsedJson) return parsedJson;
+
             try {
               const decoded = base64UrlToText(item);
-              const parsedDecoded = tryParseJson(decoded);
-              if (parsedDecoded) return parsedDecoded;
+              if (decoded && !seen.has(decoded)) {
+                const parsedDecoded = tryParseJson(decoded);
+                if (parsedDecoded) return parsedDecoded;
+                push(decoded);
+              }
             } catch (_) {}
           }
+
           return null;
         }
 
@@ -969,7 +985,7 @@
 
         function readReportId() {
           const url = new URL(window.location.href);
-          return String(url.searchParams.get('reportId') || '').trim();
+          return String(url.searchParams.get('reportId') || url.searchParams.get('r') || '').trim();
         }
 
         async function decodeWorkerReportPayload(payload, transport) {
@@ -1018,7 +1034,7 @@
             throw new Error('unable_to_decode_report_payload');
           }
 
-          return decoded;
+          return unwrapReportCandidate(decoded);
         }
 
         function readWindowPayload() {
@@ -1038,8 +1054,42 @@
           return null;
         }
 
+        function unwrapReportCandidate(raw) {
+          const candidate = raw && typeof raw === 'object' ? raw : null;
+          if (!candidate) return raw;
+
+          const nestedCandidates = [
+            candidate.report,
+            candidate.reportData,
+            candidate.data,
+            candidate.payload,
+            candidate.preview,
+            candidate.result,
+            candidate.value
+          ];
+
+          if (candidate.summary || candidate.metadata || Array.isArray(candidate.rows) || Array.isArray(candidate.transactions) || Array.isArray(candidate.timeline)) {
+            return candidate;
+          }
+
+          for (const nested of nestedCandidates) {
+            if (!nested) continue;
+            if (typeof nested === 'string') {
+              const parsed = extractPayloadCandidate(nested);
+              if (parsed) return unwrapReportCandidate(parsed);
+              continue;
+            }
+            if (typeof nested === 'object') {
+              return unwrapReportCandidate(nested);
+            }
+          }
+
+          return candidate;
+        }
+
         function normalizeReport(raw) {
-          const source = raw && typeof raw === 'object' ? raw : {};
+          const unwrapped = unwrapReportCandidate(raw);
+          const source = unwrapped && typeof unwrapped === 'object' ? unwrapped : {};
           if (source.summary && source.metadata && Array.isArray(source.rows)) {
             return source;
           }
@@ -1543,7 +1593,7 @@
             ? 'storage'
             : null;
 
-          const payload = encryptedPayload || paramsPayload || hashPayload || winPayload || storagePayload;
+          const payload = unwrapReportCandidate(encryptedPayload || paramsPayload || hashPayload || winPayload || storagePayload);
 
           if (!payload) {
             if (hasRawParam || hasRawHash) {
@@ -1655,7 +1705,8 @@
           window.TMReportShared = {
             normalizeReport,
             renderReportPages,
-            version: '1.2.0'
+            unwrapReportCandidate,
+            version: '1.3.0'
           };
           showReport(report);
           wireControls();
