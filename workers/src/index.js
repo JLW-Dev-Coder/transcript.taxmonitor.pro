@@ -1927,10 +1927,23 @@ async function handleDevMint(request, env) {
   }, 200);
 }
 
-/* ------------------------------------------
- * Router
- * ------------------------------------------ */
+export class TokenLedger {
+  constructor(state, env) {
+    this.state = state;
+    this.env = env;
+  }
 
+  async fetch() {
+    return new Response(JSON.stringify({ error: "not_implemented", message: "TokenLedger durable object is not implemented in this worker." }, null, 2), {
+      status: 501,
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+      },
+    });
+  }
+}
+
+$1
 export default {
   async fetch(request, env) {
     try {
