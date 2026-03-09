@@ -667,7 +667,6 @@
 
           <div class="topbar-actions">
             <button id="reportBackButton" type="button" class="btn btn-ghost">Back</button>
-            <button id="emailReportBtn" type="button" class="btn btn-soft">Email Report</button>
             <input id="logoFileInput" type="file" accept="image/*" class="hidden" />
             <button id="addLogoBtn" type="button" class="btn btn-soft">Add Logo</button>
             <button id="removeLogoBtn" type="button" class="btn btn-ghost hidden">Remove Logo</button>
@@ -1631,7 +1630,7 @@
         function wireControls() {
           const addBtn = document.getElementById('addLogoBtn');
           const backBtn = document.getElementById('reportBackButton');
-          const emailBtn = document.getElementById('emailReportBtn');
+          
           const removeBtn = document.getElementById('removeLogoBtn');
           const printBtn = document.getElementById('printBtn');
           const fileInput = document.getElementById('logoFileInput');
@@ -1642,15 +1641,6 @@
           }
 
           if (backBtn) backBtn.addEventListener('click', () => goBackToReturnUrl());
-
-          if (emailBtn) {
-            emailBtn.addEventListener('click', () => {
-              const subject = encodeURIComponent('IRS Transcript Report');
-              const body = encodeURIComponent(`Open report: ${window.location.href}`);
-              window.location.href = `mailto:?subject=${subject}&body=${body}`;
-            });
-          }
-
           if (printBtn) printBtn.addEventListener('click', () => triggerPrintFlow());
 
           if (addBtn && fileInput) {
