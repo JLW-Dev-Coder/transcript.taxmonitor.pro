@@ -1,1988 +1,2238 @@
-/**
- * TaxTools Tax Monitor Pro — Cloudflare Worker (v1 API)
- *
- * Checkout provider: PayPal
- *
- * Routes (alphabetical by path):
- * - GET  /dev/login?email=
- * - GET  /dev/mint?amount=
- * - GET  /transcript/report?r=...
- * - GET  /transcript/report-data?reportId=...
- * - GET  /transcript/report-link?reportId=...
- * - POST /transcript/report-link
- * - GET  /v1/auth/complete?token=
- * - GET  /v1/auth/me
- * - POST /v1/auth/logout
- * - POST /v1/auth/start
- * - GET  /v1/checkout/status?session_id=
- * - POST /v1/checkout/sessions
- * - GET  /v1/games/access?slug=
- * - POST /v1/games/end
- * - GET  /v1/help/status?ticket_id=
- * - POST /v1/help/tickets
- * - GET  /v1/tokens/balance (alias: /v1/arcade/tokens)
- * - POST /v1/tokens/spend
- * - POST /v1/webhooks/paypal
- *
- * Notes:
- * - Balances are stored in D1 (accounts.balance).
- * - Idempotency is enforced by token_ledger.id primary key.
- * - Game access windows are stored in D1 (play_grants).
- * - PayPal order->account mapping is stored in R2 (orders/<orderId>.json).
- * - PayPal webhooks are authoritative for crediting (PAYMENT.CAPTURE.COMPLETED).
- */
+<!-- app-dashboard.html -->
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transcript.Tax Monitor Pro — App Dashboard</title>
 
-const COOKIE_NAMES = Object.freeze({
-  accountId: "tm_account_id",
-  email: "tm_email",
-  session: "tm_session",
-});
-
-const CORS_ALLOWED_HEADERS = "Content-Type,Idempotency-Key";
-const CORS_ALLOWED_METHODS = "GET,POST,OPTIONS";
-const CORS_MAX_AGE_SECONDS = "86400";
-
-const LOGIN_TOKEN_TTL_MS = 15 * 60 * 1000;
-const SESSION_TTL_MS = 14 * 24 * 60 * 60 * 1000;
-
-const PLAY_GRANT_WINDOW_MS = 30 * 60 * 1000; // legacy time-window gating (kept for backward compatibility)
-const PLAY_GRANT_ABANDONED_CUTOFF_MS = 7 * 24 * 60 * 60 * 1000; // run-to-completion safety cutoff
-
-const VALID_GAME_SLUGS = new Set([
-  "circular-230-quest",
-  "irs-notice-jackpot",
-  "irs-notice-showdown",
-  "irs-tax-detective",
-  "match-the-tax-notice",
-  "tax-deadline-master",
-  "tax-deduction-quest",
-  "tax-document-hunter",
-  "tax-jargon-game",
-  "tax-strategy-adventures",
-  "tax-tips-refund-boost",
-]);
-
-const SKU_TOKEN_COUNTS = {
-  token_pack_large_200: 200,
-  token_pack_medium_80: 80,
-  token_pack_small_30: 30,
-};
-
-const SKU_USD_AMOUNTS = {
-  token_pack_large_200: "39.00",
-  token_pack_medium_80: "19.00",
-  token_pack_small_30: "9.00",
-};
-
-const state = {
-  helpTickets: new Map(),
-};
-
-/* ------------------------------------------
- * CORS + response helpers
- * ------------------------------------------ */
-
-function withCors(request, env, extra = {}) {
-  const origin = request.headers.get("Origin") || "";
-
-  const allowlist = String(env.ALLOWED_ORIGINS || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  const defaultAllow = "https://taxtools.taxmonitor.pro";
-
-  const allowOrigin = allowlist.length
-    ? (allowlist.includes(origin) ? origin : "")
-    : (origin === defaultAllow ? origin : defaultAllow);
-
-  const base = {
-    "Access-Control-Allow-Credentials": "true",
-    "Access-Control-Allow-Headers": CORS_ALLOWED_HEADERS,
-    "Access-Control-Allow-Methods": CORS_ALLOWED_METHODS,
-    "Access-Control-Max-Age": CORS_MAX_AGE_SECONDS,
-    Vary: "Origin",
-    ...extra,
-  };
-
-  if (allowOrigin) base["Access-Control-Allow-Origin"] = allowOrigin;
-  return base;
-}
-
-function json(request, env, body, status = 200, extraHeaders = {}) {
-  return new Response(JSON.stringify(body, null, 2), {
-    status,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      ...withCors(request, env),
-      ...extraHeaders,
-    },
-  });
-}
-
-function badRequest(request, env, message) {
-  return json(request, env, { error: "bad_request", message }, 400);
-}
-
-function forbidden(request, env, message) {
-  return json(request, env, { error: "forbidden", message }, 403);
-}
-
-function unauthorized(request, env, message = "Authentication required") {
-  return json(request, env, { error: "unauthorized", message }, 401);
-}
-
-function notFound(request, env) {
-  return json(request, env, { error: "not_found", message: "Not found" }, 404);
-}
-
-function methodNotAllowed(request, env) {
-  return json(request, env, { error: "method_not_allowed", message: "Method not allowed" }, 405);
-}
-
-/* ------------------------------------------
- * Generic helpers
- * ------------------------------------------ */
-
-function asIso(ms) {
-  return new Date(ms).toISOString();
-}
-
-function nowIso() {
-  return new Date().toISOString();
-}
-
-function parseCookies(request) {
-  const cookie = request.headers.get("Cookie") || "";
-  const out = {};
-  for (const part of cookie.split(";")) {
-    const [rawKey, ...rest] = part.trim().split("=");
-    if (!rawKey) continue;
-    out[rawKey] = decodeURIComponent(rest.join("=") || "");
-  }
-  return out;
-}
-
-function getCookie(request, name) {
-  const cookies = parseCookies(request);
-  return (cookies[name] || "").trim();
-}
-
-function randomId(prefix) {
-  if (globalThis.crypto && typeof globalThis.crypto.randomUUID === "function") return `${prefix}_${crypto.randomUUID()}`;
-  return `${prefix}_${Math.random().toString(16).slice(2)}_${Date.now()}`;
-}
-
-function isDevEnabled(env) {
-  return String(env.DEV_LOGIN_ENABLED || "").trim().toLowerCase() === "true";
-}
-
-function isSafeRedirect(redirect) {
-  const r = String(redirect || "").trim();
-  return !!r && r.startsWith("/");
-}
-
-function isValidEmail(email) {
-  const e = String(email || "").trim().toLowerCase();
-  return e.length <= 254 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
-}
-
-async function parseJson(request) {
-  return request.json().catch(() => null);
-}
-
-async function parseRawJson(request) {
-  const raw = await request.text().catch(() => "");
-  if (!raw) return { raw: "", parsed: null };
-  const parsed = (() => {
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return null;
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    window.pdfjsLib = window.pdfjsLib || window["pdfjs-dist/build/pdf"];
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
     }
-  })();
-  return { raw, parsed };
-}
-
-/* ------------------------------------------
- * Cookie helpers
- * ------------------------------------------ */
-
-function cookieDomain(env) {
-  const d = String(env?.COOKIE_DOMAIN || ".taxmonitor.pro").trim();
-  return d || ".taxmonitor.pro";
-}
-
-function buildCookie(name, value, { domain = null, httpOnly = true, maxAgeSec = null } = {}) {
-  const parts = [];
-  parts.push(`${name}=${encodeURIComponent(value)}`);
-  parts.push("Path=/");
-  if (domain) parts.push(`Domain=${domain}`);
-  parts.push("Secure");
-  parts.push("SameSite=Lax");
-  if (httpOnly) parts.push("HttpOnly");
-  if (typeof maxAgeSec === "number") parts.push(`Max-Age=${maxAgeSec}`);
-  return parts.join("; ");
-}
-
-function buildSessionCookies({ accountId, cookieDomain: domain = null, email, sessionId }) {
-  const maxAgeSec = Math.floor(SESSION_TTL_MS / 1000);
-  return [
-    buildCookie(COOKIE_NAMES.session, sessionId, { domain, httpOnly: true, maxAgeSec }),
-    buildCookie(COOKIE_NAMES.accountId, accountId, { domain, httpOnly: false, maxAgeSec }),
-    buildCookie(COOKIE_NAMES.email, email, { domain, httpOnly: false, maxAgeSec }),
-  ];
-}
-
-function clearCookies(domain = null) {
-  return [
-    buildCookie(COOKIE_NAMES.session, "", { domain, httpOnly: true, maxAgeSec: 0 }),
-    buildCookie(COOKIE_NAMES.accountId, "", { domain, httpOnly: false, maxAgeSec: 0 }),
-    buildCookie(COOKIE_NAMES.email, "", { domain, httpOnly: false, maxAgeSec: 0 }),
-  ];
-}
-
-/* ------------------------------------------
- * R2 keys
- * ------------------------------------------ */
-
-function keyLoginToken(token) {
-  return `auth/login_tokens/${token}.json`;
-}
-
-function keySession(sessionId) {
-  return `auth/sessions/${sessionId}.json`;
-}
-
-function keyOrder(orderId) {
-  return `orders/${orderId}.json`;
-}
-
-function keyReceiptApproved(orderId) {
-  return `receipts/paypal/${orderId}/approved.json`;
-}
-
-function keyReceiptCaptureCompleted(orderId) {
-  return `receipts/paypal/${orderId}/capture.completed.json`;
-}
-
-function keyReceiptCaptureFailed(orderId) {
-  return `receipts/paypal/${orderId}/capture.failed.json`;
-}
-
-function keyReceiptSignatureFailed(orderId) {
-  return `receipts/paypal/${orderId}/signature.failed.json`;
-}
-
-function keyReceiptUnmapped(orderId) {
-  return `receipts/paypal/${orderId}/unmapped.json`;
-}
-
-function keySupportTicket(ticketId) {
-  return `support/tickets/${ticketId}.json`;
-}
-
-async function r2Exists(env, key) {
-  const obj = await env.R2_TAXTOOLS.head(key);
-  return !!obj;
-}
-
-async function r2GetJson(env, key) {
-  const obj = await env.R2_TAXTOOLS.get(key);
-  if (!obj) return null;
-  return await obj.json().catch(() => null);
-}
-
-async function r2PutJson(env, key, value) {
-  await env.R2_TAXTOOLS.put(key, JSON.stringify(value), {
-    httpMetadata: { contentType: "application/json" },
-  });
-}
-
-/* ------------------------------------------
- * D1 helpers
- * ------------------------------------------ */
-
-function requireDb(env) {
-  if (!env.DB) throw new Error("Missing D1 binding DB");
-}
-
-async function dbAccountEnsure(env, { accountId, email }) {
-  requireDb(env);
-  const now = nowIso();
-  await env.DB.prepare(
-    "INSERT INTO accounts (account_id, email, balance, created_at, updated_at) VALUES (?, ?, 0, ?, ?) " +
-      "ON CONFLICT(account_id) DO UPDATE SET email=excluded.email, updated_at=excluded.updated_at"
-  )
-    .bind(accountId, email || null, now, now)
-    .run();
-}
-
-async function dbAccountGetBalance(env, accountId) {
-  requireDb(env);
-  const row = await env.DB.prepare("SELECT balance FROM accounts WHERE account_id = ?")
-    .bind(accountId)
-    .first();
-  const bal = Number(row?.balance);
-  return Number.isFinite(bal) ? bal : 0;
-}
-
-async function dbPlayGrantsColumns(env) {
-  requireDb(env);
-
-  if (state.playGrantsColumns && state.playGrantsColumns.size) return state.playGrantsColumns;
-
-  const cols = new Set();
-  const res = await env.DB.prepare("PRAGMA table_info(play_grants)").all();
-  const rows = Array.isArray(res?.results) ? res.results : [];
-  for (const r of rows) {
-    const name = r?.name ? String(r.name) : "";
-    if (name) cols.add(name);
-  }
-
-  state.playGrantsColumns = cols;
-  return cols;
-}
-
-async function dbGrantGetActive(env, { accountId, nowMs, slug }) {
-  requireDb(env);
-
-  const cols = await dbPlayGrantsColumns(env);
-
-  if (cols.has("ended_at")) {
-    const cutoffIso = asIso(nowMs - PLAY_GRANT_ABANDONED_CUTOFF_MS);
-
-    const row = await env.DB.prepare(
-      "SELECT grant_id, created_at, ended_at, result, slug, spent " +
-        "FROM play_grants " +
-        "WHERE account_id = ? AND slug = ? AND ended_at IS NULL AND created_at >= ? " +
-        "ORDER BY created_at DESC LIMIT 1"
-    )
-      .bind(accountId, slug, cutoffIso)
-      .first();
-
-    if (!row) return null;
-
-    return {
-      createdAt: row?.created_at ? String(row.created_at) : null,
-      endedAt: row?.ended_at ? String(row.ended_at) : null,
-      grantId: row?.grant_id ? String(row.grant_id) : null,
-      result: row?.result ? String(row.result) : null,
-      slug,
-      spent: Number(row?.spent) || 0,
-    };
-  }
-
-  const row = await env.DB.prepare(
-    "SELECT grant_id, expires_at, expires_at_ms, slug, spent " +
-      "FROM play_grants " +
-      "WHERE account_id = ? AND slug = ? AND expires_at_ms > ? " +
-      "ORDER BY expires_at_ms DESC LIMIT 1"
-  )
-    .bind(accountId, slug, nowMs)
-    .first();
-
-  if (!row) return null;
-
-  return {
-    expiresAt: row?.expires_at ? String(row.expires_at) : null,
-    expiresAtMs: Number(row?.expires_at_ms) || null,
-    grantId: row?.grant_id ? String(row.grant_id) : null,
-    slug,
-    spent: Number(row?.spent) || 0,
-  };
-}
-
-/* ------------------------------------------
- * Google (Gmail API) sender (magic link)
- * ------------------------------------------ */
-
-function b64UrlEncodeBytes(bytes) {
-  let bin = "";
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) bin += String.fromCharCode(...bytes.subarray(i, i + chunk));
-  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-}
-
-function b64UrlEncodeString(s) {
-  return b64UrlEncodeBytes(new TextEncoder().encode(s));
-}
-
-function pemToPkcs8Bytes(pem) {
-  const normalized = String(pem || "").replace(/\\n/g, "\n").trim();
-  const m = normalized.match(/-----BEGIN PRIVATE KEY-----([\s\S]+?)-----END PRIVATE KEY-----/);
-  if (!m) throw new Error("Invalid GOOGLE_PRIVATE_KEY PEM.");
-  const b64 = m[1].replace(/\s+/g, "");
-  const bin = atob(b64);
-  const bytes = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-  return bytes;
-}
-
-async function importGooglePrivateKey(pem) {
-  const pkcs8 = pemToPkcs8Bytes(pem);
-  return crypto.subtle.importKey(
-    "pkcs8",
-    pkcs8.buffer,
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-}
-
-async function googleGetAccessToken(env) {
-  const clientEmail = env.GOOGLE_CLIENT_EMAIL;
-  const privateKey = env.GOOGLE_PRIVATE_KEY;
-  const tokenUri = env.GOOGLE_TOKEN_URI;
-  const sender = env.GOOGLE_WORKSPACE_USER_NO_REPLY;
-
-  if (!clientEmail) throw new Error("Missing GOOGLE_CLIENT_EMAIL.");
-  if (!privateKey) throw new Error("Missing GOOGLE_PRIVATE_KEY.");
-  if (!tokenUri) throw new Error("Missing GOOGLE_TOKEN_URI.");
-  if (!sender) throw new Error("Missing GOOGLE_WORKSPACE_USER_NO_REPLY.");
-
-  const iat = Math.floor(Date.now() / 1000);
-  const exp = iat + 10 * 60;
-
-  const header = { alg: "RS256", typ: "JWT" };
-  const payload = {
-    aud: tokenUri,
-    exp,
-    iat,
-    iss: clientEmail,
-    scope: "https://www.googleapis.com/auth/gmail.send",
-    sub: sender,
-  };
-
-  const signingInput = `${b64UrlEncodeString(JSON.stringify(header))}.${b64UrlEncodeString(JSON.stringify(payload))}`;
-
-  const key = await importGooglePrivateKey(privateKey);
-  const sig = new Uint8Array(await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(signingInput)));
-
-  const jwt = `${signingInput}.${b64UrlEncodeBytes(sig)}`;
-
-  const form = new URLSearchParams();
-  form.set("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
-  form.set("assertion", jwt);
-
-  const res = await fetch(tokenUri, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: form.toString(),
-  });
-
-  const data = await res.json().catch(() => null);
-  if (!res.ok) {
-    const msg = data && (data.error_description || data.error) ? String(data.error_description || data.error) : "unknown";
-    throw new Error(`Google token error: ${msg}`);
-  }
-
-  const token = String(data.access_token || "");
-  if (!token) throw new Error("Google token missing access_token.");
-  return token;
-}
-
-function buildRawEmail({ from, to, subject, text }) {
-  const raw = [
-    `From: ${from}`,
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    `MIME-Version: 1.0`,
-    `Content-Type: text/plain; charset="UTF-8"`,
-    ``,
-    text,
-  ].join("\r\n");
-  return b64UrlEncodeString(raw);
-}
-
-async function gmailSendMagicLink(env, { to, link }) {
-  const accessToken = await googleGetAccessToken(env);
-  const from = env.GOOGLE_WORKSPACE_USER_NO_REPLY;
-
-  const subject = "Your TaxTools sign-in link";
-  const text =
-`Sign in to TaxTools
-
-Click this link to finish signing in:
-${link}
-
-This link expires in 15 minutes.
-
-If you didn’t request this, ignore this email.
-`;
-
-  const raw = buildRawEmail({ from, to, subject, text });
-
-  const res = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ raw }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Gmail send failed: ${body || res.status}`);
-  }
-}
-
-/* ------------------------------------------
- * ClickUp (Support task projection)
- * ------------------------------------------ */
-
-async function clickupCreateSupportTask(env, { description, subject }) {
-  const token = String(env.CLICKUP_API_TOKEN || "").trim();
-  const listId = String(env.CLICKUP_SUPPORT_LIST_ID || "").trim();
-
-  if (!token || !listId) return null;
-
-  const res = await fetch(`https://api.clickup.com/api/v2/list/${encodeURIComponent(listId)}/task`, {
-    method: "POST",
-    headers: {
-      Authorization: token,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      description: description || "",
-      name: subject || "Support ticket",
-    }),
-  });
-
-  const data = await res.json().catch(() => null);
-  if (!res.ok) return null;
-
-  const taskId = data?.id ? String(data.id) : null;
-  const url = data?.url ? String(data.url) : null;
-
-  return taskId ? { taskId, url } : null;
-}
-
-/* ------------------------------------------
- * Auth context
- * ------------------------------------------ */
-
-async function getAuthContext(request, env) {
-  const sessionId = getCookie(request, COOKIE_NAMES.session);
-  if (!sessionId) return { isAuthenticated: false, accountId: null, email: null };
-
-  const obj = await env.R2_TAXTOOLS.get(keySession(sessionId));
-  if (!obj) return { isAuthenticated: false, accountId: null, email: null };
-
-  const sess = await obj.json().catch(() => null);
-  if (!sess || !sess.email || !sess.expiresAt || !sess.accountId) return { isAuthenticated: false, accountId: null, email: null };
-
-  const exp = Date.parse(sess.expiresAt);
-  if (!Number.isFinite(exp) || exp <= Date.now()) {
-    await env.R2_TAXTOOLS.delete(keySession(sessionId));
-    return { isAuthenticated: false, accountId: null, email: null };
-  }
-
-  return {
-    isAuthenticated: true,
-    accountId: String(sess.accountId || "").trim() || null,
-    email: String(sess.email || "").toLowerCase(),
-  };
-}
-
-/* ------------------------------------------
- * PayPal helpers (create order + webhook verify)
- * ------------------------------------------ */
-
-function paypalApiBase(env) {
-  const mode = String(env.PAYPAL_ENV || "sandbox").trim().toLowerCase();
-  return mode === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
-}
-
-function paypalCheckoutBase(env) {
-  const mode = String(env.PAYPAL_ENV || "sandbox").trim().toLowerCase();
-  return mode === "live" ? "https://www.paypal.com" : "https://www.sandbox.paypal.com";
-}
-
-async function paypalGetAccessToken(env) {
-  const clientId = String(env.PAYPAL_CLIENT_ID || "").trim();
-  const secret = String(env.PAYPAL_CLIENT_SECRET || "").trim();
-  if (!clientId) throw new Error("Missing PAYPAL_CLIENT_ID");
-  if (!secret) throw new Error("Missing PAYPAL_CLIENT_SECRET");
-
-  const basic = btoa(`${clientId}:${secret}`);
-  const res = await fetch(`${paypalApiBase(env)}/v1/oauth2/token`, {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${basic}`,
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: "grant_type=client_credentials",
-  });
-
-  const data = await res.json().catch(() => null);
-  if (!res.ok) {
-    const msg = data?.error_description || data?.error || `PayPal token error (${res.status})`;
-    throw new Error(String(msg));
-  }
-
-  const token = String(data?.access_token || "").trim();
-  if (!token) throw new Error("PayPal token missing access_token");
-  return token;
-}
-
-async function paypalCaptureOrder(env, orderId) {
-  const accessToken = await paypalGetAccessToken(env);
-
-  const res = await fetch(
-    `${paypalApiBase(env)}/v2/checkout/orders/${encodeURIComponent(orderId)}/capture`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  const data = await res.json().catch(() => null);
-  return { ok: res.ok, status: res.status, data };
-}
-
-function buildCheckoutReturnUrls(request) {
-  const defaultAllow = "https://taxtools.taxmonitor.pro";
-
-  const origin = String(request.headers.get("Origin") || "").trim();
-  const base = origin || defaultAllow;
-
-  const referer = String(request.headers.get("Referer") || "").trim();
-
-  let returnUrl;
-  try {
-    returnUrl = referer ? new URL(referer) : new URL(`${base}/index.html`);
-  } catch {
-    returnUrl = new URL(`${base}/index.html`);
-  }
-
-  const baseUrl = new URL(base);
-  if (returnUrl.origin !== baseUrl.origin) returnUrl = new URL(`${base}/index.html`);
-
-  const cancelUrl = new URL(returnUrl.toString());
-  cancelUrl.searchParams.set("paypal", "cancel");
-
-  const successUrl = new URL(returnUrl.toString());
-  successUrl.searchParams.set("paypal", "success");
-
-  return {
-    cancel_url: cancelUrl.toString(),
-    success_url: successUrl.toString(),
-  };
-}
-
-async function paypalCreateOrder({ accessToken, amountUsd, cancel_url, success_url, env, metadata }) {
-  const body = {
-    application_context: {
-      cancel_url,
-      return_url: success_url,
-      user_action: "PAY_NOW",
-    },
-    intent: "CAPTURE",
-    purchase_units: [
-      {
-        amount: {
-          currency_code: "USD",
-          value: String(amountUsd),
-        },
-        custom_id: metadata?.accountId || undefined,
-        description: metadata?.description || undefined,
-        invoice_id: metadata?.idempotencyKey || undefined,
-      },
-    ],
-  };
-
-  const res = await fetch(`${paypalApiBase(env)}/v2/checkout/orders`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
-
-  const data = await res.json().catch(() => null);
-  if (!res.ok) {
-    const msg = data?.message || `PayPal order create error (${res.status})`;
-    throw new Error(String(msg));
-  }
-
-  const orderId = String(data?.id || "").trim();
-  if (!orderId) throw new Error("PayPal order missing id");
-
-  const links = Array.isArray(data?.links) ? data.links : [];
-  const approve = links.find((l) => l && l.rel === "approve")?.href;
-  const checkoutUrl = approve || `${paypalCheckoutBase(env)}/checkoutnow?token=${encodeURIComponent(orderId)}`;
-
-  return { checkoutUrl, orderId };
-}
-
-function extractPayPalOrderId(event) {
-  const r = event?.resource;
-  return (
-    (r?.id ? String(r.id).trim() : "") ||
-    (r?.supplementary_data?.related_ids?.order_id ? String(r.supplementary_data.related_ids.order_id).trim() : "") ||
-    null
-  );
-}
-
-function getPayPalWebhookHeaders(request) {
-  return {
-    auth_algo: request.headers.get("PAYPAL-AUTH-ALGO"),
-    cert_url: request.headers.get("PAYPAL-CERT-URL"),
-    transmission_id: request.headers.get("PAYPAL-TRANSMISSION-ID"),
-    transmission_sig: request.headers.get("PAYPAL-TRANSMISSION-SIG"),
-    transmission_time: request.headers.get("PAYPAL-TRANSMISSION-TIME"),
-  };
-}
-
-function missingWebhookHeaderKeys(h) {
-  return Object.entries(h)
-    .filter(([, v]) => !v)
-    .map(([k]) => k);
-}
-
-async function paypalVerifyWebhookSignature(env, request, webhookEvent) {
-  const webhookId = String(env.PAYPAL_WEBHOOK_ID || "").trim();
-  if (!webhookId) return { ok: false, reason: "missing_env", detail: ["PAYPAL_WEBHOOK_ID"] };
-
-  const headers = getPayPalWebhookHeaders(request);
-  const missingHeaders = missingWebhookHeaderKeys(headers);
-  if (missingHeaders.length) return { ok: false, reason: "missing_headers", detail: missingHeaders };
-
-  let accessToken;
-  try {
-    accessToken = await paypalGetAccessToken(env);
-  } catch (err) {
-    return { ok: false, reason: "paypal_token_error", detail: String(err?.message || err || "PayPal token error") };
-  }
-
-  const body = {
-    auth_algo: headers.auth_algo,
-    cert_url: headers.cert_url,
-    transmission_id: headers.transmission_id,
-    transmission_sig: headers.transmission_sig,
-    transmission_time: headers.transmission_time,
-    webhook_event: webhookEvent,
-    webhook_id: webhookId,
-  };
-
-  const base = String(env.PAYPAL_ENV || "").trim().toLowerCase() === "live"
-    ? "https://api-m.paypal.com"
-    : "https://api-m.sandbox.paypal.com";
-
-  let res;
-  try {
-    res = await fetch(`${base}/v1/notifications/verify-webhook-signature`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-  } catch (err) {
-    return { ok: false, reason: "paypal_verify_fetch_error", detail: String(err?.message || err || "Fetch failed") };
-  }
-
-  const data = await res.json().catch(() => null);
-  if (!res.ok) {
-    return { ok: false, reason: "paypal_verify_http_error", detail: { data, status: res.status } };
-  }
-
-  const status = String(data?.verification_status || "").toUpperCase();
-  if (status === "SUCCESS") return { ok: true };
-
-  return { ok: false, reason: "verification_failed", detail: data || null };
-}
-
-async function paypalApplyCaptureCompleted(env, { event, eventType, orderId }) {
-  if (orderId === "unknown") {
-    await r2PutJson(env, keyReceiptUnmapped(orderId), { at: nowIso(), event, reason: "missing_order_id" });
-    return { ok: true, ignored: true, reason: "missing_order_id" };
-  }
-
-  const receiptKey = keyReceiptCaptureCompleted(orderId);
-  if (await r2Exists(env, receiptKey)) return { ok: true, deduped: true };
-
-  const order = await r2GetJson(env, keyOrder(orderId));
-  if (!order?.accountId || !Number.isInteger(order?.tokens) || order.tokens <= 0) {
-    await r2PutJson(env, keyReceiptUnmapped(orderId), {
-      at: nowIso(),
-      event,
-      order: order || null,
-      reason: "missing_order_mapping_or_tokens",
-    });
-    return { ok: true, ignored: true, reason: "missing_order_mapping_or_tokens" };
-  }
-
-  const accountId = String(order.accountId);
-  const tokens = Number(order.tokens);
-  const sku = String(order.sku || "");
-  const now = nowIso();
-
-  await dbAccountEnsure(env, { accountId, email: null });
-
-  const ledgerId = `paypal:capture:${orderId}`;
-
-  const inserted = await env.DB.prepare(
-    "INSERT INTO token_ledger (id, account_id, delta, reason, metadata_json, created_at) VALUES (?, ?, ?, ?, ?, ?) " +
-      "ON CONFLICT(id) DO NOTHING"
-  )
-    .bind(ledgerId, accountId, tokens, "paypal_capture_completed", JSON.stringify({ orderId, sku, tokens }), now)
-    .run();
-
-  const changes = inserted?.meta?.changes || 0;
-
-  if (changes > 0) {
-    await env.DB.prepare("UPDATE accounts SET balance = balance + ?, updated_at = ? WHERE account_id = ?")
-      .bind(tokens, now, accountId)
-      .run();
-  }
-
-  const balanceAfter = await dbAccountGetBalance(env, accountId);
-
-  await r2PutJson(env, receiptKey, {
-    accountId,
-    at: nowIso(),
-    balanceAfter,
-    event,
-    eventType,
-    orderId,
-    sku,
-    tokens,
-  });
-
-  return { balanceAfter, credited: changes > 0, ok: true };
-}
-
-async function handleCheckoutSessions(request, env) {
-  if (request.method !== "POST") return methodNotAllowed(request, env);
-
-  const auth = await getAuthContext(request, env);
-  if (!auth.isAuthenticated || !auth.accountId) return unauthorized(request, env);
-
-  const body = await parseJson(request);
-  if (!body || typeof body !== "object") return badRequest(request, env, "Invalid JSON body");
-
-  const item = typeof body.item === "string" ? body.item.trim() : "";
-  const quantity = body.quantity == null ? 1 : Number(body.quantity);
-
-  if (!item) return badRequest(request, env, "item is required");
-  if (item.startsWith("price_")) return badRequest(request, env, "Frontend must send internal item SKU, not provider ID");
-  if (!(item in SKU_TOKEN_COUNTS)) return badRequest(request, env, "Unknown item");
-  if (!Number.isInteger(quantity) || quantity < 1) return badRequest(request, env, "quantity must be a positive integer");
-  if (quantity > 1) return badRequest(request, env, "quantity > 1 is not allowed");
-
-  const amountUsd = SKU_USD_AMOUNTS[item];
-  if (!amountUsd) return json(request, env, { error: "server_misconfigured", message: "Missing PayPal amount configuration" }, 500);
-
-  await dbAccountEnsure(env, { accountId: auth.accountId, email: auth.email });
-
-  let accessToken;
-  try {
-    accessToken = await paypalGetAccessToken(env);
-  } catch (err) {
-    return json(request, env, { error: "server_misconfigured", message: String(err?.message || err) }, 500);
-  }
-
-  const { cancel_url, success_url } = buildCheckoutReturnUrls(request);
-  const idempotencyKey = String(request.headers.get("Idempotency-Key") || "").trim() || `checkout:${auth.accountId}:${item}`;
-
-  let created;
-  try {
-    created = await paypalCreateOrder({
-      accessToken,
-      amountUsd,
-      cancel_url,
-      env,
-      metadata: {
-        accountId: auth.accountId,
-        description: `TaxTools token pack: ${item}`,
-        idempotencyKey,
-      },
-      success_url,
-    });
-  } catch (err) {
-    return json(request, env, { error: "paypal_error", message: String(err?.message || err) }, 502);
-  }
-
-  const { checkoutUrl, orderId } = created;
-  const sessionId = orderId;
-  const tokens = SKU_TOKEN_COUNTS[item];
-
-  await r2PutJson(env, keyOrder(sessionId), {
-    accountId: auth.accountId,
-    amountUsd,
-    createdAt: nowIso(),
-    provider: "paypal",
-    sku: item,
-    tokens,
-  });
-
-  return json(request, env, { checkoutUrl, sessionId }, 201);
-}
-
-async function handleCheckoutStatus(request, env) {
-  if (request.method !== "GET") return methodNotAllowed(request, env);
-
-  const auth = await getAuthContext(request, env);
-  if (!auth.isAuthenticated || !auth.accountId) return unauthorized(request, env);
-
-  const url = new URL(request.url);
-  const sessionId = (url.searchParams.get("session_id") || url.searchParams.get("token") || "").trim();
-  if (!sessionId) return badRequest(request, env, "session_id is required");
-
-  const order = await r2GetJson(env, keyOrder(sessionId));
-  if (order?.accountId && String(order.accountId) !== String(auth.accountId)) {
-    return forbidden(request, env, "This checkout session does not belong to the authenticated account");
-  }
-
-  const completed = await r2Exists(env, keyReceiptCaptureCompleted(sessionId));
-  const approved = !completed && (await r2Exists(env, keyReceiptApproved(sessionId)));
-
-  const paymentStatus = completed ? "paid" : approved ? "approved" : "unpaid";
-  const status = completed ? "complete" : "open";
-
-  const balance = await dbAccountGetBalance(env, auth.accountId);
-
-  return json(request, env, { balance, paymentStatus, sessionId, status }, 200);
-}
-
-async function handleGamesAccess(request, env) {
-  if (request.method !== "GET") return methodNotAllowed(request, env);
-
-  const auth = await getAuthContext(request, env);
-  if (!auth.isAuthenticated || !auth.accountId) return unauthorized(request, env);
-
-  const url = new URL(request.url);
-  const slug = (url.searchParams.get("slug") || "").trim();
-  if (!slug || !VALID_GAME_SLUGS.has(slug)) return badRequest(request, env, "slug is invalid");
-
-  const grant = await dbGrantGetActive(env, { accountId: auth.accountId, nowMs: Date.now(), slug });
-  if (!grant) return json(request, env, { allowed: false, grant: null, slug }, 200);
-
-  return json(
-    request,
-    env,
-    {
-      allowed: true,
-      grant: {
-        createdAt: grant.createdAt || null,
-        endedAt: grant.endedAt || null,
-        expiresAt: grant.expiresAt || null,
-        grantId: grant.grantId || null,
-        result: grant.result || null,
-        slug: grant.slug,
-        spent: grant.spent,
-      },
-      slug,
-    },
-    200
-  );
-}
-
-async function handleGamesEnd(request, env) {
-  if (request.method !== "POST") return methodNotAllowed(request, env);
-
-  const auth = await getAuthContext(request, env);
-  if (!auth.isAuthenticated || !auth.accountId) return unauthorized(request, env);
-
-  const body = await parseJson(request);
-  if (!body || typeof body !== "object") return badRequest(request, env, "Invalid JSON body");
-
-  const slug = typeof body.slug === "string" ? body.slug.trim() : "";
-  const result = typeof body.result === "string" ? body.result.trim().toLowerCase() : "";
-
-  if (!slug || !VALID_GAME_SLUGS.has(slug)) return badRequest(request, env, "slug is invalid");
-  if (!(result === "completed" || result === "lost")) return badRequest(request, env, "result must be completed|lost");
-
-  const cols = await dbPlayGrantsColumns(env);
-  if (!cols.has("ended_at")) {
-    return json(
-      request,
-      env,
-      {
-        error: "server_misconfigured",
-        message: "play_grants table is missing ended_at/result columns (run-to-completion gating requires a schema migration)",
-      },
-      500
-    );
-  }
-
-  const now = nowIso();
-  const cutoffIso = asIso(Date.now() - PLAY_GRANT_ABANDONED_CUTOFF_MS);
-
-  const upd = await env.DB.prepare(
-    "UPDATE play_grants SET ended_at = ?, result = ? " +
-      "WHERE grant_id = (" +
-      "  SELECT grant_id FROM play_grants " +
-      "  WHERE account_id = ? AND slug = ? AND ended_at IS NULL AND created_at >= ? " +
-      "  ORDER BY created_at DESC LIMIT 1" +
-      ")"
-  )
-    .bind(now, result, auth.accountId, slug, cutoffIso)
-    .run();
-
-  const changes = upd?.meta?.changes || 0;
-  return json(request, env, { ok: true, updated: changes > 0 }, 200);
-}
-
-async function handleHealth(request, env) {
-  if (request.method !== "GET") return methodNotAllowed(request, env);
-  return json(request, env, { status: "ok" }, 200);
-}
-
-async function handleHelpStatus(request, env) {
-  if (request.method !== "GET") return methodNotAllowed(request, env);
-
-  const url = new URL(request.url);
-  const ticketId = (url.searchParams.get("ticket_id") || url.searchParams.get("supportId") || url.searchParams.get("support_id") || "").trim();
-  if (!ticketId) return badRequest(request, env, "ticket_id is required");
-
-  const obj = await env.R2_TAXTOOLS.get(keySupportTicket(ticketId));
-  if (!obj) {
-    return json(request, env, {
-      latestUpdate: null,
-      latest_update: null,
-      status: "unknown",
-      ticket_id: ticketId,
-      updatedAt: null,
-      updated_at: null,
-    });
-  }
-
-  const ticket = await obj.json().catch(() => null);
-  if (!ticket || typeof ticket !== "object") {
-    return json(request, env, {
-      latestUpdate: null,
-      latest_update: null,
-      status: "unknown",
-      ticket_id: ticketId,
-      updatedAt: null,
-      updated_at: null,
-    });
-  }
-
-  const latestUpdate = ticket.latestUpdate || ticket.updatedAt || ticket.createdAt || null;
-  const updatedAt = ticket.updatedAt || ticket.createdAt || null;
-
-  return json(request, env, {
-    clickupTaskId: ticket.clickupTaskId || null,
-    clickupUrl: ticket.clickupUrl || null,
-    latestUpdate,
-    latest_update: latestUpdate,
-    status: ticket.status || "open",
-    ticket_id: ticketId,
-    updatedAt,
-    updated_at: updatedAt,
-  });
-}
-
-async function handleHelpTickets(request, env) {
-  if (request.method !== "POST") return methodNotAllowed(request, env);
-
-  const body = await parseJson(request);
-  if (!body || typeof body !== "object") return badRequest(request, env, "Invalid JSON body");
-
-  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-  const message = typeof body.message === "string" ? body.message.trim() : "";
-  const subject = typeof body.subject === "string" ? body.subject.trim() : "";
-
-  if (!email) return badRequest(request, env, "email is required");
-  if (!subject) return badRequest(request, env, "subject is required");
-  if (!message) return badRequest(request, env, "message is required");
-  if (!isValidEmail(email)) return badRequest(request, env, "Invalid email");
-
-  const category = typeof body.category === "string" ? body.category.trim() : "";
-  const eventId = typeof body.eventId === "string" ? body.eventId.trim() : "";
-  const issueType = typeof body.issueType === "string" ? body.issueType.trim() : "";
-  const name = typeof body.name === "string" ? body.name.trim() : "";
-  const priority = typeof body.priority === "string" ? body.priority.trim() : "";
-  const urgency = typeof body.urgency === "string" ? body.urgency.trim() : "";
-  const tokenId = typeof body.tokenId === "string" ? body.tokenId.trim() : "";
-  const relatedOrderId = typeof body.relatedOrderId === "string" ? body.relatedOrderId.trim() : "";
-
-  const utm_campaign = typeof body.utm_campaign === "string" ? body.utm_campaign.trim() : "";
-  const utm_content = typeof body.utm_content === "string" ? body.utm_content.trim() : "";
-  const utm_medium = typeof body.utm_medium === "string" ? body.utm_medium.trim() : "";
-  const utm_source = typeof body.utm_source === "string" ? body.utm_source.trim() : "";
-  const utm_term = typeof body.utm_term === "string" ? body.utm_term.trim() : "";
-
-  const supportId = `sup_${crypto.randomUUID()}`;
-  const createdAt = nowIso();
-  const updatedAt = createdAt;
-
-  const ticket = {
-    category,
-    clickupTaskId: null,
-    clickupUrl: null,
-    createdAt,
-    email,
-    eventId,
-    issueType,
-    latestUpdate: createdAt,
-    message,
-    name,
-    priority,
-    relatedOrderId,
-    status: "open",
-    subject,
-    supportId,
-    ticket_id: supportId,
-    tokenId,
-    updatedAt,
-    urgency,
-    utm_campaign,
-    utm_content,
-    utm_medium,
-    utm_source,
-    utm_term,
-  };
-
-  await env.R2_TAXTOOLS.put(keySupportTicket(supportId), JSON.stringify(ticket), {
-    httpMetadata: { contentType: "application/json" },
-  });
-
-  try {
-    const descriptionLines = [
-      `Support ID: ${supportId}`,
-      `From: ${email}`,
-      `Name: ${name || "(not provided)"}`,
-      `Created: ${createdAt}`,
-      ``,
-      `Category: ${category || "(none)"}`,
-      `Issue Type: ${issueType || "(none)"}`,
-      `Priority: ${priority || "(none)"}`,
-      `Urgency: ${urgency || "(none)"}`,
-      `Event ID: ${eventId || "(none)"}`,
-      `Token ID: ${tokenId || "(none)"}`,
-      `Related Order ID: ${relatedOrderId || "(none)"}`,
-      ``,
-      `UTM Source: ${utm_source || "(none)"}`,
-      `UTM Medium: ${utm_medium || "(none)"}`,
-      `UTM Campaign: ${utm_campaign || "(none)"}`,
-      `UTM Term: ${utm_term || "(none)"}`,
-      `UTM Content: ${utm_content || "(none)"}`,
-      ``,
-      `Subject: ${subject}`,
-      ``,
-      message,
-    ];
-
-    const created = await clickupCreateSupportTask(env, {
-      description: descriptionLines.join("\n"),
-      subject,
-    });
-
-    if (created?.taskId) {
-      ticket.clickupTaskId = created.taskId;
-      ticket.clickupUrl = created.url;
-      ticket.updatedAt = nowIso();
-      ticket.latestUpdate = `Created ClickUp task ${created.taskId}`;
-
-      await env.R2_TAXTOOLS.put(keySupportTicket(supportId), JSON.stringify(ticket), {
-        httpMetadata: { contentType: "application/json" },
-      });
-    }
-  } catch (_) {
-    // swallow on purpose
-  }
-
-  return json(request, env, { supportId, support_id: supportId, ticket_id: supportId }, 201);
-}
-
-async function handleTokensBalance(request, env) {
-  if (request.method !== "GET") return methodNotAllowed(request, env);
-
-  const auth = await getAuthContext(request, env);
-  if (!auth.isAuthenticated || !auth.accountId) return unauthorized(request, env);
-
-  await dbAccountEnsure(env, { accountId: auth.accountId, email: auth.email });
-  const balance = await dbAccountGetBalance(env, auth.accountId);
-
-  return json(request, env, { balance }, 200);
-}
-
-async function handleTokensSpend(request, env) {
-  if (request.method !== "POST") return methodNotAllowed(request, env);
-
-  const auth = await getAuthContext(request, env);
-  if (!auth.isAuthenticated || !auth.accountId) return unauthorized(request, env);
-
-  const body = await parseJson(request);
-  if (!body || typeof body !== "object") return badRequest(request, env, "Invalid JSON body");
-
-  const amount = Number(body.amount);
-  const idempotencyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim() : "";
-  const reason = typeof body.reason === "string" ? body.reason.trim() : "";
-  const slug = typeof body.slug === "string" ? body.slug.trim() : "";
-
-  if (!Number.isInteger(amount) || amount <= 0) return badRequest(request, env, "amount must be a positive integer");
-  if (!idempotencyKey) return badRequest(request, env, "idempotencyKey is required");
-  if (!reason) return badRequest(request, env, "reason is required");
-  if (!slug || !VALID_GAME_SLUGS.has(slug)) return badRequest(request, env, "slug is invalid");
-
-  await dbAccountEnsure(env, { accountId: auth.accountId, email: auth.email });
-
-  const ledgerId = `spend:${auth.accountId}:${idempotencyKey}`;
-  const now = nowIso();
-
-  const existing = await env.DB.prepare("SELECT metadata_json FROM token_ledger WHERE id = ?")
-    .bind(ledgerId)
-    .first();
-
-  if (existing?.metadata_json) {
-    const parsed = (() => {
-      try {
-        return JSON.parse(String(existing.metadata_json));
-      } catch {
-        return null;
+  </script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['DM Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial']
+          }
+        }
       }
-    })();
-    if (parsed) return json(request, env, parsed, 200);
-  }
+    };
+  </script>
 
-  const grantId = crypto.randomUUID();
-  const nowMs = Date.now();
-  const expiresAtMs = nowMs + PLAY_GRANT_ABANDONED_CUTOFF_MS;
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles/site.css?v=1" />
+  <link rel="apple-touch-icon" href="/assets/favicon.ico" />
+  <link rel="icon" href="/assets/favicon.ico" sizes="any" />
+  <link rel="icon" type="image/svg+xml" href="/assets/logo.svg" />
 
-  const grant = {
-    createdAt: asIso(nowMs),
-    endedAt: null,
-    expiresAt: asIso(expiresAtMs),
-    expiresAtMs,
-    grantId,
-    result: null,
-    slug,
-    spent: amount,
-  };
+  <style>
+    :root {
+      --tm-bg: #0f172a;
+      --tm-bg-soft: #111827;
+      --tm-card: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+      --tm-line: rgba(148, 163, 184, 0.18);
+      --tm-purple: #8b5cf6;
+      --tm-purple-soft: rgba(139, 92, 246, 0.12);
+      --tm-blue-soft: rgba(59, 130, 246, 0.12);
+      --tm-green-soft: rgba(16, 185, 129, 0.12);
+      --tm-red-soft: rgba(239, 68, 68, 0.12);
+      --tm-text: #f8fafc;
+      --tm-text-soft: #cbd5e1;
+      --tm-text-muted: #94a3b8;
+      --tm-shadow: 0 24px 64px rgba(2, 8, 23, 0.32);
+    }
 
-  const response = {
-    balance: 0,
-    grant: {
-      createdAt: grant.createdAt,
-      endedAt: grant.endedAt,
-      expiresAt: grant.expiresAt,
-      grantId: grant.grantId,
-      result: grant.result,
-      slug: grant.slug,
-      spent: grant.spent,
-    },
-  };
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      color: var(--tm-text);
+      font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background:
+        radial-gradient(circle at 18% 14%, rgba(168, 85, 247, 0.18), transparent 24%),
+        radial-gradient(circle at 82% 18%, rgba(99, 102, 241, 0.14), transparent 20%),
+        linear-gradient(180deg, #1e1b4b 0%, #111827 42%, #020617 100%);
+    }
 
-  const insertLedger = await env.DB.prepare(
-    "INSERT INTO token_ledger (id, account_id, delta, reason, metadata_json, created_at) VALUES (?, ?, ?, ?, ?, ?) " +
-      "ON CONFLICT(id) DO NOTHING"
-  )
-    .bind(ledgerId, auth.accountId, -amount, reason, null, now)
-    .run();
+    .app-shell {
+      min-height: 100vh;
+      display: flex;
+    }
 
-  const insertedLedgerChanges = insertLedger?.meta?.changes || 0;
+    .button-row {
+      padding-top: 10px;
+    }
 
-  if (insertedLedgerChanges === 0) {
-    const again = await env.DB.prepare("SELECT metadata_json FROM token_ledger WHERE id = ?").bind(ledgerId).first();
-    const parsed = (() => {
-      try {
-        return JSON.parse(String(again?.metadata_json || ""));
-      } catch {
-        return null;
+    .detail-row {
+      padding-top: 10px;
+    }
+
+    .sidebar {
+      width: 270px;
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.98) 0%, rgba(15, 23, 42, 0.98) 100%);
+      border-right: 1px solid var(--tm-line);
+      display: flex;
+      flex-direction: column;
+      padding: 22px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-inner {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: white;
+      padding: 0 22px 22px;
+      border-bottom: 1px solid var(--tm-line);
+      margin-bottom: 20px;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
+      color: #020617;
+      font-size: 14px;
+      font-weight: 800;
+      box-shadow: 0 14px 30px rgba(99, 102, 241, 0.22);
+    }
+
+    .brand-copy strong {
+      display: block;
+      font-size: 15px;
+      line-height: 1.1;
+    }
+
+    .brand-copy span {
+      color: var(--tm-text-muted);
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-top: 4px;
+      text-transform: uppercase;
+    }
+
+    .nav-section {
+      padding: 0 12px 18px;
+    }
+
+    .nav-title {
+      color: var(--tm-text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0 10px 10px;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: transparent;
+      border: 0;
+      border-radius: 12px;
+      color: var(--tm-text-soft);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 12px;
+      text-align: left;
+      transition: 180ms ease;
+    }
+
+    .nav-item:hover {
+      background: rgba(139, 92, 246, 0.10);
+      color: white;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(90deg, rgba(139, 92, 246, 0.22) 0%, rgba(59, 130, 246, 0.10) 100%);
+      color: #ddd6fe;
+      box-shadow: inset 3px 0 0 #8b5cf6;
+    }
+
+    .nav-item svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-card {
+      margin: auto 12px 0;
+      background: rgba(139, 92, 246, 0.10);
+      border: 1px solid rgba(139, 92, 246, 0.22);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .sidebar-card + .sidebar-card {
+      margin-top: 12px;
+    }
+
+    .sidebar-label {
+      color: var(--tm-text-muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+
+    .sidebar-value {
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .sidebar-subcopy {
+      color: #86efac;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .main-shell {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(16px);
+      background: rgba(15, 23, 42, 0.78);
+      border-bottom: 1px solid var(--tm-line);
+    }
+
+    .topbar-inner,
+    .workspace,
+    .footer-inner {
+      width: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 28px;
+    }
+
+    .topbar-title {
+      color: white;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 4px;
+    }
+
+    .topbar-desc {
+      color: var(--tm-text-muted);
+      font-size: 13px;
+      margin: 0;
+    }
+
+    .topbar-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 42px;
+      padding: 0 16px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: 180ms ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover { transform: translateY(-1px); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+      color: white;
+      box-shadow: 0 16px 34px rgba(99, 102, 241, 0.22);
+    }
+
+    .btn-secondary {
+      background: rgba(15, 23, 42, 0.66);
+      border-color: rgba(168, 85, 247, 0.22);
+      color: #ede9fe;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+
+    .btn-danger {
+      background: rgba(127, 29, 29, 0.22);
+      border-color: rgba(248, 113, 113, 0.22);
+      color: #fecaca;
+    }
+
+    .workspace {
+      padding: 28px;
+      flex: 1;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(320px, 0.85fr);
+      gap: 24px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--tm-card);
+      border: 1px solid var(--tm-line);
+      border-radius: 18px;
+      box-shadow: var(--tm-shadow);
+      overflow: hidden;
+    }
+
+    .card-body {
+      padding: 24px;
+    }
+
+    .card-title {
+      color: white;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 8px;
+    }
+
+    .card-desc {
+      color: var(--tm-text-muted);
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .support-links {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .support-link {
+      align-items: center;
+      background: rgba(15, 23, 42, 0.58);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 14px;
+      color: #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 16px;
+      text-decoration: none;
+      transition: 180ms ease;
+    }
+
+    .support-link:hover {
+      background: rgba(139, 92, 246, 0.10);
+      border-color: rgba(168, 85, 247, 0.28);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .support-link span:last-child {
+      color: #c4b5fd;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .hero-card {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.16) 0%, rgba(59, 130, 246, 0.10) 100%);
+      border-color: rgba(139, 92, 246, 0.22);
+    }
+
+    .parser-card-shell {
+      position: relative;
+      overflow: hidden;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 28px 80px rgba(2, 8, 23, 0.34);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(2, 6, 23, 0.92) 100%);
+    }
+
+    .parser-card-shell::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 18% 14%, rgba(168, 85, 247, 0.12), transparent 24%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.08) 0%, rgba(15, 23, 42, 0.20) 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .parser-card-body {
+      position: relative;
+      z-index: 2;
+      padding: 28px;
+    }
+
+    .parser-hero {
+      text-align: center;
+      margin: 0 auto 26px;
+      max-width: 720px;
+    }
+
+    .parser-hero h2 {
+      color: white;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin: 0 0 12px;
+    }
+
+    .parser-hero p {
+      color: var(--tm-text-soft);
+      font-size: 15px;
+      line-height: 1.75;
+      margin: 0;
+    }
+
+    .parser-hero p + p {
+      color: var(--tm-text-muted);
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    .parser-steps {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+      padding-bottom: 26px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .parser-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .parser-step-badge,
+    .section-badge {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.14);
+      border: 1px solid rgba(168, 85, 247, 0.24);
+      color: #ddd6fe;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .parser-step-title,
+    .parser-section-title {
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+
+    .parser-step-copy,
+    .parser-section-copy {
+      color: var(--tm-text-muted);
+      font-size: 12px;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .parser-section {
+      padding: 0 0 28px;
+      margin-bottom: 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .parser-section:last-of-type {
+      border-bottom: 0;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .parser-section-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .parser-input {
+      width: 100%;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.20);
+      background: rgba(15, 23, 42, 0.72);
+      color: white;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 14px 16px;
+      outline: none;
+    }
+
+    .parser-input::placeholder {
+      color: rgba(255,255,255,0.34);
+    }
+
+    .parser-form-label {
+      color: var(--tm-text-soft);
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .parser-note {
+      color: var(--tm-text-muted);
+      font-size: 12px;
+      line-height: 1.7;
+      margin-top: 10px;
+    }
+
+    .logo-actions {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .logo-preview {
+      align-items: center;
+      background: rgba(15, 23, 42, 0.58);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 16px;
+      display: flex;
+      gap: 14px;
+      margin-top: 14px;
+      min-height: 88px;
+      padding: 12px 14px;
+    }
+
+    .logo-preview.hidden {
+      display: none !important;
+    }
+
+    .logo-preview-image {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      border-radius: 14px;
+      flex-shrink: 0;
+      height: 60px;
+      object-fit: contain;
+      padding: 6px;
+      width: 60px;
+    }
+
+    .logo-preview-copy {
+      min-width: 0;
+    }
+
+    .logo-preview-title {
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 0 0 4px;
+    }
+
+    .logo-preview-meta {
+      color: var(--tm-text-muted);
+      font-size: 12px;
+      line-height: 1.6;
+      margin: 0;
+      word-break: break-word;
+    }
+
+    .parser-balance-row,
+    .parser-email-grid {
+      display: grid;
+      gap: 14px;
+      align-items: end;
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .parser-status-box,
+    .parser-info-box,
+    .parser-output-box,
+    .unauthorized-box {
+      border-radius: 18px;
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      background: rgba(15, 23, 42, 0.58);
+      padding: 16px 18px;
+    }
+
+    .parser-info-box {
+      border-color: rgba(168, 85, 247, 0.18);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.84) 0%, rgba(76, 29, 149, 0.14) 100%);
+    }
+
+    .unauthorized-box {
+      background: rgba(127, 29, 29, 0.18);
+      border-color: rgba(248, 113, 113, 0.22);
+      margin-bottom: 20px;
+    }
+
+    .unauthorized-box h2 {
+      color: white;
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 10px;
+    }
+
+    .unauthorized-box p {
+      color: #fecaca;
+      line-height: 1.7;
+      margin: 0 0 14px;
+    }
+
+    .unauthorized-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .parser-balance-value {
+      color: #d8b4fe;
+      font-size: 18px;
+      font-weight: 800;
+      margin-left: 8px;
+    }
+
+    .parser-upload-zone {
+      border: 2px dashed rgba(168, 85, 247, 0.34);
+      border-radius: 22px;
+      background: rgba(139, 92, 246, 0.06);
+      padding: 34px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: 180ms ease;
+    }
+
+    .parser-upload-zone:hover,
+    .parser-upload-zone.is-dragover {
+      background: rgba(139, 92, 246, 0.10);
+      border-color: rgba(168, 85, 247, 0.56);
+    }
+
+    .parser-upload-zone svg {
+      display: block;
+      width: 56px;
+      height: 56px;
+      color: #d8b4fe;
+      margin: 0 auto 14px;
+      opacity: 0.86;
+    }
+
+    .parser-upload-title {
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .parser-upload-copy {
+      color: var(--tm-text-muted);
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .parser-action-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .parser-output-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .parser-output-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .parser-output-title {
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .parser-copy-btn {
+      background: transparent;
+      border: 0;
+      color: #ddd6fe;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 0;
+    }
+
+    .parser-output-pre {
+      color: #e2e8f0;
+      font-size: 12px;
+      line-height: 1.7;
+      margin: 0;
+      min-height: 160px;
+      max-height: 320px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .footer-inner p,
+    .footer-inner a {
+      color: var(--tm-text-muted);
+      font-size: 14px;
+      text-decoration: none;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1180px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
       }
-    })();
-    if (parsed) return json(request, env, parsed, 200);
-    return json(request, env, { error: "idempotency_conflict", message: "Spend already processed" }, 409);
-  }
-
-  const balanceUpdate = await env.DB.prepare(
-    "UPDATE accounts SET balance = balance - ?, updated_at = ? WHERE account_id = ? AND balance >= ?"
-  )
-    .bind(amount, now, auth.accountId, amount)
-    .run();
-
-  const balanceChanges = balanceUpdate?.meta?.changes || 0;
-
-  if (balanceChanges === 0) {
-    await env.DB.prepare("DELETE FROM token_ledger WHERE id = ?").bind(ledgerId).run();
-    const balance = await dbAccountGetBalance(env, auth.accountId);
-    return json(request, env, { balance, error: "insufficient_balance" }, 402);
-  }
-
-  try {
-    const cols = await dbPlayGrantsColumns(env);
-
-    if (cols.has("ended_at")) {
-      await env.DB.prepare(
-        "INSERT INTO play_grants (grant_id, account_id, slug, created_at, ended_at, result, expires_at, expires_at_ms, spent) " +
-          "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-      )
-        .bind(grantId, auth.accountId, slug, grant.createdAt, null, null, grant.expiresAt, grant.expiresAtMs, amount)
-        .run();
-    } else {
-      await env.DB.prepare(
-        "INSERT INTO play_grants (grant_id, account_id, slug, expires_at, expires_at_ms, spent, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
-      )
-        .bind(grantId, auth.accountId, slug, grant.expiresAt, grant.expiresAtMs, amount, now)
-        .run();
-    }
-  } catch (err) {
-    await env.DB.prepare("UPDATE accounts SET balance = balance + ?, updated_at = ? WHERE account_id = ?")
-      .bind(amount, now, auth.accountId)
-      .run();
-    await env.DB.prepare("DELETE FROM token_ledger WHERE id = ?").bind(ledgerId).run();
-
-    return json(
-      request,
-      env,
-      { error: "grant_insert_failed", message: String(err?.message || err || "Failed to create grant") },
-      500
-    );
-  }
-
-  const balance = await dbAccountGetBalance(env, auth.accountId);
-  response.balance = balance;
-
-  await env.DB.prepare("UPDATE token_ledger SET metadata_json = ? WHERE id = ?")
-    .bind(JSON.stringify(response), ledgerId)
-    .run();
-
-  return json(request, env, response, 200);
-}
-
-async function handlePayPalWebhook(request, env) {
-  if (request.method !== "POST") return methodNotAllowed(request, env);
-
-  const enabled = String(env.PAYPAL_WEBHOOKS_ENABLED || "").trim().toLowerCase() === "true";
-  if (!enabled) return json(request, env, { ok: true, reason: "webhooks_disabled", skipped: true }, 200);
-
-  const { raw, parsed } = await parseRawJson(request);
-  if (!parsed) return badRequest(request, env, "Invalid JSON body");
-
-  const orderId = extractPayPalOrderId(parsed) || "unknown";
-  const eventType = String(parsed.event_type || "").trim();
-
-  const verified = await paypalVerifyWebhookSignature(env, request, parsed);
-  if (!verified.ok) {
-    await r2PutJson(env, keyReceiptSignatureFailed(orderId), {
-      at: nowIso(),
-      detail: verified.detail,
-      eventType: eventType || null,
-      raw: raw || null,
-      reason: verified.reason,
-    });
-    return json(request, env, { error: "signature_verification_failed", ok: false }, 401);
-  }
-
-  if (!eventType) {
-    await r2PutJson(env, keyReceiptUnmapped(orderId), { at: nowIso(), event: parsed, reason: "missing_event_type" });
-    return json(request, env, { ignored: true, ok: true }, 200);
-  }
-
-  if (eventType === "CHECKOUT.ORDER.APPROVED") {
-    if (orderId !== "unknown") {
-      await r2PutJson(env, keyReceiptApproved(orderId), { at: nowIso(), event: parsed, eventType, orderId });
-    } else {
-      await r2PutJson(env, keyReceiptUnmapped(orderId), { at: nowIso(), event: parsed, reason: "missing_order_id" });
-      return json(request, env, { ignored: true, ok: true }, 200);
     }
 
-    let capture;
-    try {
-      capture = await paypalCaptureOrder(env, orderId);
-    } catch (err) {
-      await r2PutJson(env, keyReceiptCaptureFailed(orderId), {
-        at: nowIso(),
-        error: String(err?.message || err || "capture_error"),
-        eventType,
-        orderId,
+    @media (max-width: 980px) {
+      .app-shell {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding-bottom: 16px;
+      }
+
+      .sidebar-card {
+        margin-top: 16px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .workflow-grid,
+      .metrics-grid,
+      .parser-action-row,
+      .parser-email-grid,
+      .parser-output-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar-inner,
+      .section-header,
+      .footer-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .workspace,
+      .topbar-inner,
+      .footer-inner {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+
+      .topbar-actions {
+        width: 100%;
+      }
+
+      .topbar-actions .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body class="h-full">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <!-- PARTIAL:app-sidebar -->
+    </aside>
+
+    <div class="main-shell">
+      <header class="topbar">
+        <!-- PARTIAL:app-topbar -->
+      </header>
+
+      <main class="workspace">
+        <div id="unauthorizedNotice" class="unauthorized-box hidden">
+          <h2>Sign-in required</h2>
+          <p>Your session is missing or expired. The dashboard will stay here instead of throwing you at the sign-in page like a shopping cart with bad wheels.</p>
+          <div class="unauthorized-actions">
+            <a href="/sign-in.html?redirect=/app-dashboard.html" class="btn btn-primary">Sign In</a>
+            <a href="/index.html" class="btn btn-secondary">Back to Home</a>
+          </div>
+        </div>
+
+        <section id="dashboardPage" class="page active">
+          <div class="stack">
+            <div class="parser-card-shell">
+              <div class="parser-card-body">
+                <div class="parser-hero">
+                  <h2>Ready to use the Transcript Parser?</h2>
+                  <p>Upload a transcript PDF. Parsing runs locally in your browser so the file never leaves your device.</p>
+                  <p>Optional: add your firm logo so the preview report looks like your deliverable.</p>
+                </div>
+
+                <div class="parser-steps">
+                  <div class="parser-step">
+                    <span class="parser-step-badge">1</span>
+                    <div>
+                      <div class="parser-step-title">Check App Balance</div>
+                      <p class="parser-step-copy">Check your available credits</p>
+                    </div>
+                  </div>
+                  <div class="parser-step">
+                    <span class="parser-step-badge">2</span>
+                    <div>
+                      <div class="parser-step-title">Upload Transcript PDF</div>
+                      <p class="parser-step-copy">Choose your transcript</p>
+                    </div>
+                  </div>
+                  <div class="parser-step">
+                    <span class="parser-step-badge">3</span>
+                    <div>
+                      <div class="parser-step-title">Outputs</div>
+                      <p class="parser-step-copy">Preview and email</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="parser-section">
+                  <div class="parser-section-head">
+                    <span class="section-badge">1</span>
+                    <div>
+                      <div class="parser-section-title">Check App Balance</div>
+                      <p class="parser-section-copy">Use your signed-in account</p>
+                    </div>
+                  </div>
+
+                  <div style="display:grid; gap:14px;">
+                    <div>
+                      <label for="parser-token-id" class="parser-form-label">Signed-in Account</label>
+                      <input id="parser-token-id" type="text" placeholder="Signed in session required" class="parser-input" autocomplete="off" disabled />
+                      <p class="parser-note">Saving a preview consumes 1 credit from your balance.</p>
+                    </div>
+
+                    <div class="parser-balance-row">
+                      <div class="parser-status-box">
+                        <span style="color: var(--tm-text-soft); font-size: 13px;">Available balance:</span>
+                        <span id="parser-token-available" class="parser-balance-value">-</span>
+                      </div>
+                      <button id="parser-save-token" type="button" class="btn btn-secondary">Refresh Balance</button>
+                    </div>
+
+                    <div class="parser-info-box">
+                      <div class="parser-balance-row" style="align-items:center;">
+                        <div>
+                          <div class="parser-form-label" style="margin-bottom:8px;">Need more credits?</div>
+                          <div class="parser-status-box" style="margin:0;">Purchase more credits if your balance is low.</div>
+                          <p class="parser-note">Preview reports are saved to your account.</p>
+                        </div>
+                        <div style="display:grid; gap:8px;">
+                          <a id="parser-buy-credits" href="/app-dashboard.html" class="btn btn-primary">Buy Credits</a>
+                          <div id="parser-checkout-status" class="parser-note" style="margin-top:0; text-align:center;">Purchase credits to continue using the parser.</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="parser-section">
+                  <div class="parser-section-head">
+                    <span class="section-badge">2</span>
+                    <div>
+                      <div class="parser-section-title">Upload Transcript PDF</div>
+                      <p class="parser-section-copy">Choose your transcript</p>
+                    </div>
+                  </div>
+
+                  <div style="margin-bottom:20px;">
+                    <label class="parser-form-label">Firm Logo (Optional)</label>
+
+                    <div class="logo-actions">
+                      <label for="brand-logo" class="btn btn-secondary" style="display:inline-flex;">
+                        <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Choose File</span>
+                      </label>
+
+                      <button id="remove-brand-logo" type="button" class="btn btn-danger hidden">Remove Logo</button>
+                    </div>
+
+                    <input id="brand-logo" type="file" accept="image/*" class="hidden" />
+
+                    <span id="brand-logo-file-name" class="parser-note" style="display:inline-block; margin-top:10px;">No file chosen</span>
+
+                    <div id="brand-logo-preview" class="logo-preview hidden">
+                      <img id="brand-logo-preview-image" class="logo-preview-image" alt="Saved firm logo preview" />
+                      <div class="logo-preview-copy">
+                        <div class="logo-preview-title">Saved logo</div>
+                        <p id="brand-logo-preview-meta" class="logo-preview-meta">This logo will stay available on this device until you remove it.</p>
+                      </div>
+                    </div>
+
+                    <p class="parser-note">For best results upload a 600×600 PNG (SVG/JPG ok). Your logo can stay saved on this device until you remove it.</p>
+                  </div>
+
+                  <div id="pdf-drop-zone" class="parser-upload-zone" role="button" tabindex="0" aria-label="Upload transcript PDF">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                    </svg>
+                    <div class="parser-upload-title">Drop PDF here or click to browse</div>
+                    <p class="parser-upload-copy">Accepts IRS transcripts (Account, Return, Wage &amp; Income)</p>
+                  </div>
+
+                  <input id="pdf-upload" type="file" accept="application/pdf,.pdf" class="hidden" />
+                </div>
+
+                <div class="parser-section">
+                  <div class="parser-section-head">
+                    <span class="section-badge">3</span>
+                    <div>
+                      <div class="parser-section-title">Outputs</div>
+                      <p class="parser-section-copy">Preview and email</p>
+                    </div>
+                  </div>
+
+                  <div class="parser-action-row" style="margin-bottom:16px;">
+                    <button id="extract-raw-btn" type="button" class="btn btn-secondary opacity-50 cursor-not-allowed" disabled>Extract Raw Text</button>
+                    <button id="parse-structured-btn" type="button" class="btn btn-primary opacity-50 cursor-not-allowed" disabled>Parse Structured JSON</button>
+                    <a id="preview-report-btn" href="#" class="btn btn-secondary opacity-50 cursor-not-allowed pointer-events-none" aria-disabled="true">Save Preview Report</a>
+                  </div>
+
+                  <div id="preview-action-status" class="parser-status-box" style="margin-bottom:16px;">Runs in your browser. Your PDF is not uploaded or stored.</div>
+
+                  <div class="parser-output-grid" style="margin-bottom:16px;">
+                    <div class="parser-output-box">
+                      <div class="parser-output-head">
+                        <div class="parser-output-title">Raw Text Output</div>
+                        <button id="copy-raw" type="button" class="parser-copy-btn">Copy</button>
+                      </div>
+                      <pre id="raw-output" class="parser-output-pre">(no text yet)</pre>
+                    </div>
+
+                    <div class="parser-output-box">
+                      <div class="parser-output-head">
+                        <div class="parser-output-title">Structured JSON Output</div>
+                        <button id="copy-json" type="button" class="parser-copy-btn">Copy</button>
+                      </div>
+                      <pre id="json-output" class="parser-output-pre">(no json yet)</pre>
+                    </div>
+                  </div>
+
+                  <div class="parser-output-box">
+                    <div class="parser-output-head" style="align-items:flex-start; flex-direction:column;">
+                      <div class="parser-output-title">Email report link</div>
+                      <div class="parser-note" style="margin-top:0;">A short secure report link is generated for email delivery.</div>
+                    </div>
+
+                    <div class="parser-email-grid">
+                      <div>
+                        <label for="report-email" class="parser-form-label">Email</label>
+                        <input id="report-email" type="email" placeholder="client@firm.com" class="parser-input" autocomplete="email" />
+                        <p class="parser-note">Requires parsed JSON and a saved preview report.</p>
+                      </div>
+                      <div style="display:grid; gap:8px;">
+                        <button id="report-email-btn" type="button" class="btn btn-primary opacity-50 cursor-not-allowed" disabled>Email report link</button>
+                        <div id="report-email-status" class="parser-note" style="margin-top:0; text-align:center;">Not ready.</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="reportsPage" class="page">
+          <div class="card">
+            <div class="card-body">
+              <div class="section-header">
+                <div>
+                  <h2 class="card-title">Reports history</h2>
+                  <p class="card-desc">Review saved reports, reopen prior work, and confirm whether each report has been printed and finalized.</p>
+                </div>
+              </div>
+
+              <div id="reportsPageEmpty" class="empty-state hidden">No reports found yet.</div>
+
+              <div id="reportsPageTableWrap" class="table-wrap hidden">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Created At</th>
+                      <th>Printed At</th>
+                      <th>Report ID</th>
+                      <th>Status</th>
+                      <th>Open</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reportsPageTbody">
+                    <tr>
+                      <td colspan="5">Loading reports...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="receiptsPage" class="page">
+          <div class="stack">
+            <div class="card">
+              <div class="card-body">
+                <h2 class="card-title">Receipt summary</h2>
+                <p class="card-desc">See your latest purchase state at a glance, including current tokens and most recent payment status.</p>
+
+                <div class="detail-list">
+                  <div class="detail-row">
+                    <div class="detail-label">Signed-in email</div>
+                    <div id="receiptSummaryEmail" class="detail-value">Loading...</div>
+                  </div>
+                  <div class="detail-row">
+                    <div class="detail-label">Current tokens</div>
+                    <div id="receiptSummaryTokens" class="detail-value">—</div>
+                  </div>
+                  <div class="detail-row">
+                    <div class="detail-label">Latest purchase status</div>
+                    <div id="receiptSummaryStatus" class="detail-value">—</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <h2 class="card-title">Purchase history</h2>
+                <p class="card-desc">Review your receipt history and verify completed credit purchases tied to this account.</p>
+
+                <div id="receiptsPageEmpty" class="empty-state hidden">No purchases found yet.</div>
+
+                <div id="receiptsPageTableWrap" class="table-wrap hidden">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Created At</th>
+                        <th>Credits</th>
+                        <th>Price ID</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="receiptsPageTbody">
+                      <tr>
+                        <td colspan="4">Loading receipts...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="supportPage" class="page">
+          <div class="stack">
+            <div class="card">
+              <div class="card-body">
+                <h2 class="card-title">Support</h2>
+                <p class="card-desc">Get help with transcript reports, account questions, and purchase issues from the appropriate support path.</p>
+                <div class="support-links">
+                  <a href="/contact.html" class="support-link"><span>Contact support</span><span>→</span></a>
+                  <a href="/contact.html" class="support-link"><span>Open support page</span><span>→</span></a>
+                  <a href="/legal/terms.html" class="support-link"><span>Terms &amp; privacy</span><span>→</span></a>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <h2 class="card-title">Response expectations</h2>
+                <p class="card-desc">For the fastest resolution, include the report ID, purchase date, or signed-in email when you contact support.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="accountPage" class="page">
+          <div class="stack">
+            <div class="card">
+              <div class="card-body">
+                <h2 class="card-title">Account summary</h2>
+                <p class="card-desc">Core session-backed account state.</p>
+                <div class="detail-list">
+                  <div class="detail-row">
+                    <div class="detail-label">Email</div>
+                    <div id="accountEmail" class="detail-value">Loading...</div>
+                  </div>
+                  <div class="detail-row">
+                    <div class="detail-label">Sign-in method</div>
+                    <div class="detail-value">Magic link</div>
+                  </div>
+                  <div class="detail-row">
+                    <div class="detail-label">Token balance</div>
+                    <div id="accountTokens" class="detail-value">—</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <h2 class="card-title">Account actions</h2>
+                <p class="card-desc">Buy more credits when needed or sign out of the current session.</p>
+                <div class="button-row">
+                  <a href="/index.html#pricing" class="btn btn-primary">Buy Credits</a>
+                  <button id="signOutBtnSecondary" type="button" class="btn btn-danger">Log Out</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    let latestMe = null;
+    let latestPurchases = [];
+    let latestReports = [];
+    let savedBrandLogo = null;
+    let isUnauthorized = false;
+
+    const BRAND_LOGO_STORAGE_KEY = "tm_brand_logo_v1";
+
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function firstDefined() {
+      for (let i = 0; i < arguments.length; i++) {
+        const value = arguments[i];
+        if (value !== undefined && value !== null && String(value).trim() !== '') return value;
+      }
+      return '';
+    }
+
+    function formatDate(value) {
+      const raw = String(value || '').trim();
+      if (!raw) return '—';
+      const d = new Date(raw);
+      if (Number.isNaN(d.getTime())) return raw;
+      return d.toLocaleString();
+    }
+
+    function getStatusBadge(status) {
+      const text = String(status || '').trim() || 'pending';
+      const lower = text.toLowerCase();
+      const cls = lower === 'completed' || lower === 'printed' ? 'pill pill-printed' : 'pill pill-pending';
+      return '<span class="' + cls + '">' + escapeHtml(text) + '</span>';
+    }
+
+    function showToast(message) {
+      window.alert(String(message || 'Not wired yet.'));
+    }
+
+    function bytesToReadable(value) {
+      const size = Number(value || 0);
+      if (!Number.isFinite(size) || size <= 0) return '';
+      if (size < 1024) return size + ' B';
+      if (size < 1024 * 1024) return (size / 1024).toFixed(1).replace(/\.0$/, '') + ' KB';
+      return (size / (1024 * 1024)).toFixed(1).replace(/\.0$/, '') + ' MB';
+    }
+
+    function updateBrandLogoUi() {
+      const fileNameEl = document.getElementById('brand-logo-file-name');
+      const previewEl = document.getElementById('brand-logo-preview');
+      const previewImageEl = document.getElementById('brand-logo-preview-image');
+      const previewMetaEl = document.getElementById('brand-logo-preview-meta');
+      const removeBtn = document.getElementById('remove-brand-logo');
+
+      if (!savedBrandLogo) {
+        if (fileNameEl) fileNameEl.textContent = 'No file chosen';
+        if (previewEl) previewEl.classList.add('hidden');
+        if (previewImageEl) previewImageEl.removeAttribute('src');
+        if (previewMetaEl) previewMetaEl.textContent = 'This logo will stay available on this device until you remove it.';
+        if (removeBtn) removeBtn.classList.add('hidden');
+        return;
+      }
+
+      const metaParts = [savedBrandLogo.name || 'Saved logo'];
+      if (savedBrandLogo.size) metaParts.push(bytesToReadable(savedBrandLogo.size));
+
+      if (fileNameEl) fileNameEl.textContent = savedBrandLogo.name || 'Saved logo';
+      if (previewImageEl) previewImageEl.src = savedBrandLogo.dataUrl || '';
+      if (previewMetaEl) previewMetaEl.textContent = metaParts.join(' • ');
+      if (previewEl) previewEl.classList.remove('hidden');
+      if (removeBtn) removeBtn.classList.remove('hidden');
+    }
+
+    function loadSavedBrandLogo() {
+      try {
+        const raw = window.localStorage.getItem(BRAND_LOGO_STORAGE_KEY);
+        if (!raw) {
+          savedBrandLogo = null;
+          return;
+        }
+
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed.dataUrl !== 'string' || !parsed.dataUrl.trim()) {
+          savedBrandLogo = null;
+          window.localStorage.removeItem(BRAND_LOGO_STORAGE_KEY);
+          return;
+        }
+
+        savedBrandLogo = parsed;
+      } catch (_) {
+        savedBrandLogo = null;
+      }
+    }
+
+    function saveBrandLogo(payload) {
+      savedBrandLogo = payload;
+      try {
+        window.localStorage.setItem(BRAND_LOGO_STORAGE_KEY, JSON.stringify(payload));
+      } catch (_) {
+        showToast('Logo could not be saved on this device. The file may be too large.');
+      }
+      updateBrandLogoUi();
+    }
+
+    function removeBrandLogo() {
+      savedBrandLogo = null;
+      try {
+        window.localStorage.removeItem(BRAND_LOGO_STORAGE_KEY);
+      } catch (_) {
+      }
+
+      const input = document.getElementById('brand-logo');
+      if (input) input.value = '';
+      updateBrandLogoUi();
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise(function (resolve, reject) {
+        const reader = new FileReader();
+        reader.onload = function () {
+          resolve(String(reader.result || ''));
+        };
+        reader.onerror = function () {
+          reject(new Error('Failed to read file.'));
+        };
+        reader.readAsDataURL(file);
       });
-      return json(request, env, { capture: "failed", ok: true }, 200);
     }
 
-    const captureStatus = String(capture?.data?.status || "").toUpperCase();
-    if (!capture.ok || captureStatus !== "COMPLETED") {
-      await r2PutJson(env, keyReceiptCaptureFailed(orderId), {
-        at: nowIso(),
-        capture: { data: capture.data, ok: capture.ok, status: capture.status },
-        eventType,
-        orderId,
-        reason: !capture.ok ? "capture_http_error" : "capture_not_completed",
+    function wireBrandLogo() {
+      const input = document.getElementById('brand-logo');
+      const removeBtn = document.getElementById('remove-brand-logo');
+
+      loadSavedBrandLogo();
+      updateBrandLogoUi();
+
+      if (input) {
+        input.addEventListener('change', async function () {
+          const file = input.files && input.files[0] ? input.files[0] : null;
+          if (!file) return;
+
+          if (!String(file.type || '').startsWith('image/')) {
+            showToast('Please choose an image file for the logo.');
+            input.value = '';
+            return;
+          }
+
+          try {
+            const dataUrl = await readFileAsDataUrl(file);
+            saveBrandLogo({
+              dataUrl: dataUrl,
+              name: file.name || 'Saved logo',
+              size: Number(file.size || 0),
+              type: file.type || ''
+            });
+          } catch (error) {
+            showToast(String(error && error.message || error || 'Failed to save logo.'));
+          }
+        });
+      }
+
+      if (removeBtn) {
+        removeBtn.addEventListener('click', function () {
+          removeBrandLogo();
+        });
+      }
+    }
+
+    function setPdfUploadState(file) {
+      const statusEl = document.getElementById('preview-action-status');
+      const uploadTitleEl = document.querySelector('#pdf-drop-zone .parser-upload-title');
+      const uploadCopyEl = document.querySelector('#pdf-drop-zone .parser-upload-copy');
+      const extractBtn = document.getElementById('extract-raw-btn');
+      const parseBtn = document.getElementById('parse-structured-btn');
+
+      if (!file) {
+        if (statusEl) statusEl.textContent = 'Runs in your browser. Your PDF is not uploaded or stored.';
+        if (uploadTitleEl) uploadTitleEl.textContent = 'Drop PDF here or click to browse';
+        if (uploadCopyEl) uploadCopyEl.textContent = 'Accepts IRS transcripts (Account, Return, Wage & Income)';
+        if (extractBtn) extractBtn.disabled = true;
+        if (parseBtn) parseBtn.disabled = true;
+        if (extractBtn) extractBtn.className = 'btn btn-secondary opacity-50 cursor-not-allowed';
+        if (parseBtn) parseBtn.className = 'btn btn-primary opacity-50 cursor-not-allowed';
+        return;
+      }
+
+      if (statusEl) statusEl.textContent = 'PDF selected: ' + (file.name || 'transcript.pdf') + '. Ready for local parsing.';
+      if (uploadTitleEl) uploadTitleEl.textContent = file.name || 'PDF selected';
+      if (uploadCopyEl) uploadCopyEl.textContent = 'File size: ' + (bytesToReadable(file.size) || 'Unknown size');
+      if (extractBtn) extractBtn.disabled = false;
+      if (parseBtn) parseBtn.disabled = false;
+      if (extractBtn) extractBtn.className = 'btn btn-secondary';
+      if (parseBtn) parseBtn.className = 'btn btn-primary';
+    }
+
+    function handlePdfSelection(file) {
+      const input = document.getElementById('pdf-upload');
+      if (!file) {
+        setPdfUploadState(null);
+        return;
+      }
+
+      const isPdf = String(file.type || '').toLowerCase() === 'application/pdf' || /\.pdf$/i.test(String(file.name || ''));
+      if (!isPdf) {
+        if (input) input.value = '';
+        setPdfUploadState(null);
+        showToast('Please choose a PDF file.');
+        return;
+      }
+
+      setPdfUploadState(file);
+    }
+
+    function wirePdfUpload() {
+      const dropZone = document.getElementById('pdf-drop-zone');
+      const input = document.getElementById('pdf-upload');
+      if (!dropZone || !input) return;
+
+      setPdfUploadState(null);
+
+      dropZone.addEventListener('click', function () {
+        input.click();
       });
-      return json(request, env, { capture: captureStatus || "unknown", ok: true }, 200);
+
+      dropZone.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          input.click();
+        }
+      });
+
+      input.addEventListener('change', function () {
+        const file = input.files && input.files[0] ? input.files[0] : null;
+        handlePdfSelection(file);
+      });
+
+      ['dragenter', 'dragover'].forEach(function (eventName) {
+        dropZone.addEventListener(eventName, function (event) {
+          event.preventDefault();
+          dropZone.classList.add('is-dragover');
+        });
+      });
+
+      ['dragleave', 'dragend'].forEach(function (eventName) {
+        dropZone.addEventListener(eventName, function () {
+          dropZone.classList.remove('is-dragover');
+        });
+      });
+
+      dropZone.addEventListener('drop', function (event) {
+        event.preventDefault();
+        dropZone.classList.remove('is-dragover');
+
+        const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]
+          ? event.dataTransfer.files[0]
+          : null;
+
+        if (!file) return;
+
+        try {
+          const transfer = new DataTransfer();
+          transfer.items.add(file);
+          input.files = transfer.files;
+        } catch (_) {
+        }
+
+        handlePdfSelection(file);
+      });
     }
 
-    await paypalApplyCaptureCompleted(env, {
-      event: {
-        approvedEvent: parsed,
-        capture: capture.data,
-        source: "paypal_capture_api",
-      },
-      eventType: "PAYMENT.CAPTURE.COMPLETED",
-      orderId,
-    });
-
-    return json(request, env, { capture: "COMPLETED", ok: true }, 200);
-  }
-
-  if (eventType === "PAYMENT.CAPTURE.COMPLETED") {
-    await paypalApplyCaptureCompleted(env, { event: parsed, eventType, orderId });
-    return json(request, env, { ok: true }, 200);
-  }
-
-  return json(request, env, { ignored: true, ok: true }, 200);
-}
-
-/* ------------------------------------------
- * Transcript short-link helpers
- * ------------------------------------------ */
-
-function b64UrlEncode(bytes) {
-  let bin = "";
-  const chunk = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunk) bin += String.fromCharCode(...bytes.subarray(i, i + chunk));
-  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-}
-
-function tryParseJson(value) {
-  try {
-    return { ok: true, value: JSON.parse(String(value || "")) };
-  } catch {
-    return { ok: false, value: null };
-  }
-}
-
-function getReportKv(env) {
-  return env.KV_TRANSCRIPT || null;
-}
-
-function getShortReportKey(reportId) {
-  return `report:${String(reportId || "").trim()}`;
-}
-
-function randomShortId(bytes = 18) {
-  const arr = new Uint8Array(bytes);
-  crypto.getRandomValues(arr);
-  return b64UrlEncode(arr);
-}
-
-function buildAssetReportUrl(payload, transport = "hash") {
-  const target = new URL("https://transcript.taxmonitor.pro/assets/report");
-
-  if (String(transport || "hash") === "query") {
-    target.searchParams.set("data", String(payload || ""));
-  } else {
-    target.hash = String(payload || "");
-  }
-
-  return target.toString();
-}
-
-function buildShortReportUrl(reportId) {
-  return `https://transcript.taxmonitor.pro/transcript/report?r=${encodeURIComponent(reportId)}`;
-}
-
-function extractStoredReportPayload(reportUrl) {
-  const url = new URL(String(reportUrl || "").trim());
-
-  if (url.searchParams.get("r")) {
-    return { ok: false, error: "reportUrl_already_short" };
-  }
-
-  const hash = url.hash ? url.hash.slice(1).trim() : "";
-  if (hash) {
-    return { ok: true, payload: hash, transport: "hash" };
-  }
-
-  const qp = url.searchParams.get("data") || url.searchParams.get("payload") || "";
-  if (qp.trim()) {
-    return { ok: true, payload: qp.trim(), transport: "query" };
-  }
-
-  return { ok: false, error: "missing_report_payload" };
-}
-
-function extractInboundReportPayload(input = {}) {
-  const payload = String(input?.payload || "").trim();
-  const reportUrl = String(input?.reportUrl || "").trim();
-  const transport = String(input?.transport || "").trim().toLowerCase();
-
-  if (payload) {
-    return {
-      ok: true,
-      payload,
-      transport: transport === "query" ? "query" : "hash",
-    };
-  }
-
-  if (reportUrl) {
-    return extractStoredReportPayload(reportUrl);
-  }
-
-  return { ok: false, error: "missing_report_payload" };
-}
-
-async function storeShortReportPayload(env, payload, meta = {}) {
-  const kv = getReportKv(env);
-  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
-
-  const now = new Date().toISOString();
-
-  for (let i = 0; i < 5; i++) {
-    const reportId = randomShortId();
-    const key = getShortReportKey(reportId);
-
-    const existing = await kv.get(key);
-    if (existing) continue;
-
-    await kv.put(
-      key,
-      JSON.stringify(
-        {
-          createdAt: now,
-          payload: String(payload || ""),
-          payloadTransport: meta.payloadTransport || "hash",
-          sourcePath: meta.sourcePath || "/assets/report",
-        },
-        null,
-        2
-      )
-    );
-
-    return {
-      reportId,
-      shortUrl: buildShortReportUrl(reportId),
-    };
-  }
-
-  throw new Error("Failed to allocate a unique reportId");
-}
-
-async function resolveShortReportPayload(env, reportId) {
-  const kv = getReportKv(env);
-  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
-
-  const raw = await kv.get(getShortReportKey(reportId));
-  if (!raw) return null;
-
-  const parsed = tryParseJson(raw);
-  if (!parsed.ok || !parsed.value || typeof parsed.value !== "object") return null;
-
-  return parsed.value;
-}
-
-async function getShortReportLink(env, reportId) {
-  const stored = await resolveShortReportPayload(env, reportId);
-  if (!stored || !stored.payload) return null;
-
-  const target = new URL("https://transcript.taxmonitor.pro/assets/report");
-
-  if (String(stored.payloadTransport || "hash") === "query") {
-    target.searchParams.set("data", String(stored.payload));
-  } else {
-    target.hash = String(stored.payload);
-  }
-
-  return {
-    reportId: String(reportId || "").trim(),
-    reportUrl: target.toString(),
-  };
-}
-
-async function handleGetTranscriptReportLink(request, env) {
-  const url = new URL(request.url);
-  const payload = (url.searchParams.get("payload") || url.searchParams.get("data") || "").trim();
-  const reportId = (url.searchParams.get("reportId") || url.searchParams.get("r") || "").trim();
-  const reportUrl = (url.searchParams.get("reportUrl") || "").trim();
-  const shouldShorten = ["1", "true", "yes"].includes(
-    String(url.searchParams.get("short") || "").trim().toLowerCase()
-  );
-  const transport = String(url.searchParams.get("transport") || "").trim().toLowerCase();
-
-  if (reportId) {
-    const link = await getShortReportLink(env, reportId);
-    if (!link) return json(request, env, { ok: false, error: "report_not_found" }, 404);
-
-    return json(request, env, { ok: true, reportId: link.reportId, reportUrl: link.reportUrl }, 200);
-  }
-
-  const extracted = extractInboundReportPayload({ payload, reportUrl, transport });
-  if (!extracted.ok) {
-    return json(request, env, { ok: false, error: extracted.error }, 400);
-  }
-
-  if (shouldShorten) {
-    const shortLink = await storeShortReportPayload(env, extracted.payload, {
-      payloadTransport: extracted.transport,
-      sourcePath: "/assets/report",
-    });
-
-    return json(
-      request,
-      env,
-      {
-        ok: true,
-        reportId: shortLink.reportId,
-        reportUrl: shortLink.shortUrl,
-      },
-      200
-    );
-  }
-
-  return json(
-    request,
-    env,
-    {
-      ok: true,
-      reportUrl: buildAssetReportUrl(extracted.payload, extracted.transport),
-      transport: extracted.transport,
-    },
-    200
-  );
-}
-
-async function handlePostTranscriptReportLink(request, env) {
-  if (request.method !== "POST") return methodNotAllowed(request, env);
-
-  const body = await request.json().catch(() => ({}));
-  const extracted = extractInboundReportPayload(body || {});
-  if (!extracted.ok) {
-    return json(request, env, { ok: false, error: extracted.error }, 400);
-  }
-
-  const shouldShorten = Boolean(body?.short);
-
-  if (shouldShorten) {
-    const shortLink = await storeShortReportPayload(env, extracted.payload, {
-      payloadTransport: extracted.transport,
-      sourcePath: "/assets/report",
-    });
-
-    return json(
-      request,
-      env,
-      {
-        ok: true,
-        reportId: shortLink.reportId,
-        reportUrl: shortLink.shortUrl,
-      },
-      200
-    );
-  }
-
-  return json(
-    request,
-    env,
-    {
-      ok: true,
-      reportUrl: buildAssetReportUrl(extracted.payload, extracted.transport),
-      transport: extracted.transport,
-    },
-    200
-  );
-}
-
-async function handleGetTranscriptReportData(request, env) {
-  const url = new URL(request.url);
-  const reportId = (url.searchParams.get("reportId") || "").trim();
-
-  if (!reportId) {
-    return json(request, env, { error: "missing_reportId" }, 400);
-  }
-
-  const stored = await resolveShortReportPayload(env, reportId);
-
-  if (!stored || !stored.payload) {
-    return json(request, env, { error: "report_not_found" }, 404);
-  }
-
-  return json(
-    request,
-    env,
-    {
-      ok: true,
-      reportId,
-      payload: stored.payload,
-      transport: stored.payloadTransport || "hash",
-      createdAt: stored.createdAt || null,
-    },
-    200
-  );
-}
-
-async function handleShortReportLookup(request, env) {
-  const url = new URL(request.url);
-  const reportId = (url.searchParams.get("r") || "").trim();
-  if (!reportId) return json(request, env, { error: "missing_reportId" }, 400);
-
-  const link = await getShortReportLink(env, reportId);
-  if (!link) return json(request, env, { error: "report_not_found" }, 404);
-
-  return Response.redirect(link.reportUrl, 302);
-}
-
-
-async function handleAuthStart(request, env) {
-  if (request.method !== "POST") return methodNotAllowed(request, env);
-
-  const body = await parseJson(request);
-  if (!body || typeof body !== "object") return badRequest(request, env, "Invalid JSON body");
-
-  const email = String(body.email || "").trim().toLowerCase();
-  const redirect = String(body.redirect || "").trim();
-
-  if (!isValidEmail(email)) return badRequest(request, env, "Invalid email");
-  if (!isSafeRedirect(redirect)) return badRequest(request, env, "Invalid redirect (must be a relative path)");
-
-  const token = randomId("ml");
-  const rec = {
-    createdAt: nowIso(),
-    email,
-    expiresAt: asIso(Date.now() + LOGIN_TOKEN_TTL_MS),
-    redirect,
-  };
-
-  await env.R2_TAXTOOLS.put(keyLoginToken(token), JSON.stringify(rec), {
-    httpMetadata: { contentType: "application/json" },
-  });
-
-  const baseUrl = String(env.TAXTOOLS_AUTH_BASE_URL || "https://tools-api.taxmonitor.pro").replace(/\/+$/g, "");
-  const link = `${baseUrl}/v1/auth/complete?token=${encodeURIComponent(token)}`;
-
-  try {
-    await gmailSendMagicLink(env, { link, to: email });
-  } catch (err) {
-    await env.R2_TAXTOOLS.delete(keyLoginToken(token));
-    return json(
-      request,
-      env,
-      { error: "email_send_failed", message: String(err?.message || err || "Email send failed") },
-      500
-    );
-  }
-
-  return json(request, env, { ok: true }, 200);
-}
-
-async function handleAuthComplete(request, env) {
-  if (request.method !== "GET") return methodNotAllowed(request, env);
-
-  const url = new URL(request.url);
-  const token = String(url.searchParams.get("token") || "").trim();
-  if (!token) return badRequest(request, env, "token is required");
-
-  const rec = await r2GetJson(env, keyLoginToken(token));
-  if (!rec) return json(request, env, { error: "invalid_or_expired", message: "Login link is invalid or expired" }, 400);
-
-  const expMs = Date.parse(String(rec.expiresAt || ""));
-  if (!Number.isFinite(expMs) || expMs <= Date.now()) {
-    await env.R2_TAXTOOLS.delete(keyLoginToken(token));
-    return json(request, env, { error: "invalid_or_expired", message: "Login link is invalid or expired" }, 400);
-  }
-
-  const email = String(rec.email || "").trim().toLowerCase();
-  if (!isValidEmail(email)) {
-    await env.R2_TAXTOOLS.delete(keyLoginToken(token));
-    return json(request, env, { error: "invalid_or_expired", message: "Login link is invalid or expired" }, 400);
-  }
-
-  const redirect = isSafeRedirect(rec.redirect) ? String(rec.redirect).trim() : "/";
-  const existingAccountId = getCookie(request, COOKIE_NAMES.accountId);
-  const accountId = String(existingAccountId || "").trim() || `acct_${crypto.randomUUID()}`;
-
-  await dbAccountEnsure(env, { accountId, email });
-
-  const sessionId = randomId("sess");
-  const session = {
-    accountId,
-    createdAt: nowIso(),
-    email,
-    expiresAt: asIso(Date.now() + SESSION_TTL_MS),
-    sessionId,
-  };
-
-  await r2PutJson(env, keySession(sessionId), session);
-  await env.R2_TAXTOOLS.delete(keyLoginToken(token));
-
-  const appOrigin = String(env.TAXTOOLS_APP_ORIGIN || "https://taxtools.taxmonitor.pro").replace(/\/+$/g, "");
-  const location = `${appOrigin}${redirect}`;
-
-  const headers = new Headers({ Location: location });
-  for (const c of buildSessionCookies({ accountId, cookieDomain: cookieDomain(env), email, sessionId })) {
-    headers.append("Set-Cookie", c);
-  }
-
-  return new Response(null, { headers, status: 302 });
-}
-
-async function handleAuthMe(request, env) {
-  if (request.method !== "GET") return methodNotAllowed(request, env);
-
-  const auth = await getAuthContext(request, env);
-  if (!auth.isAuthenticated || !auth.accountId) return unauthorized(request, env);
-
-  return json(request, env, { accountId: auth.accountId, email: auth.email }, 200);
-}
-
-async function handleAuthLogout(request, env) {
-  if (request.method !== "POST") return methodNotAllowed(request, env);
-
-  const sessionId = getCookie(request, COOKIE_NAMES.session);
-  if (sessionId) await env.R2_TAXTOOLS.delete(keySession(sessionId));
-
-  const res = json(request, env, { ok: true }, 200);
-  for (const c of clearCookies(cookieDomain(env))) res.headers.append("Set-Cookie", c);
-  return res;
-}
-
-/* ------------------------------------------
- * Dev handlers
- * ------------------------------------------ */
-
-async function handleDevLogin(request, env) {
-  if (request.method !== "GET") return methodNotAllowed(request, env);
-  if (!isDevEnabled(env)) return forbidden(request, env, "Dev routes are disabled");
-
-  const url = new URL(request.url);
-  const email = String(url.searchParams.get("email") || "").trim().toLowerCase();
-  const redirect = String(url.searchParams.get("redirect") || "/").trim();
-
-  if (!isValidEmail(email)) return badRequest(request, env, "email is required");
-  if (!isSafeRedirect(redirect)) return badRequest(request, env, "Invalid redirect (must be a relative path)");
-
-  const existingAccountId = getCookie(request, COOKIE_NAMES.accountId);
-  const accountId = String(existingAccountId || "").trim() || `acct_${crypto.randomUUID()}`;
-
-  await dbAccountEnsure(env, { accountId, email });
-
-  const sessionId = randomId("sess");
-  const session = {
-    accountId,
-    createdAt: nowIso(),
-    email,
-    expiresAt: asIso(Date.now() + SESSION_TTL_MS),
-    sessionId,
-  };
-
-  await r2PutJson(env, keySession(sessionId), session);
-
-  const appOrigin = String(env.TAXTOOLS_APP_ORIGIN || "https://taxtools.taxmonitor.pro").replace(/\/+$/g, "");
-  const location = `${appOrigin}${redirect}`;
-
-  const headers = new Headers({ Location: location });
-  for (const c of buildSessionCookies({ accountId, cookieDomain: cookieDomain(env), email, sessionId })) {
-    headers.append("Set-Cookie", c);
-  }
-
-  return new Response(null, { headers, status: 302 });
-}
-
-async function handleDevMint(request, env) {
-  if (request.method !== "GET") return methodNotAllowed(request, env);
-  if (!isDevEnabled(env)) return forbidden(request, env, "Dev routes are disabled");
-
-  const auth = await getAuthContext(request, env);
-  if (!auth.isAuthenticated || !auth.accountId) return unauthorized(request, env);
-
-  const url = new URL(request.url);
-  const amount = Number(url.searchParams.get("amount"));
-
-  if (!Number.isInteger(amount) || amount <= 0) {
-    return badRequest(request, env, "amount must be a positive integer");
-  }
-
-  await dbAccountEnsure(env, { accountId: auth.accountId, email: auth.email });
-
-  const now = nowIso();
-  const ledgerId = `dev:mint:${auth.accountId}:${crypto.randomUUID()}`;
-
-  await env.DB.prepare(
-    "INSERT INTO token_ledger (id, account_id, delta, reason, metadata_json, created_at) VALUES (?, ?, ?, ?, ?, ?)"
-  )
-    .bind(
-      ledgerId,
-      auth.accountId,
-      amount,
-      "dev_mint",
-      JSON.stringify({ amount, mintedAt: now }),
-      now
-    )
-    .run();
-
-  await env.DB.prepare("UPDATE accounts SET balance = balance + ?, updated_at = ? WHERE account_id = ?")
-    .bind(amount, now, auth.accountId)
-    .run();
-
-  const balance = await dbAccountGetBalance(env, auth.accountId);
-
-  return json(request, env, {
-    accountId: auth.accountId,
-    amount,
-    balance,
-    email: auth.email,
-    ledgerId,
-    ok: true,
-  }, 200);
-}
-
-export class TokenLedger {
-  constructor(state, env) {
-    this.state = state;
-    this.env = env;
-  }
-
-  async fetch() {
-    return new Response(JSON.stringify({ error: "not_implemented", message: "TokenLedger durable object is not implemented in this worker." }, null, 2), {
-      status: 501,
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-      },
-    });
-  }
-}
-
-export default {
-  async fetch(request, env) {
-    try {
-      const url = new URL(request.url);
-
-      if (request.method === "OPTIONS") return new Response(null, { headers: withCors(request, env), status: 204 });
-      if (!env.R2_TAXTOOLS) return json(request, env, { error: "server_misconfigured", message: "Missing R2_TAXTOOLS binding" }, 500);
-      if (!env.DB) return json(request, env, { error: "server_misconfigured", message: "Missing D1 binding DB" }, 500);
-
-      const path = url.pathname === "/v1/arcade/tokens" ? "/v1/tokens/balance" : url.pathname;
-
-      if (path === "/dev/login") return handleDevLogin(request, env);
-      if (path === "/dev/mint") return handleDevMint(request, env);
-
-      if (path === "/transcript/report") return handleShortReportLookup(request, env);
-      if (path === "/transcript/report-data") return handleGetTranscriptReportData(request, env);
-      if (path === "/transcript/report-link" && request.method === "GET") return handleGetTranscriptReportLink(request, env);
-      if (path === "/transcript/report-link" && request.method === "POST") return handlePostTranscriptReportLink(request, env);
-      if (path === "/v1/auth/complete") return handleAuthComplete(request, env);
-      if (path === "/v1/auth/me") return handleAuthMe(request, env);
-      if (path === "/v1/auth/logout") return handleAuthLogout(request, env);
-      if (path === "/v1/auth/start") return handleAuthStart(request, env);
-      if (path === "/v1/checkout/sessions") return handleCheckoutSessions(request, env);
-      if (path === "/v1/checkout/status") return handleCheckoutStatus(request, env);
-      if (path === "/v1/games/access") return handleGamesAccess(request, env);
-      if (path === "/v1/games/end") return handleGamesEnd(request, env);
-      if (path === "/v1/help/status") return handleHelpStatus(request, env);
-      if (path === "/v1/help/tickets") return handleHelpTickets(request, env);
-      if (path === "/v1/tokens/balance") return handleTokensBalance(request, env);
-      if (path === "/v1/tokens/spend") return handleTokensSpend(request, env);
-      if (path === "/v1/webhooks/paypal") return handlePayPalWebhook(request, env);
-
-      return notFound(request, env);
-    } catch (err) {
-      return json(
-        request,
-        env,
-        { error: "internal_error", message: String(err?.message || err || "Unknown error") },
-        500
+    function disableProtectedUi() {
+      [
+        'brand-logo',
+        'extract-raw-btn',
+        'parse-structured-btn',
+        'parser-save-token',
+        'report-email',
+        'report-email-btn',
+        'pdf-upload',
+        'preview-report-btn',
+        'remove-brand-logo'
+      ].sort().forEach(function (id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        if ('disabled' in el) el.disabled = true;
+        if (el.tagName === 'A') {
+          el.setAttribute('aria-disabled', 'true');
+          el.classList.add('opacity-50', 'pointer-events-none', 'cursor-not-allowed');
+        }
+      });
+
+      const dropZone = document.getElementById('pdf-drop-zone');
+      if (dropZone) {
+        dropZone.setAttribute('aria-disabled', 'true');
+        dropZone.style.opacity = '0.55';
+        dropZone.style.pointerEvents = 'none';
+      }
+    }
+
+    function showUnauthorizedState() {
+      isUnauthorized = true;
+
+      const box = document.getElementById('unauthorizedNotice');
+      if (box) box.classList.remove('hidden');
+
+      setText('accountEmail', 'Not signed in');
+      setText('accountTokens', '—');
+      setText('parser-token-available', '—');
+      setText('receiptSummaryEmail', 'Not signed in');
+      setText('receiptSummaryStatus', '—');
+      setText('receiptSummaryTokens', '—');
+      setText('sidebarEmail', 'Not signed in');
+      setText('sidebarTokens', '—');
+      setValue('parser-token-id', '');
+
+      const statusEl = document.getElementById('preview-action-status');
+      if (statusEl) statusEl.textContent = 'Sign in to use saved reports, credits, and email delivery.';
+
+      disableProtectedUi();
+    }
+
+    async function fetchJson(url, options) {
+      const response = await fetch(url, Object.assign({
+        credentials: 'include',
+        method: 'GET'
+      }, options || {}));
+
+      if (response.status === 401) {
+        showUnauthorizedState();
+        throw new Error('unauthorized');
+      }
+
+      const text = await response.text().catch(() => '');
+      let data = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch (_) {
+        data = null;
+      }
+
+      if (!response.ok) {
+        const message = data && (data.error || data.message) ? String(data.error || data.message) : (text || response.statusText || 'request_failed');
+        throw new Error(message);
+      }
+
+      return data;
+    }
+
+    function normalizeReports(data) {
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.reports)) return data.reports;
+      if (data && Array.isArray(data.items)) return data.items;
+      return [];
+    }
+
+    function normalizePurchases(data) {
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.purchases)) return data.purchases;
+      if (data && Array.isArray(data.items)) return data.items;
+      return [];
+    }
+
+    function getMeEmail(me) {
+      return firstDefined(me && me.email, me && me.user && me.user.email, 'Unknown');
+    }
+
+    function getMeTokenId(me) {
+      const raw = firstDefined(
+        me && me.tokenId,
+        me && me.transcriptTokenId,
+        me && me.ledgerTokenId,
+        me && me.user && me.user.tokenId,
+        me && me.user && me.user.transcriptTokenId,
+        me && me.user && me.user.ledgerTokenId,
+        window.localStorage && window.localStorage.getItem('transcriptTokenId'),
+        window.localStorage && window.localStorage.getItem('tokenId'),
+        window.sessionStorage && window.sessionStorage.getItem('transcriptTokenId'),
+        window.sessionStorage && window.sessionStorage.getItem('tokenId'),
+        ''
       );
+      return String(raw || '').trim();
     }
-  },
-};
+
+    function getMeTokens(me) {
+      const raw = firstDefined(
+        me && me.tokenBalance,
+        me && me.tokens,
+        me && me.balance,
+        me && me.availableTokens,
+        me && me.user && me.user.balance,
+        me && me.user && me.user.tokenBalance,
+        '0'
+      );
+      return String(raw);
+    }
+
+    async function fetchLedgerBalance(tokenId) {
+      const cleanTokenId = String(tokenId || '').trim();
+      if (!cleanTokenId) return null;
+
+      const data = await fetchJson('/transcript/tokens?tokenId=' + encodeURIComponent(cleanTokenId));
+      if (!data || typeof data.balance === 'undefined' || data.balance === null) return null;
+
+      return String(data.balance);
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = String(value == null ? '' : value);
+    }
+
+    function setValue(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.value = String(value == null ? '' : value);
+    }
+
+    function setAccountState(me, tokenBalanceOverride) {
+      latestMe = me || {};
+
+      const email = getMeEmail(latestMe);
+      const tokenId = getMeTokenId(latestMe);
+      const tokens = tokenBalanceOverride != null ? String(tokenBalanceOverride) : getMeTokens(latestMe);
+
+      [
+        ['accountEmail', email],
+        ['accountTokens', tokens],
+        ['parser-token-available', tokens],
+        ['receiptSummaryEmail', email],
+        ['receiptSummaryTokens', tokens],
+        ['sidebarEmail', email],
+        ['sidebarTokens', tokens]
+      ].sort(function (a, b) {
+        return a[0].localeCompare(b[0]);
+      }).forEach(function (entry) {
+        setText(entry[0], entry[1]);
+      });
+
+      setValue('parser-token-id', tokenId || '');
+    }
+
+    function renderReportRows(tbodyId, reports) {
+      const tbody = document.getElementById(tbodyId);
+      if (!tbody) return;
+
+      tbody.innerHTML = reports.map(function (item) {
+        const createdAt = firstDefined(item.createdAt, item.created_at, item.insertedAt);
+        const printedAt = firstDefined(item.printedAt, item.printed_at);
+        const reportId = firstDefined(item.reportId, item.report_id, item.id);
+        const reportUrl = reportId
+          ? '/transcript/report?r=' + encodeURIComponent(reportId)
+          : firstDefined(item.reportUrl, item.report_url, '');
+        const status = firstDefined(item.status, printedAt ? 'printed' : 'pending');
+
+        return '' +
+          '<tr>' +
+            '<td>' + escapeHtml(formatDate(createdAt)) + '</td>' +
+            '<td>' + escapeHtml(formatDate(printedAt)) + '</td>' +
+            '<td>' + escapeHtml(reportId || '—') + '</td>' +
+            '<td>' + getStatusBadge(status) + '</td>' +
+            '<td>' + (reportUrl ? '<a class="btn btn-secondary" style="min-height:36px; padding:0 12px;" href="' + escapeHtml(reportUrl) + '">Open report</a>' : '—') + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function renderPurchaseRows(tbodyId, purchases) {
+      const tbody = document.getElementById(tbodyId);
+      if (!tbody) return;
+
+      tbody.innerHTML = purchases.map(function (item) {
+        const createdAt = firstDefined(item.createdAt, item.created_at, item.at);
+        const credits = firstDefined(item.credits, item.creditAmount, item.amountCredits, '—');
+        const priceId = firstDefined(item.priceId, item.price_id, '—');
+        const status = firstDefined(item.status, item.paymentStatus, 'completed');
+
+        return '' +
+          '<tr>' +
+            '<td>' + escapeHtml(formatDate(createdAt)) + '</td>' +
+            '<td>' + escapeHtml(String(credits)) + '</td>' +
+            '<td>' + escapeHtml(String(priceId)) + '</td>' +
+            '<td>' + getStatusBadge(status) + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function renderReports(data) {
+      latestReports = normalizeReports(data);
+      const hasReports = latestReports.length > 0;
+
+      const pairs = [
+        ['reportsEmpty', 'reportsTableWrap', 'reportsTbody'],
+        ['reportsPageEmpty', 'reportsPageTableWrap', 'reportsPageTbody']
+      ];
+
+      pairs.forEach(function (pair) {
+        const empty = document.getElementById(pair[0]);
+        const wrap = document.getElementById(pair[1]);
+        if (!empty || !wrap) return;
+
+        if (!hasReports) {
+          empty.classList.remove('hidden');
+          wrap.classList.add('hidden');
+          const tbody = document.getElementById(pair[2]);
+          if (tbody) tbody.innerHTML = '';
+          return;
+        }
+
+        empty.classList.add('hidden');
+        wrap.classList.remove('hidden');
+        renderReportRows(pair[2], latestReports);
+      });
+    }
+
+    function renderPurchases(data) {
+      latestPurchases = normalizePurchases(data);
+      const hasPurchases = latestPurchases.length > 0;
+
+      const pairs = [
+        ['purchasesEmpty', 'purchasesTableWrap', 'purchasesTbody'],
+        ['receiptsPageEmpty', 'receiptsPageTableWrap', 'receiptsPageTbody']
+      ];
+
+      pairs.forEach(function (pair) {
+        const empty = document.getElementById(pair[0]);
+        const wrap = document.getElementById(pair[1]);
+        if (!empty || !wrap) return;
+
+        if (!hasPurchases) {
+          empty.classList.remove('hidden');
+          wrap.classList.add('hidden');
+          const tbody = document.getElementById(pair[2]);
+          if (tbody) tbody.innerHTML = '';
+          return;
+        }
+
+        empty.classList.add('hidden');
+        wrap.classList.remove('hidden');
+        renderPurchaseRows(pair[2], latestPurchases);
+      });
+
+      const latest = latestPurchases[0] || null;
+      const latestStatus = latest ? firstDefined(latest.status, latest.paymentStatus, 'completed') : '—';
+      setText('receiptSummaryStatus', latestStatus);
+    }
+
+    function switchPage(page) {
+      const key = String(page || 'dashboard').trim().toLowerCase();
+
+      document.querySelectorAll('.page').forEach(function (el) {
+        el.classList.toggle('active', el.id === key + 'Page');
+      });
+
+      document.querySelectorAll('.nav-item').forEach(function (el) {
+        el.classList.toggle('active', String(el.getAttribute('data-page') || '').trim().toLowerCase() === key);
+      });
+
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+    }
+
+    async function signOut() {
+      try {
+        await fetch('/api/transcripts/sign-out', {
+          credentials: 'include',
+          method: 'POST'
+        });
+      } catch (_) {
+      }
+
+      latestMe = null;
+      latestPurchases = [];
+      latestReports = [];
+      showUnauthorizedState();
+      switchPage('dashboard');
+      showToast('You are signed out.');
+    }
+
+    function wireNavigation() {
+      document.addEventListener('click', function (event) {
+        const pageButton = event.target.closest('[data-page]');
+        if (pageButton) {
+          event.preventDefault();
+          switchPage(pageButton.getAttribute('data-page'));
+          return;
+        }
+
+        const jumpButton = event.target.closest('[data-page-jump]');
+        if (jumpButton) {
+          event.preventDefault();
+          switchPage(jumpButton.getAttribute('data-page-jump'));
+        }
+      });
+    }
+
+    function wireStaticButtons() {
+      wireBrandLogo();
+      wirePdfUpload();
+
+      document.querySelectorAll('[data-toast]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          showToast(btn.getAttribute('data-toast'));
+        });
+      });
+
+      const refreshBalanceBtn = document.getElementById('parser-save-token');
+      const signOutBtn = document.getElementById('signOutBtn');
+      const signOutBtnSecondary = document.getElementById('signOutBtnSecondary');
+
+      if (refreshBalanceBtn) {
+        refreshBalanceBtn.addEventListener('click', async function () {
+          refreshBalanceBtn.disabled = true;
+          const originalText = refreshBalanceBtn.textContent;
+          refreshBalanceBtn.textContent = 'Refreshing...';
+
+          try {
+            const me = await fetchJson('/api/transcripts/me');
+            const tokenId = getMeTokenId(me || {});
+            const ledgerBalance = tokenId ? await fetchLedgerBalance(tokenId) : null;
+            setAccountState(me || {}, ledgerBalance);
+          } catch (error) {
+            if (String(error && error.message || error) !== 'unauthorized') {
+              showToast('Failed to refresh balance. ' + String(error && error.message || error || 'unknown_error'));
+            }
+          } finally {
+            refreshBalanceBtn.disabled = false;
+            refreshBalanceBtn.textContent = originalText;
+          }
+        });
+      }
+
+      if (signOutBtn) signOutBtn.addEventListener('click', signOut);
+      if (signOutBtnSecondary) signOutBtnSecondary.addEventListener('click', signOut);
+    }
+
+    async function boot() {
+      wireNavigation();
+      wireStaticButtons();
+      switchPage('dashboard');
+
+      const me = await fetchJson('/api/transcripts/me');
+      const tokenId = getMeTokenId(me || {});
+      const ledgerBalance = tokenId ? await fetchLedgerBalance(tokenId) : null;
+      setAccountState(me || {}, ledgerBalance);
+
+      const purchasesPromise = fetchJson('/api/transcripts/purchases');
+      const reportsPromise = fetchJson('/api/transcripts/reports');
+
+      const purchases = await purchasesPromise;
+      renderPurchases(purchases);
+
+      const reports = await reportsPromise;
+      renderReports(reports);
+
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+    }
+
+    boot().catch(function (error) {
+      if (String(error && error.message || error) === 'unauthorized') {
+        return;
+      }
+
+      const message = 'Dashboard failed to load. ' + String(error && error.message || error || 'unknown_error');
+
+      ['purchasesEmpty', 'receiptsPageEmpty', 'reportsEmpty', 'reportsPageEmpty'].sort().forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) {
+          el.classList.remove('hidden');
+          el.textContent = message;
+        }
+      });
+
+      ['purchasesTableWrap', 'receiptsPageTableWrap', 'reportsTableWrap', 'reportsPageTableWrap'].sort().forEach(function (id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+    });
+  </script>
+  <script>
+    async function fetchJsonLocal(url, options) {
+      return fetchJson(url, options);
+    }
+
+    async function resolvePreviewUrlFromReportId(reportId) {
+      const cleanReportId = String(reportId || '').trim();
+      if (!cleanReportId) throw new Error('missing_reportId');
+
+      const response = await fetchJsonLocal('/transcript/report-link?reportId=' + encodeURIComponent(cleanReportId));
+      const reportUrl = String(response && response.reportUrl || '').trim();
+      if (!reportUrl) throw new Error('missing_reportUrl');
+
+      return reportUrl;
+    }
+
+    (function () {
+      const parserState = {
+        extractedAt: '',
+        file: null,
+        json: null,
+        lastEmailEventId: '',
+        previewReportId: '',
+        rawText: '',
+        resolvedPreviewUrl: ''
+      };
+
+      function updateParserControls() {
+        const extractBtn = document.getElementById('extract-raw-btn');
+        const parseBtn = document.getElementById('parse-structured-btn');
+        const previewBtn = document.getElementById('preview-report-btn');
+        const emailBtn = document.getElementById('report-email-btn');
+        const emailInput = document.getElementById('report-email');
+        const hasFile = !!parserState.file;
+        const hasJson = !!parserState.json;
+        const hasPreview = !!parserState.previewReportId && !!parserState.resolvedPreviewUrl;
+        const hasEmail = !!String(emailInput && emailInput.value || '').trim();
+        const hasToken = !!getMeTokenId(latestMe || {});
+
+        if (extractBtn) {
+          extractBtn.disabled = !hasFile;
+          extractBtn.className = extractBtn.disabled ? 'btn btn-secondary opacity-50 cursor-not-allowed' : 'btn btn-secondary';
+        }
+        if (parseBtn) {
+          parseBtn.disabled = !hasFile;
+          parseBtn.className = parseBtn.disabled ? 'btn btn-primary opacity-50 cursor-not-allowed' : 'btn btn-primary';
+        }
+        if (previewBtn) {
+          previewBtn.href = hasPreview ? parserState.resolvedPreviewUrl : '#';
+          previewBtn.setAttribute('aria-disabled', hasJson ? 'false' : 'true');
+          previewBtn.className = hasJson ? 'btn btn-secondary' : 'btn btn-secondary opacity-50 cursor-not-allowed pointer-events-none';
+        }
+        if (emailBtn) {
+          emailBtn.disabled = !(hasJson && hasPreview && hasEmail && hasToken);
+          emailBtn.className = emailBtn.disabled ? 'btn btn-primary opacity-50 cursor-not-allowed' : 'btn btn-primary';
+        }
+      }
+
+      function readSelectedPdf() {
+        const input = document.getElementById('pdf-upload');
+        parserState.file = input && input.files && input.files[0] ? input.files[0] : null;
+        parserState.json = null;
+        parserState.lastEmailEventId = '';
+        parserState.previewReportId = '';
+        parserState.rawText = '';
+        parserState.resolvedPreviewUrl = '';
+        setText('json-output', '(no json yet)');
+        setText('raw-output', '(no text yet)');
+        setText('report-email-status', 'Not ready.');
+        updateParserControls();
+      }
+
+      async function extractPdfText(file) {
+        if (!window.pdfjsLib || typeof window.pdfjsLib.getDocument !== 'function') {
+          throw new Error('PDF parser library did not load.');
+        }
+
+        const buffer = await file.arrayBuffer();
+        const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+        const pages = [];
+
+        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+          const page = await pdf.getPage(pageNumber);
+          const text = await page.getTextContent();
+          const parts = [];
+
+          text.items.forEach(function (item) {
+            const str = String(item && item.str || '').trim();
+            if (str) parts.push(str);
+          });
+
+          pages.push(parts.join(' '));
+        }
+
+        return pages.join('
+
+').trim();
+      }
+
+      function parseStructuredTranscript(rawText, fileName) {
+        const text = String(rawText || '');
+        const lower = text.toLowerCase();
+        const years = [];
+        text.split(/[^0-9]/).forEach(function (token) {
+          if (token.length === 4) {
+            const yearNum = Number(token);
+            if (yearNum >= 1990 && yearNum <= 2099 && years.indexOf(token) === -1) years.push(token);
+          }
+        });
+        years.sort();
+
+        const transcriptTypes = [];
+        if (lower.indexOf('account transcript') !== -1) transcriptTypes.push('Account Transcript');
+        if (lower.indexOf('record of account') !== -1) transcriptTypes.push('Record of Account');
+        if (lower.indexOf('return transcript') !== -1) transcriptTypes.push('Return Transcript');
+        if (lower.indexOf('wage and income transcript') !== -1 || lower.indexOf('wage & income transcript') !== -1) transcriptTypes.push('Wage & Income Transcript');
+
+        return {
+          fileName: fileName || '',
+          generatedAt: new Date().toISOString(),
+          rawTextLength: text.length,
+          summary: {
+            yearCount: years.length
+          },
+          taxpayer: {
+            transcriptType: transcriptTypes.length ? transcriptTypes.join(' + ') : 'IRS Transcript'
+          },
+          transcript: {
+            yearsMentioned: years
+          }
+        };
+      }
+
+      async function handleExtractRawText() {
+        if (!parserState.file) {
+          showToast('Please choose a PDF file.');
+          return;
+        }
+
+        const button = document.getElementById('extract-raw-btn');
+        const originalText = button ? button.textContent : '';
+
+        try {
+          if (button) {
+            button.disabled = true;
+            button.textContent = 'Extracting...';
+          }
+          setText('preview-action-status', 'Extracting raw text locally from your PDF...');
+          parserState.rawText = await extractPdfText(parserState.file);
+          parserState.extractedAt = new Date().toISOString();
+          setText('raw-output', parserState.rawText || '(no text yet)');
+          setText('preview-action-status', 'Raw text extracted locally. Nothing was uploaded.');
+        } catch (error) {
+          setText('preview-action-status', 'Raw text extraction failed.');
+          showToast(String(error && error.message || error || 'Extraction failed.'));
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.textContent = originalText;
+          }
+          updateParserControls();
+        }
+      }
+
+      async function handleParseStructuredJson() {
+        if (!parserState.file) {
+          showToast('Please choose a PDF file.');
+          return;
+        }
+
+        const button = document.getElementById('parse-structured-btn');
+        const originalText = button ? button.textContent : '';
+
+        try {
+          if (button) {
+            button.disabled = true;
+            button.textContent = 'Parsing...';
+          }
+          if (!parserState.rawText) {
+            parserState.rawText = await extractPdfText(parserState.file);
+            parserState.extractedAt = new Date().toISOString();
+            setText('raw-output', parserState.rawText || '(no text yet)');
+          }
+          parserState.json = parseStructuredTranscript(parserState.rawText, parserState.file && parserState.file.name || '');
+          setText('json-output', JSON.stringify(parserState.json, null, 2));
+          setText('report-email-status', 'Ready after preview save.');
+          setText('preview-action-status', 'Structured JSON created locally. Preview save will use 1 credit.');
+        } catch (error) {
+          setText('preview-action-status', 'Structured parsing failed.');
+          showToast(String(error && error.message || error || 'Structured parsing failed.'));
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.textContent = originalText;
+          }
+          updateParserControls();
+        }
+      }
+
+      async function handlePreview(event) {
+        if (event) event.preventDefault();
+        if (!parserState.json) {
+          showToast('Parse the transcript before saving a preview report.');
+          return;
+        }
+
+        const button = document.getElementById('preview-report-btn');
+        const originalText = button ? button.textContent : '';
+
+        try {
+          if (button) {
+            button.textContent = 'Saving...';
+            button.classList.add('pointer-events-none');
+          }
+
+          setText('preview-action-status', 'Saving preview report and consuming 1 credit...');
+          const response = await fetchJsonLocal('/api/transcripts/preview', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ reportData: {
+              brandLogo: savedBrandLogo ? {
+                dataUrl: savedBrandLogo.dataUrl || '',
+                name: savedBrandLogo.name || '',
+                type: savedBrandLogo.type || ''
+              } : null,
+              file: {
+                name: parserState.file && parserState.file.name ? parserState.file.name : '',
+                size: parserState.file && parserState.file.size ? parserState.file.size : 0
+              },
+              meta: {
+                extractedAt: parserState.extractedAt || new Date().toISOString(),
+                generatedBy: 'app-dashboard',
+                generatedFrom: 'local-pdfjs',
+                previewTitle: parserState.json && parserState.json.taxpayer ? parserState.json.taxpayer.transcriptType : 'IRS Transcript Report'
+              },
+              rawText: parserState.rawText,
+              structured: parserState.json
+            } })
+          });
+
+          parserState.lastEmailEventId = String(response && response.eventId || '').trim();
+          parserState.previewReportId = String(response && response.reportId || '').trim();
+          parserState.resolvedPreviewUrl = await resolvePreviewUrlFromReportId(parserState.previewReportId);
+
+          setText('report-email-status', 'Preview saved. Email delivery ready.');
+          setText('preview-action-status', 'Preview saved. Your secure report link is ready.');
+          updateParserControls();
+
+          const reports = await fetchJson('/api/transcripts/reports');
+          renderReports(reports);
+
+          if (parserState.resolvedPreviewUrl) {
+            window.open(parserState.resolvedPreviewUrl, '_blank', 'noopener');
+          }
+        } catch (error) {
+          setText('preview-action-status', 'Preview save failed. ' + String(error && error.message || error || 'preview_failed'));
+          showToast('Preview save failed. ' + String(error && error.message || error || 'preview_failed'));
+        } finally {
+          if (button) {
+            button.textContent = originalText;
+            button.classList.remove('pointer-events-none');
+          }
+          updateParserControls();
+        }
+      }
+
+      async function handleEmailReport() {
+        const email = String(document.getElementById('report-email') && document.getElementById('report-email').value || '').trim();
+        const tokenId = getMeTokenId(latestMe || {});
+        const button = document.getElementById('report-email-btn');
+        const originalText = button ? button.textContent : '';
+
+        if (!email) {
+          showToast('Please enter an email address.');
+          return;
+        }
+        if (!parserState.lastEmailEventId || !parserState.resolvedPreviewUrl) {
+          showToast('Save the preview report first.');
+          return;
+        }
+
+        try {
+          if (button) {
+            button.disabled = true;
+            button.textContent = 'Sending...';
+          }
+
+          setText('report-email-status', 'Sending...');
+          setText('preview-action-status', 'Emailing secure report link...');
+          await fetchJsonLocal('/forms/transcript/report-email', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              email: email,
+              eventId: parserState.lastEmailEventId,
+              reportUrl: parserState.resolvedPreviewUrl,
+              tokenId: tokenId
+            })
+          });
+
+          setText('report-email-status', 'Email sent.');
+          setText('preview-action-status', 'Email sent with a secure report link.');
+        } catch (error) {
+          setText('report-email-status', 'Send failed.');
+          setText('preview-action-status', 'Email failed. ' + String(error && error.message || error || 'email_failed'));
+          showToast('Email failed. ' + String(error && error.message || error || 'email_failed'));
+        } finally {
+          if (button) {
+            button.disabled = false;
+            button.textContent = originalText;
+          }
+          updateParserControls();
+        }
+      }
+
+      async function handleBuyCredits(event) {
+        if (event) event.preventDefault();
+
+        const button = document.getElementById('parser-buy-credits');
+        const status = document.getElementById('parser-checkout-status');
+        const originalText = button ? button.textContent : '';
+
+        try {
+          if (button) {
+            button.textContent = 'Loading...';
+            button.classList.add('pointer-events-none');
+          }
+          if (status) status.textContent = 'Loading checkout...';
+
+          const pricesResponse = await fetchJsonLocal('/transcript/prices');
+          const prices = Array.isArray(pricesResponse && pricesResponse.prices) ? pricesResponse.prices.slice() : [];
+          prices.sort(function (a, b) {
+            return Number(a && a.credits || 0) - Number(b && b.credits || 0);
+          });
+
+          const selected = prices.find(function (item) {
+            return !!item && !!item.priceId && Number(item.credits || 0) > 0;
+          });
+
+          if (!selected || !selected.priceId) throw new Error('No valid credit pack was returned.');
+
+          const checkout = await fetchJsonLocal('/transcript/checkout', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({
+              priceId: selected.priceId,
+              returnUrlBase: window.location.origin,
+              successPath: '/assets/payment-success.html'
+            })
+          });
+
+          if (!checkout || !checkout.url) throw new Error('Checkout URL was not returned.');
+          if (status) status.textContent = 'Redirecting to checkout...';
+          window.location.href = checkout.url;
+        } catch (error) {
+          if (status) status.textContent = 'Unable to load checkout.';
+          showToast('Checkout failed. ' + String(error && error.message || error || 'checkout_failed'));
+        } finally {
+          if (button) {
+            button.textContent = originalText;
+            button.classList.remove('pointer-events-none');
+          }
+        }
+      }
+
+      const emailInput = document.getElementById('report-email');
+      const emailBtn = document.getElementById('report-email-btn');
+      const extractBtn = document.getElementById('extract-raw-btn');
+      const parseBtn = document.getElementById('parse-structured-btn');
+      const previewBtn = document.getElementById('preview-report-btn');
+      const buyBtn = document.getElementById('parser-buy-credits');
+      const pdfInput = document.getElementById('pdf-upload');
+
+      if (pdfInput) pdfInput.addEventListener('change', readSelectedPdf);
+      if (emailInput) emailInput.addEventListener('input', updateParserControls);
+      if (emailBtn) emailBtn.addEventListener('click', handleEmailReport);
+      if (extractBtn) extractBtn.addEventListener('click', handleExtractRawText);
+      if (parseBtn) parseBtn.addEventListener('click', handleParseStructuredJson);
+      if (previewBtn) previewBtn.addEventListener('click', handlePreview);
+      if (buyBtn) buyBtn.addEventListener('click', handleBuyCredits);
+
+      updateParserControls();
+    })();
+  </script>
+</body>
+</html>
