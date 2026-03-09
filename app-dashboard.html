@@ -1381,6 +1381,21 @@
       }
 
       setPdfUploadState(file);
+
+      const parserScriptState = window.__tmParserState;
+      if (parserScriptState) {
+        parserScriptState.file = file;
+        parserScriptState.extractedAt = '';
+        parserScriptState.json = null;
+        parserScriptState.lastEmailEventId = '';
+        parserScriptState.previewReportId = '';
+        parserScriptState.rawText = '';
+        parserScriptState.resolvedPreviewUrl = '';
+      }
+
+      setText('json-output', '(no json yet)');
+      setText('raw-output', '(no text yet)');
+      setText('report-email-status', 'Not ready.');
     }
 
     function wirePdfUpload() {
@@ -1867,7 +1882,7 @@
     }
 
     (function () {
-      const parserState = {
+      const parserState = window.__tmParserState = {
         extractedAt: '',
         file: null,
         json: null,
@@ -1951,9 +1966,7 @@
           pages.push(parts.join(' '));
         }
 
-        return pages.join('
-
-').trim();
+        return pages.join(String.fromCharCode(10, 10)).trim();
       }
 
       function parseStructuredTranscript(rawText, fileName) {
