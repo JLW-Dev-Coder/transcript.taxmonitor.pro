@@ -1001,7 +1001,7 @@
                       <div>
                         <label for="report-email" class="parser-form-label">Email</label>
                         <input id="report-email" type="email" placeholder="client@firm.com" class="parser-input" autocomplete="email" />
-                        <p class="parser-note">Requires parsed JSON and a saved preview report.</p>
+                        <p class="parser-note">Requires parsed JSON, a saved preview report, and a generated secure preview link.</p>
                       </div>
                       <div style="display:grid; gap:8px;">
                         <button id="report-email-btn" type="button" class="btn btn-primary opacity-50 cursor-not-allowed" disabled>Email report link</button>
@@ -1856,7 +1856,8 @@
         json: null,
         lastEmailEventId: '',
         previewReportId: '',
-        rawText: ''
+        rawText: '',
+        resolvedPreviewUrl: ''
       };
 
       function setStatus(message) {
@@ -1869,9 +1870,9 @@
         if (el) el.textContent = String(value == null ? '' : value);
       }
 
-      function previewLink(reportId) {
-        const clean = String(reportId || '').trim();
-        return clean ? '/transcript/report-link?reportId=' + encodeURIComponent(clean) : '#';
+      function buildResolvedPreviewUrl(reportData) {
+        const payload = encodeURIComponent(JSON.stringify(reportData || {}));
+        return window.location.origin + '/assets/report.html?data=' + payload;
       }
 
       function getSavedLogo() {
@@ -1900,6 +1901,7 @@
         const hasFile = !!parserState.file;
         const hasJson = !!parserState.json;
         const hasPreview = !!parserState.previewReportId;
+        const hasResolvedPreview = !!parserState.resolvedPreviewUrl;
         const hasToken = !!getTokenId();
 
         if (extractBtn) {
@@ -1916,9 +1918,9 @@
           const disabled = !hasJson;
           previewBtn.className = disabled ? 'btn btn-secondary opacity-50 cursor-not-allowed pointer-events-none' : 'btn btn-secondary';
           previewBtn.setAttribute('aria-disabled', disabled ? 'true' : 'false');
-          previewBtn.href = hasPreview ? previewLink(parserState.previewReportId) : '#';
+          previewBtn.href = hasResolvedPreview ? parserState.resolvedPreviewUrl : '#';
 
-          if (hasPreview) {
+          if (hasResolvedPreview) {
             previewBtn.target = '_blank';
             previewBtn.rel = 'noopener';
           } else {
@@ -1928,7 +1930,7 @@
         }
 
         if (emailBtn) {
-          emailBtn.disabled = !(hasEmail && hasJson && hasPreview && hasToken);
+          emailBtn.disabled = !(hasEmail && hasJson && hasPreview && hasResolvedPreview && hasToken);
           emailBtn.className = emailBtn.disabled ? 'btn btn-primary opacity-50 cursor-not-allowed' : 'btn btn-primary';
         }
       }
@@ -1940,6 +1942,7 @@
         parserState.lastEmailEventId = '';
         parserState.previewReportId = '';
         parserState.rawText = '';
+        parserState.resolvedPreviewUrl = '';
 
         setOutput('json-output', '(no json yet)');
         setOutput('raw-output', '(no text yet)');
@@ -2226,6 +2229,7 @@
 
           parserState.lastEmailEventId = String(response && response.eventId || '').trim();
           parserState.previewReportId = String(response && response.reportId || '').trim();
+          parserState.resolvedPreviewUrl = buildResolvedPreviewUrl(buildPreviewPayload());
 
           setOutput('report-email-status', 'Preview saved. Email delivery ready.');
           setStatus('Preview saved. Your secure report link is ready.');
@@ -2243,8 +2247,8 @@
 
           updateControls();
 
-          if (parserState.previewReportId) {
-            window.open(previewLink(parserState.previewReportId), '_blank', 'noopener');
+          if (parserState.resolvedPreviewUrl) {
+            window.open(parserState.resolvedPreviewUrl, '_blank', 'noopener');
           }
         } catch (error) {
           setStatus('Preview save failed. ' + String(error && error.message || error || 'preview_failed'));
@@ -2268,8 +2272,8 @@
           return;
         }
 
-        if (!parserState.previewReportId || !parserState.lastEmailEventId) {
-          alert('Save the preview report first.');
+        if (!parserState.previewReportId || !parserState.lastEmailEventId || !parserState.resolvedPreviewUrl) {
+          alert('Save the preview report first so the secure preview link can be generated.');
           return;
         }
 
@@ -2289,7 +2293,8 @@
             body: JSON.stringify({
               email: email,
               eventId: parserState.lastEmailEventId,
-              reportUrl: previewLink(parserState.previewReportId),
+              reportId: parserState.previewReportId,
+              reportUrl: parserState.resolvedPreviewUrl,
               tokenId: tokenId
             }),
             headers: { 'content-type': 'application/json' },
@@ -2341,7 +2346,8 @@
             body: JSON.stringify({
               priceId: selected.priceId,
               returnUrlBase: window.location.origin,
-              successPath: '/assets/payment-success.html'
+              successPath: '/assets/payment-success.html',
+              tokenId: getTokenId()
             }),
             headers: { 'content-type': 'application/json' },
             method: 'POST'
