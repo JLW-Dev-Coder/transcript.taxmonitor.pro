@@ -223,7 +223,7 @@
 
   <script>
   (function () {
-    var API = window.TRANSCRIPT_API_BASE || '';
+    var API = window.TRANSCRIPT_API_BASE || 'https://tools-api.taxmonitor.pro';
 
     var login = document.getElementById('login-link');
     var loginMobile = document.getElementById('login-link-mobile');
@@ -273,7 +273,7 @@
     }
 
     function buildUrl(path) {
-      return API ? String(API).replace(/\/$/, '') + path : path;
+      return String(API).replace(/\/$/, '') + path;
     }
 
     function extractEmail(data) {
@@ -284,13 +284,15 @@
       return '';
     }
 
-    function extractTokenId(data) {
+    function extractAccountId(data) {
       if (!data || typeof data !== 'object') return '';
-      if (typeof data.tokenId === 'string' && data.tokenId) return data.tokenId;
-      if (data.user && typeof data.user.tokenId === 'string' && data.user.tokenId) return data.user.tokenId;
-      if (data.session && typeof data.session.tokenId === 'string' && data.session.tokenId) return data.session.tokenId;
-      if (data.account && typeof data.account.tokenId === 'string' && data.account.tokenId) return data.account.tokenId;
-      if (data.tokens && typeof data.tokens.tokenId === 'string' && data.tokens.tokenId) return data.tokens.tokenId;
+      if (typeof data.accountId === 'string' && data.accountId) return data.accountId;
+      if (typeof data.account_id === 'string' && data.account_id) return data.account_id;
+      if (data.user && typeof data.user.accountId === 'string' && data.user.accountId) return data.user.accountId;
+      if (data.user && typeof data.user.account_id === 'string' && data.user.account_id) return data.user.account_id;
+      if (data.session && typeof data.session.accountId === 'string' && data.session.accountId) return data.session.accountId;
+      if (data.session && typeof data.session.account_id === 'string' && data.session.account_id) return data.session.account_id;
+      if (data.account && typeof data.account.id === 'string' && data.account.id) return data.account.id;
       return '';
     }
 
@@ -329,21 +331,11 @@
       if (accountMobile) accountMobile.classList.remove('hidden');
     }
 
-    function shouldHydrateAuth() {
-      var body = document.body;
-      if (!body) return false;
-
-      var attr = body.getAttribute('data-auth-header');
-      if (attr === 'true' || attr === '1') return true;
-
-      return false;
-    }
-
     function wireSignout(link) {
       if (!link) return;
       link.addEventListener('click', function (e) {
         e.preventDefault();
-        fetch(buildUrl('/api/transcripts/sign-out'), {
+        fetch(buildUrl('/v1/auth/logout'), {
           credentials: 'include',
           method: 'POST'
         }).finally(function () {
@@ -352,15 +344,9 @@
       });
     }
 
-    async function hydrateCredits(tokenId) {
-      if (!tokenId) {
-        hideCredits();
-        return;
-      }
-
+    async function hydrateCredits() {
       try {
-        var url = buildUrl('/transcript/tokens?tokenId=' + encodeURIComponent(tokenId));
-        var response = await fetch(url, {
+        var response = await fetch(buildUrl('/v1/tokens/balance'), {
           credentials: 'include'
         });
 
@@ -424,7 +410,7 @@
 
     async function hydrate() {
       try {
-        var response = await fetch(buildUrl('/api/transcripts/me'), {
+        var response = await fetch(buildUrl('/v1/auth/me'), {
           credentials: 'include'
         });
 
@@ -435,25 +421,22 @@
 
         var data = await response.json();
         var user = extractEmail(data);
-        var tokenId = extractTokenId(data);
+        var accountId = extractAccountId(data);
 
-        if (!user) {
+        if (!user || !accountId) {
           showLoggedOut();
           return;
         }
 
         showLoggedIn(user);
-        await hydrateCredits(tokenId);
+        await hydrateCredits();
       } catch (err) {
         showLoggedOut();
       }
     }
 
     showLoggedOut();
-
-    if (shouldHydrateAuth()) {
-      hydrate();
-    }
+    hydrate();
   })();
 </script>
 </header>
