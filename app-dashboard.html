@@ -1619,7 +1619,9 @@
         const createdAt = firstDefined(item.createdAt, item.created_at, item.insertedAt);
         const printedAt = firstDefined(item.printedAt, item.printed_at);
         const reportId = firstDefined(item.reportId, item.report_id, item.id);
-        const reportUrl = firstDefined(item.reportUrl, item.report_url, reportId ? '/assets/report.html?reportId=' + encodeURIComponent(reportId) : '');
+        const reportUrl = reportId
+          ? buildReportHistoryUrl(reportId)
+          : firstDefined(item.reportUrl, item.report_url, '');
         const status = firstDefined(item.status, printedAt ? 'printed' : 'pending');
 
         return '' +
@@ -1870,9 +1872,14 @@
         if (el) el.textContent = String(value == null ? '' : value);
       }
 
-      function buildResolvedPreviewUrl(reportData) {
-        const payload = encodeURIComponent(JSON.stringify(reportData || {}));
-        return window.location.origin + '/assets/report.html?data=' + payload;
+      function buildShortPreviewRoute(reportId) {
+        const clean = String(reportId || '').trim();
+        return clean ? (window.location.origin + '/transcript/report?r=' + encodeURIComponent(clean)) : '';
+      }
+
+      function buildReportHistoryUrl(reportId) {
+        const clean = String(reportId || '').trim();
+        return clean ? ('/transcript/report?r=' + encodeURIComponent(clean)) : '';
       }
 
       function getSavedLogo() {
@@ -1930,7 +1937,7 @@
         }
 
         if (emailBtn) {
-          emailBtn.disabled = !(hasEmail && hasJson && hasPreview && hasToken);
+          emailBtn.disabled = !(hasEmail && hasJson && hasPreview && hasResolvedPreview && hasToken);
           emailBtn.className = emailBtn.disabled ? 'btn btn-primary opacity-50 cursor-not-allowed' : 'btn btn-primary';
         }
       }
@@ -2229,7 +2236,11 @@
 
           parserState.lastEmailEventId = String(response && response.eventId || '').trim();
           parserState.previewReportId = String(response && response.reportId || '').trim();
-          parserState.resolvedPreviewUrl = buildResolvedPreviewUrl(buildPreviewPayload());
+          parserState.resolvedPreviewUrl = buildShortPreviewRoute(parserState.previewReportId);
+
+          if (!parserState.resolvedPreviewUrl) {
+            throw new Error('preview_url_missing');
+          }
 
           setOutput('report-email-status', 'Preview saved. Email delivery ready.');
           setStatus('Preview saved. Your secure report link is ready.');
@@ -2272,8 +2283,8 @@
           return;
         }
 
-        if (!parserState.previewReportId || !parserState.lastEmailEventId) {
-          alert('Save the preview report first.');
+        if (!parserState.previewReportId || !parserState.lastEmailEventId || !parserState.resolvedPreviewUrl) {
+          alert('Save the preview report first so the secure preview link can be generated.');
           return;
         }
 
