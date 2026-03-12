@@ -29,6 +29,9 @@ const COPY_DIRS = [
 // Copy these root files into dist/ (alphabetical)
 const COPY_FILES = ["_redirects", "sitemap.xml"].sort();
 
+// Copy HTML from these directories into dist/, preserving structure (alphabetical)
+const HTML_SOURCE_DIRS = ["app"].sort();
+
 async function exists(targetPath) {
   try {
     await stat(targetPath);
@@ -128,8 +131,9 @@ async function injectPartialsIntoDistHtml() {
 }
 
 async function buildRootHtmlFiles() {
-  const rootFiles = (await readdir(__dirname))
-    .filter((file) => file.toLowerCase().endsWith(".html"))
+  const rootFiles = (await readdir(__dirname, { withFileTypes: true }))
+    .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith(".html"))
+    .map((entry) => entry.name)
     .sort();
 
   for (const file of rootFiles) {
@@ -137,6 +141,27 @@ async function buildRootHtmlFiles() {
     const dst = path.join(DIST, file);
     const html = await readFile(src, "utf8");
     await writeFile(dst, html, "utf8");
+  }
+}
+
+async function buildNestedHtmlFiles() {
+  for (const dir of HTML_SOURCE_DIRS) {
+    const srcDir = path.join(__dirname, dir);
+    if (!(await exists(srcDir))) continue;
+
+    const files = (await walk(srcDir))
+      .filter((targetPath) => targetPath.toLowerCase().endsWith(".html"))
+      .sort();
+
+    for (const file of files) {
+      const relativePath = path.relative(__dirname, file);
+      const dst = path.join(DIST, relativePath);
+      const dstDir = path.dirname(dst);
+      const html = await readFile(file, "utf8");
+
+      await mkdir(dstDir, { recursive: true });
+      await writeFile(dst, html, "utf8");
+    }
   }
 }
 
@@ -196,6 +221,7 @@ async function main() {
     throw new Error("Missing /partials directory at repo root.");
   }
 
+  await buildNestedHtmlFiles();
   await buildRootHtmlFiles();
   await copyStaticDirs();
   await ensurePartialsCopied();
