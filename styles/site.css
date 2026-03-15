@@ -40,11 +40,11 @@ body {
 /* Dark theme overrides for Tailwind utility classes used in this file */
 .bg-cream, .bg-white { background: transparent !important; }
 .border-gray-200 { border-color: rgba(148, 163, 184, 0.18) !important; }
-.text-midnight { color: #f8fafc !important; }
 .text-gray-400 { color: rgba(226, 232, 240, 0.65) !important; }
 .text-gray-500 { color: rgba(226, 232, 240, 0.70) !important; }
 .text-gray-600 { color: rgba(226, 232, 240, 0.78) !important; }
 .text-gray-700 { color: rgba(226, 232, 240, 0.86) !important; }
+.text-midnight { color: #f8fafc !important; }
 
 .glass {
   background: rgba(15, 23, 42, 0.55);
@@ -73,7 +73,6 @@ body {
 }
 
 .font-display {
-  /* Keep headings consistent with the primary theme font. */
   font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
 }
 
@@ -191,8 +190,8 @@ body {
   animation: slideIn 0.3s ease;
 }
 
-.toast-success { background: #7c3aed; }
 .toast-error { background: #dc2626; }
+.toast-success { background: #7c3aed; }
 
 @keyframes slideIn {
   from { transform: translateX(100%); opacity: 0; }
@@ -252,7 +251,6 @@ body {
   justify-content: center;
   color: white;
   font-size: 0.75rem;
-
 }
 
 /* SEO content helpers (shared) */
@@ -274,4 +272,181 @@ body {
 .tm-prose a {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+/* Sidebar partial classes */
+.sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 100%;
+  padding: 0 16px;
+}
+
+.brand {
+  align-items: center;
+  color: #f8fafc;
+  display: flex;
+  gap: 12px;
+  padding: 4px 8px 8px;
+  text-decoration: none;
+}
+
+.brand:hover {
+  text-decoration: none;
+}
+
+.brand-mark {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 1) 0%, rgba(79, 70, 229, 1) 100%);
+  border: 1px solid rgba(196, 181, 253, 0.18);
+  border-radius: 16px;
+  box-shadow: 0 14px 28px rgba(76, 29, 149, 0.28);
+  color: white;
+  display: inline-flex;
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 800;
+  height: 44px;
+  justify-content: center;
+  letter-spacing: 0.04em;
+  width: 44px;
+}
+
+.brand-copy {
+  color: #cbd5e1;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  min-width: 0;
+}
+
+.brand-copy strong {
+  color: #f8fafc;
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.brand-copy span {
+  color: #94a3b8;
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.nav-section {
+  display: grid;
+  gap: 8px;
+}
+
+.nav-title {
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0 8px 6px;
+  text-transform: uppercase;
+}
+
+.nav-item {
+  align-items: center;
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  color: #e2e8f0;
+  cursor: pointer;
+  display: flex;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  gap: 12px;
+  padding: 12px 14px;
+  text-align: left;
+  transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
+  width: 100%;
+}
+
+.nav-item:hover {
+  background: rgba(139, 92, 246, 0.10);
+  border-color: rgba(168, 85, 247, 0.18);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.16) 0%, rgba(79, 70, 229, 0.12) 100%);
+  border-color: rgba(168, 85, 247, 0.28);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  color: #ffffff;
+}
+
+.nav-item i,
+.nav-item svg,
+.nav-item [data-lucide] {
+  flex-shrink: 0;
+  height: 18px;
+  width: 18px;
+}
+
+.nav-item span {
+  display: block;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.sidebar-card {
+  background: rgba(15, 23, 42, 0.58);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 16px;
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+}
+
+.sidebar-card + .sidebar-card {
+  margin-top: -8px;
+}
+
+.sidebar-label {
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sidebar-value {
+  color: #f8fafc;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.sidebar-subcopy {
+  color: #94a3b8;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 980px) {
+  .sidebar-inner {
+    gap: 16px;
+    padding: 0 12px;
+  }
+
+  .brand {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .sidebar-card + .sidebar-card {
+    margin-top: 0;
+  }
 }
