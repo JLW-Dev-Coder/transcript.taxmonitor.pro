@@ -21,6 +21,14 @@ preview_id = "cf03ea6f9e934bd59d301192352f0489"
 binding = "R2_TRANSCRIPT"
 bucket_name = "transcript-taxmonitor-pro"
 
+[[durable_objects.bindings]]
+name = "TOKEN_LEDGER"
+class_name = "TokenLedger"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["TokenLedger"]
+
 [vars]
 CREDIT_MAP_JSON = "{\"price_1T83KXQEa4WBi79g8sD2NI7c\":10,\"price_1T84hAQEa4WBi79gCziLGXUD\":25,\"price_1T8pDtQEa4WBi79gWfSQwLgM\":100}"
 GOOGLE_CLIENT_EMAIL = "tax-monitor-worker@tax-monitor-pro.iam.gserviceaccount.com"
