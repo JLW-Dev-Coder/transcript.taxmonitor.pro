@@ -1,0 +1,76 @@
+{
+  "contract": "app-dashboard.v1",
+  "page": "/app/dashboard.html",
+  "type": "application",
+  "description": "Transcript Tax Monitor Pro dashboard for transcript parsing, report generation, receipts, and account monitoring.",
+  "modules": [
+    "parser",
+    "reports",
+    "receipts",
+    "support"
+  ],
+  "ui": {
+    "partials": [
+      "app-sidebar",
+      "app-topbar"
+    ],
+    "tabs": [
+      {
+        "id": "step-balance",
+        "label": "Check Balance",
+        "order": 1
+      },
+      {
+        "id": "step-upload",
+        "label": "Upload Transcript",
+        "order": 2
+      },
+      {
+        "id": "step-output",
+        "label": "Outputs",
+        "order": 3
+      }
+    ]
+  },
+  "events": {
+    "check_balance": {
+      "method": "GET",
+      "endpoint": "/api/balance"
+    },
+    "upload_transcript": {
+      "method": "POST",
+      "endpoint": "/api/parse"
+    },
+    "generate_report": {
+      "method": "POST",
+      "endpoint": "/api/report"
+    },
+    "list_receipts": {
+      "method": "GET",
+      "endpoint": "/api/receipts"
+    }
+  },
+  "storage": {
+    "bucket": "tm-receipts",
+    "paths": {
+      "reports": "reports/{eventId}.json",
+      "transcripts": "transcripts/{eventId}.pdf",
+      "receipts": "receipts/{eventId}.json"
+    }
+  },
+  "inputs": [
+    "transcript_pdf"
+  ],
+  "outputs": [
+    "parsed_transcript",
+    "client_report",
+    "analysis_summary"
+  ],
+  "security": {
+    "auth": "session",
+    "roles": [
+      "admin",
+      "user"
+    ]
+  }
+}
