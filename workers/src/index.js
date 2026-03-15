@@ -1,34 +1,81 @@
 /**
- * Transcript Tax Monitor Pro — Cloudflare Worker
+ * Transcript Tax Monitor Pro — Cloudflare Worker (transcript API + support API)
  *
- * Routes:
- * - GET  /api/health
- * - GET  /transcript/prices
- * - POST /transcript/checkout
- * - GET  /transcript/tokens?tokenId=...
- * - POST /transcript/credit
- * - POST /transcript/consume
- * - POST /transcript/stripe/webhook
- * - GET  /transcript/report?r=...
- * - POST /forms/transcript/report-email
- * - GET  /transcript/report-link?reportId=...
- * - GET  /transcript/report?r=...
- * - GET  /api/transcripts/checkout/status?session_id=...
- * - GET  /api/transcripts/me
- * - GET  /api/transcripts/purchases
- * - POST /api/transcripts/preview
- * - GET  /api/transcripts/reports
- * - POST /api/transcripts/report/:reportId/print-complete
- * - POST /api/transcripts/sign-out
- * - GET  /v1/help/status?ticket_id=...
- * - POST /v1/help/tickets
- * - POST /v1/clickup/webhook
+ * Inbound routes:
+ * - GET    /api/health
+ * - GET    /api/transcripts/checkout/status?session_id=...
+ * - GET    /api/transcripts/magic-link/verify?token=...
+ * - GET    /api/transcripts/me
+ * - GET    /api/transcripts/purchases
+ * - GET    /api/transcripts/reports
+ * - GET    /transcript/prices
+ * - GET    /transcript/report-data?reportId=...
+ * - GET    /transcript/report-link
+ * - GET    /transcript/report?r=...
+ * - GET    /transcript/tokens?tokenId=...
+ * - GET    /v1/help/status?ticket_id=...
+ * - OPTIONS /forms/transcript/report-email
+ * - OPTIONS /v1/clickup/webhook
+ * - POST   /api/transcripts/magic-link/request
+ * - POST   /api/transcripts/preview
+ * - POST   /api/transcripts/report/:reportId/print-complete
+ * - POST   /api/transcripts/sign-out
+ * - POST   /forms/transcript/report-email
+ * - POST   /transcript/checkout
+ * - POST   /transcript/consume
+ * - POST   /transcript/credit
+ * - POST   /transcript/report-link
+ * - POST   /transcript/stripe/webhook
+ * - POST   /v1/clickup/webhook
+ * - POST   /v1/help/tickets
  *
- * Notes:
- * - Extracted from the mixed Tax Monitor Pro Worker.
- * - Keeps existing Stripe, Durable Object, Gmail, and transcript receipt behavior.
- * - Non-transcript routes intentionally removed.
+ * Implemented:
+ * - Deny-by-default routing.
+ * - Contract-first request handling with explicit validation helpers.
+ * - Transcript balances are authoritative in Durable Object ledger.
+ * - Short report links and auth sessions are persisted in KV.
+ * - Stripe webhook signature verification is required.
+ * - Google Workspace Gmail API is the transactional email path.
+ * - Support status is projected from ClickUp into canonical Worker state.
+ *
+ * Planned:
+ * - Move support ticket canonical records from KV shadow state into explicit R2 support_tickets objects.
+ * - Add D1 projection for query/reporting once canonical write surfaces are finalized.
+ *
+ * NOTE:
+ * - Keep edits minimal and contract-safe.
+ * - R2 is authoritative where R2 canonical objects exist; projection happens after canonical write.
+ * - Do not change payload shapes in contracts without changing the matching UI page and route together.
  */
+
+/* ------------------------------------------
+ * Bindings + Config
+ * ------------------------------------------ */
+
+const TRANSCRIPT_SESSION_COOKIE = "tm_transcript_session";
+
+const CLICKUP_TRANSCRIPT = {
+  ACCOUNTS_LIST_ID: "901710909567",
+  SUPPORT_LIST_ID: "901710818377",
+  ACCOUNT_FIELDS: {
+    ACCOUNT_ID: "e5f176ba-82c8-47d8-b3b1-0716d075f43f",
+    PRIMARY_EMAIL: "a105f99e-b33d-4d12-bb24-f7c827ec761a",
+    SUPPORT_STATUS: "bbdf5418-8be0-452d-8bd0-b9f46643375e",
+    SUPPORT_TASK_LINK: "9e14a458-96fd-4109-a276-034d8270e15b",
+    TRANSCRIPT_CREDITS: "f938260c-600d-405a-bee7-a8db5d09bf6d",
+  },
+  SUPPORT_FIELDS: {
+    ACTION_REQUIRED: "aac0816d-0e05-4c57-8196-6098929f35ac",
+    EMAIL: "7f547901-690d-4f39-8851-d19e19f87bf8",
+    EVENT_ID: "8e8b453e-01f3-40fe-8156-2e9d9633ebd6",
+    LATEST_UPDATE: "03ebc8ba-714e-4f7c-9748-eb1b62e657f7",
+    PRIORITY: "b96403c7-028a-48eb-b6b1-349f295244b5",
+    RELATED_ORDER_ID: "423fda3b-f7c0-471e-aaa2-464d78db0a31",
+    SUPPORT_ID: "30fda9ea-12cd-4dc1-a89f-4633f4d06b27",
+    TYPE: "e09d9f53-4f03-49fe-8c5f-abe3b160b167",
+  },
+  WEBHOOK_ROUTE: "/v1/clickup/webhook",
+};
 
 /* ------------------------------------------
  * Shared Utilities
@@ -86,10 +133,6 @@ function handleCorsPreflight(request) {
   return new Response(null, { status: 204, headers: withCors(request) });
 }
 
-/* ------------------------------------------
- * Transcript: Report Email helpers (CORS + Gmail)
- * ------------------------------------------ */
-
 function corsHeadersForRequest(req) {
   const origin = req.headers.get("Origin") || "";
   const allowed = ["https://transcript.taxmonitor.pro"];
@@ -107,75 +150,175 @@ function corsHeadersForRequest(req) {
   };
 }
 
-function isLikelyEmail(v) {
-  const s = String(v || "").trim().toLowerCase();
-  if (!s || s.length > 254) return false;
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+function jsonError(request, status, error, details = null) {
+  const payload = { error };
+  if (details) payload.details = details;
+
+  const pathname = new URL(request.url).pathname;
+  const isTranscriptRequest =
+    pathname.startsWith("/transcript/") || pathname === "/forms/transcript/report-email";
+
+  return json(payload, status, isTranscriptRequest ? withCors(request) : undefined);
 }
 
-function isTokenIdFormat(v) {
-  const s = String(v || "").trim();
-  return /^[A-Za-z0-9_-]{8,128}$/.test(s);
-}
-
-function isSafeReportUrl(v) {
-  const s = String(v || "").trim();
-  if (!s) return false;
-
-  let url;
+function normalizeOrigin(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
   try {
-    url = new URL(s);
+    return new URL(raw).origin;
   } catch {
-    return false;
+    return "";
+  }
+}
+
+function getAllowedReturnOrigins(env) {
+  const fallback = ["https://transcript.taxmonitor.pro"];
+
+  const raw = String(env.TRANSCRIPT_RETURN_ORIGINS_JSON || "").trim();
+  if (!raw) return new Set(fallback);
+
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return new Set(fallback);
+
+    const normalized = arr.map(normalizeOrigin).filter(Boolean);
+    return new Set(normalized.length ? normalized : fallback);
+  } catch {
+    return new Set(fallback);
+  }
+}
+
+async function parseInboundBody(request) {
+  const contentType = (request.headers.get("content-type") || "").toLowerCase();
+
+  if (contentType.includes("application/json")) {
+    const raw = await request.text();
+    const parsed = tryParseJson(raw);
+    if (!parsed.ok) {
+      return {
+        ok: false,
+        error: "Invalid JSON",
+        details: String(parsed.error?.message || parsed.error),
+      };
+    }
+    return { ok: true, data: parsed.value, type: "json" };
   }
 
-  if (url.origin !== "https://transcript.taxmonitor.pro") return false;
-
-  const allowedPaths = new Set([
-    "/assets/report",
-    "/assets/report.html",
-    "/assets/report-preview.html",
-    "/transcript/report",
-  ]);
-
-  if (!allowedPaths.has(url.pathname)) return false;
-
-  const hasShortId = !!url.searchParams.get("r");
-  const hasHash = !!(url.hash && url.hash.slice(1).trim());
-  const hasPayloadQuery = !!(
-    (url.searchParams.get("data") || "").trim() ||
-    (url.searchParams.get("payload") || "").trim()
-  );
-
-  return hasShortId || hasHash || hasPayloadQuery;
+  try {
+    const fd = await request.formData();
+    const data = {};
+    for (const [k, v] of fd.entries()) {
+      data[k] = typeof v === "string" ? v : v?.name || "uploaded_file";
+    }
+    return { ok: true, data, type: "form" };
+  } catch (error) {
+    return {
+      ok: false,
+      error: "Unsupported body type",
+      details: String(error?.message || error),
+    };
+  }
 }
 
+function assertEnv(env, keys) {
+  const missing = keys.filter((k) => !env[k]);
+  if (missing.length) throw new Error(`Missing env vars: ${missing.join(", ")}`);
+}
 
+function envMissing(env, keys) {
+  return keys.filter((k) => !env[k]);
+}
 
-async function getShortReportLink(env, reportId) {
-  const stored = await resolveShortReportPayload(env, reportId);
-  if (!stored || !stored.payload) return null;
+function normalizeEmail(value) {
+  return String(value || "").trim().toLowerCase();
+}
 
-  return {
-    reportId: String(reportId || "").trim(),
-    reportUrl: `https://transcript.taxmonitor.pro/assets/report.html?reportId=${encodeURIComponent(String(reportId || "").trim())}`,
-  };
+function buildAppDashboardUrl() {
+  return "https://transcript.taxmonitor.pro/app-dashboard.html";
+}
+
+function buildMagicVerifyUrl(token) {
+  return `https://transcript.taxmonitor.pro/api/transcripts/magic-link/verify?token=${encodeURIComponent(token)}`;
+}
+
+function buildReportPageUrl(reportId) {
+  return `https://transcript.taxmonitor.pro/assets/report.html?reportId=${encodeURIComponent(reportId)}`;
+}
+
+function buildSessionCookie(sessionId, maxAgeSeconds = 60 * 60 * 24 * 30) {
+  return [
+    `${TRANSCRIPT_SESSION_COOKIE}=${encodeURIComponent(sessionId)}`,
+    "HttpOnly",
+    `Max-Age=${maxAgeSeconds}`,
+    "Path=/",
+    "SameSite=Lax",
+    "Secure",
+  ].join("; ");
+}
+
+function buildSessionCookieClear() {
+  return [
+    `${TRANSCRIPT_SESSION_COOKIE}=`,
+    "HttpOnly",
+    "Max-Age=0",
+    "Path=/",
+    "SameSite=Lax",
+    "Secure",
+  ].join("; ");
+}
+
+function getCookieValue(request, name) {
+  const raw = String(request.headers.get("cookie") || "");
+  if (!raw) return "";
+  const parts = raw.split(";").map((x) => x.trim());
+  for (const part of parts) {
+    const idx = part.indexOf("=");
+    if (idx === -1) continue;
+    const key = part.slice(0, idx).trim();
+    const value = part.slice(idx + 1).trim();
+    if (key === name) return decodeURIComponent(value);
+  }
+  return "";
+}
+
+function getMagicLinkKey(token) {
+  return `magic-link:${String(token || "").trim()}`;
+}
+
+function getSessionKey(sessionId) {
+  return `session:${String(sessionId || "").trim()}`;
+}
+
+function getUserAccountKey(email) {
+  return `user-account:${String(email || "").trim().toLowerCase()}`;
+}
+
+function getReportIndexKey(email, createdAt, reportId) {
+  return `report-index:${String(email || "").trim().toLowerCase()}:${String(createdAt || "").trim()}:${String(reportId || "").trim()}`;
+}
+
+function getReportMetaKey(reportId) {
+  return `report-meta:${String(reportId || "").trim()}`;
+}
+
+function getSupportStatusKey(supportId) {
+  return `support-status:${String(supportId || "").trim()}`;
+}
+
+function getSupportTaskKey(taskId) {
+  return `support-task:${String(taskId || "").trim()}`;
+}
+
+function getSupportEmailIndexKey(email, supportId) {
+  return `support-email-index:${normalizeEmail(email)}:${String(supportId || "").trim()}`;
 }
 
 function getReportKv(env) {
-  // Canonical KV binding for permanent report links
   return env.KV_TRANSCRIPT || null;
 }
 
-// TTL removed intentionally — report links are permanent unless manually deleted from KV
 function getReportLinkTtlSeconds(env) {
   return null;
-}
-
-function randomShortId(bytes = 18) {
-  const arr = new Uint8Array(bytes);
-  crypto.getRandomValues(arr);
-  return b64UrlEncode(arr);
 }
 
 function getShortReportKey(reportId) {
@@ -184,6 +327,171 @@ function getShortReportKey(reportId) {
 
 function getReportUnlockKey(eventId) {
   return `report-unlock:${String(eventId || "").trim()}`;
+}
+
+function buildShortReportUrl(reportId) {
+  return `https://transcript.taxmonitor.pro/transcript/report?r=${encodeURIComponent(reportId)}`;
+}
+
+function getLedgerStub(env, tokenId) {
+  if (!env.TOKEN_LEDGER) throw new Error("Missing Durable Object binding: TOKEN_LEDGER");
+  const id = env.TOKEN_LEDGER.idFromName(tokenId);
+  return env.TOKEN_LEDGER.get(id);
+}
+
+function getClickUpApiToken(env) {
+  return String(env.CLICKUP_API_TOKEN || env.CLICKUP_TOKEN || "").trim();
+}
+
+function clickupHeaders(env) {
+  const token = getClickUpApiToken(env);
+  if (!token) throw new Error("Missing ClickUp API token");
+  return {
+    authorization: token,
+    "content-type": "application/json",
+  };
+}
+
+function getTranscriptCreditMap(env) {
+  const raw = String(env.CREDIT_MAP_JSON || "").trim();
+  if (!raw) throw new Error("Missing CREDIT_MAP_JSON");
+
+  const parsed = JSON.parse(raw);
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error("Invalid CREDIT_MAP_JSON");
+  }
+
+  return parsed;
+}
+
+function getCreditsForPriceId(env, priceId) {
+  const creditMap = getTranscriptCreditMap(env);
+  const credits = creditMap[String(priceId || "").trim()];
+  return typeof credits === "number" && Number.isFinite(credits) ? credits : null;
+}
+
+function buildPaymentMethodLabel(paymentMethod) {
+  const card = paymentMethod && paymentMethod.card ? paymentMethod.card : null;
+  if (!card) return "Not available";
+
+  const brandRaw = String(card.brand || "").trim();
+  const brand = brandRaw ? brandRaw.charAt(0).toUpperCase() + brandRaw.slice(1) : "Card";
+  const last4 = String(card.last4 || "").trim();
+
+  return last4 ? `${brand} • ${last4}` : brand;
+}
+
+function randomShortId(bytes = 18) {
+  const arr = new Uint8Array(bytes);
+  crypto.getRandomValues(arr);
+  return b64UrlEncode(arr);
+}
+
+function b64UrlEncode(bytes) {
+  const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes || []);
+  let bin = "";
+  for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function buildCanonicalSupportId() {
+  return `SUP-${randomShortId(9).replace(/[^A-Za-z0-9]/g, "").toUpperCase()}`;
+}
+
+function normalizeSupportId(value) {
+  return String(value || "").trim();
+}
+
+function normalizeSupportStatus(value) {
+  return String(value || "").trim() || "open / new";
+}
+
+function getPriorityOptionName(priority) {
+  const normalized = String(priority || "").trim().toLowerCase();
+  if (normalized === "critical") return "🟥 Critical — Today";
+  if (normalized === "high") return "🟧 High — 48 Hours";
+  if (normalized === "low") return "🟦 Low — As Scheduled";
+  return "🟨 Normal — 3–5 Days";
+}
+
+function getSupportTypeOptionName(payload) {
+  const issueType = String(payload && payload.issueType || "").trim().toLowerCase();
+  if (issueType === "token" || issueType === "credits" || issueType === "billing") {
+    return "Ticket - Transcript Token";
+  }
+  return "Ticket - Transcript Token";
+}
+
+function buildInitialSupportLatestUpdate(payload) {
+  const subject = String(payload && payload.subject || "").trim();
+  if (subject) return `Ticket submitted: ${subject}`;
+  return "Ticket submitted.";
+}
+
+function buildSupportTaskDescription(payload, supportId) {
+  const lines = [
+    `Support ID: ${supportId}`,
+    `Name: ${String(payload && payload.name || "").trim()}`,
+    `Email: ${normalizeEmail(payload && payload.email)}`,
+    `Category: ${String(payload && payload.category || "").trim()}`,
+    `Issue Type: ${String(payload && payload.issueType || "").trim()}`,
+    `Priority: ${String(payload && payload.priority || "").trim()}`,
+    `Urgency: ${String(payload && payload.urgency || "").trim()}`,
+    `Event ID: ${String(payload && payload.eventId || "").trim()}`,
+  ];
+
+  const tokenId = String(payload && payload.tokenId || "").trim();
+  const relatedOrderId = String(payload && payload.relatedOrderId || "").trim();
+  if (tokenId) lines.push(`Token ID: ${tokenId}`);
+  if (relatedOrderId) lines.push(`Related Order ID: ${relatedOrderId}`);
+
+  lines.push("");
+  lines.push(`Subject: ${String(payload && payload.subject || "").trim()}`);
+  lines.push("");
+  lines.push("Message:");
+  lines.push(String(payload && payload.message || "").trim());
+
+  return lines.join("\n");
+}
+
+function mapSupportStatusToAccountStatus(status) {
+  const normalized = String(status || "").trim().toLowerCase();
+  if (normalized === "blocked") return "Blocked";
+  if (normalized === "client feedback") return "Waiting on Client";
+  if (normalized === "closed") return "Closed";
+  if (normalized === "complete") return "Complete";
+  if (normalized === "in progress") return "In Progress";
+  if (normalized === "in review") return "Needs Review";
+  if (normalized === "open / new") return "New / Open";
+  if (normalized === "resolved") return "Complete";
+  if (normalized === "waiting on client") return "Waiting on Client";
+  return "New / Open";
+}
+
+function getDropdownOptionIdByName(options, name) {
+  const target = String(name || "").trim().toLowerCase();
+  const list = Array.isArray(options) ? options : [];
+  const found = list.find((option) => String(option && option.name || "").trim().toLowerCase() === target);
+  return found && found.id ? String(found.id) : "";
+}
+
+function makeRfc2822({ from, to, subject, text }) {
+  const safeSubject = String(subject || "").replace(/[\r\n]+/g, " ").trim();
+  const safeFrom = String(from || "").replace(/[\r\n]+/g, "").trim();
+  const safeTo = String(to || "").replace(/[\r\n]+/g, "").trim();
+  const safeText = String(text || "").replace(/\r\n/g, "\n");
+
+  return [
+    "From: " + safeFrom,
+    "To: " + safeTo,
+    "Subject: " + safeSubject,
+    "MIME-Version: 1.0",
+    "Content-Type: text/plain; charset=UTF-8",
+    "Content-Transfer-Encoding: 7bit",
+    "",
+    safeText,
+    "",
+  ].join("\n");
 }
 
 function extractStoredReportPayload(reportUrl) {
@@ -238,57 +546,39 @@ function extractInboundReportPayload(input = {}) {
   return { ok: false, error: "missing_report_payload" };
 }
 
-async function storeShortReportPayload(env, payload, meta = {}) {
-  const kv = getReportKv(env);
-  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+function buildSupportLatestUpdateFromTask(task, fallbackHistoryItem) {
+  const explicit = getTaskCustomFieldValue(task, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.LATEST_UPDATE);
+  if (explicit) return explicit;
 
-  const now = new Date().toISOString();
+  const status = normalizeSupportStatus(task && task.status && task.status.status);
+  const at = task && task.date_updated ? new Date(Number(task.date_updated)).toISOString() : new Date().toISOString();
+  const by = fallbackHistoryItem && fallbackHistoryItem.user && fallbackHistoryItem.user.username ? String(fallbackHistoryItem.user.username).trim() : "Staff";
 
-  for (let i = 0; i < 5; i++) {
-    const reportId = randomShortId();
-    const key = getShortReportKey(reportId);
+  return `${status} • ${by} • ${at}`;
+}
 
-    const existing = await kv.get(key);
-    if (existing) continue;
+function getTaskCustomField(task, fieldId) {
+  const fields = Array.isArray(task && task.custom_fields) ? task.custom_fields : [];
+  return fields.find((field) => String(field && field.id || "") === String(fieldId || "")) || null;
+}
 
-    await kv.put(
-      key,
-      JSON.stringify(
-        {
-          createdAt: now,
-          payload: String(payload || ""),
-          payloadTransport: meta.payloadTransport || "hash",
-          sourcePath: meta.sourcePath || "/assets/report"
-        },
-        null,
-        2
-      )
-    );
+function getTaskCustomFieldValue(task, fieldId) {
+  const field = getTaskCustomField(task, fieldId);
+  if (!field) return "";
 
-    return {
-      reportId,
-      shortUrl: buildShortReportUrl(reportId)
-    };
+  if (field.value === undefined || field.value === null) return "";
+
+  if (typeof field.value === "string") return field.value.trim();
+
+  if (typeof field.value === "number" || typeof field.value === "boolean") return String(field.value);
+
+  if (typeof field.value === "object") {
+    if (typeof field.value.name === "string") return field.value.name.trim();
+    if (typeof field.value.label === "string") return field.value.label.trim();
+    if (typeof field.value.text === "string") return field.value.text.trim();
   }
 
-  throw new Error("Failed to allocate a unique reportId");
-}
-
-function buildShortReportUrl(reportId) {
-  return `https://transcript.taxmonitor.pro/transcript/report?r=${encodeURIComponent(reportId)}`;
-}
-
-async function resolveShortReportPayload(env, reportId) {
-  const kv = getReportKv(env);
-  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
-
-  const raw = await kv.get(getShortReportKey(reportId));
-  if (!raw) return null;
-
-  const parsed = tryParseJson(raw);
-  if (!parsed.ok || !parsed.value || typeof parsed.value !== "object") return null;
-
-  return parsed.value;
+  return String(field.value || "").trim();
 }
 
 function pemToArrayBuffer(pem) {
@@ -302,217 +592,8 @@ function pemToArrayBuffer(pem) {
   return bytes.buffer;
 }
 
-function b64UrlEncode(bytes) {
-  const u8 = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes || []);
-  let bin = "";
-  for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
-  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
-}
-
-async function googleServiceAccountAccessToken(env, subjectUser, scopes) {
-  const now = Math.floor(Date.now() / 1000);
-  const iat = now - 5;
-  const exp = now + 55 * 60;
-
-  const tokenUri = env.GOOGLE_TOKEN_URI;
-  const clientEmail = env.GOOGLE_CLIENT_EMAIL;
-  const privateKeyPem = env.GOOGLE_PRIVATE_KEY;
-
-  if (!tokenUri || !clientEmail || !privateKeyPem) {
-    throw new Error("Missing Google env vars: GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY, GOOGLE_TOKEN_URI.");
-  }
-  if (!subjectUser) {
-    throw new Error("Missing Workspace user env var: GOOGLE_WORKSPACE_USER_*.");
-  }
-
-  const header = { alg: "RS256", typ: "JWT" };
-  const claim = {
-    aud: tokenUri,
-    exp,
-    iat,
-    iss: clientEmail,
-    scope: (Array.isArray(scopes) ? scopes : [String(scopes)]).join(" "),
-    sub: subjectUser,
-  };
-
-  const enc = (obj) => b64UrlEncode(new TextEncoder().encode(JSON.stringify(obj)));
-  const signingInput = enc(header) + "." + enc(claim);
-
-  const key = await crypto.subtle.importKey(
-    "pkcs8",
-    pemToArrayBuffer(privateKeyPem),
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
-    ["sign"]
-  );
-
-  const sig = await crypto.subtle.sign(
-    { name: "RSASSA-PKCS1-v1_5" },
-    key,
-    new TextEncoder().encode(signingInput)
-  );
-
-  const jwt = signingInput + "." + b64UrlEncode(new Uint8Array(sig));
-
-  const body = new URLSearchParams();
-  body.set("assertion", jwt);
-  body.set("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
-
-  const res = await fetch(tokenUri, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-  });
-
-  if (!res.ok) {
-    const t = await res.text().catch(() => "");
-    throw new Error("Google token exchange failed (" + String(res.status) + "): " + (t || res.statusText));
-  }
-
-  const parsed = await res.json();
-  const accessToken = parsed && parsed.access_token ? String(parsed.access_token) : "";
-  if (!accessToken) throw new Error("Google token exchange returned no access_token.");
-  return accessToken;
-}
-
-function makeRfc2822({ from, to, subject, text }) {
-  const safeSubject = String(subject || "").replace(/[\r\n]+/g, " ").trim();
-  const safeFrom = String(from || "").replace(/[\r\n]+/g, "").trim();
-  const safeTo = String(to || "").replace(/[\r\n]+/g, "").trim();
-  const safeText = String(text || "").replace(/\r\n/g, "\n");
-
-  return [
-    "From: " + safeFrom,
-    "To: " + safeTo,
-    "Subject: " + safeSubject,
-    "MIME-Version: 1.0",
-    "Content-Type: text/plain; charset=UTF-8",
-    "Content-Transfer-Encoding: 7bit",
-    "",
-    safeText,
-    "",
-  ].join("\n");
-}
-
-async function gmailSendMessage(env, { from, to, subject, text }) {
-  const workspaceUser =
-    env.GOOGLE_WORKSPACE_USER_SUPPORT ||
-    env.GOOGLE_WORKSPACE_USER_NOREPLY ||
-    env.GOOGLE_WORKSPACE_USER_DEFAULT;
-
-  const token = await googleServiceAccountAccessToken(env, workspaceUser, [
-    "https://www.googleapis.com/auth/gmail.send",
-  ]);
-
-  const rfc = makeRfc2822({ from, to, subject, text });
-  const raw = b64UrlEncode(new TextEncoder().encode(rfc));
-
-  const res = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + token,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ raw }),
-  });
-
-  if (!res.ok) {
-    const t = await res.text().catch(() => "");
-    throw new Error("Gmail send failed (" + String(res.status) + "): " + (t || res.statusText));
-  }
-
-  return await res.json().catch(() => ({}));
-}
-
-function assertEnv(env, keys) {
-  const missing = keys.filter((k) => !env[k]);
-  if (missing.length) throw new Error(`Missing env vars: ${missing.join(", ")}`);
-}
-
-function envMissing(env, keys) {
-  return keys.filter((k) => !env[k]);
-}
-
-function jsonError(request, status, error, details = null) {
-  const payload = { error };
-  if (details) payload.details = details;
-
-  const pathname = new URL(request.url).pathname;
-  const isTranscriptRequest =
-    pathname.startsWith("/transcript/") || pathname === "/forms/transcript/report-email";
-
-  return json(payload, status, isTranscriptRequest ? withCors(request) : undefined);
-}
-
 /* ------------------------------------------
- * Transcript: Return origin allowlist (strict)
- * ------------------------------------------ */
-
-function normalizeOrigin(value) {
-  const raw = String(value || "").trim();
-  if (!raw) return "";
-  try {
-    return new URL(raw).origin;
-  } catch {
-    return "";
-  }
-}
-
-function getAllowedReturnOrigins(env) {
-  const fallback = ["https://transcript.taxmonitor.pro"];
-
-  const raw = String(env.TRANSCRIPT_RETURN_ORIGINS_JSON || "").trim();
-  if (!raw) return new Set(fallback);
-
-  try {
-    const arr = JSON.parse(raw);
-    if (!Array.isArray(arr)) return new Set(fallback);
-
-    const normalized = arr.map(normalizeOrigin).filter(Boolean);
-    return new Set(normalized.length ? normalized : fallback);
-  } catch {
-    return new Set(fallback);
-  }
-}
-
-/* ------------------------------------------
- * Body Parsing (Forms + JSON)
- * ------------------------------------------ */
-
-async function parseInboundBody(request) {
-  const contentType = (request.headers.get("content-type") || "").toLowerCase();
-
-  if (contentType.includes("application/json")) {
-    const raw = await request.text();
-    const parsed = tryParseJson(raw);
-    if (!parsed.ok) {
-      return {
-        ok: false,
-        error: "Invalid JSON",
-        details: String(parsed.error?.message || parsed.error),
-      };
-    }
-    return { ok: true, data: parsed.value, type: "json" };
-  }
-
-  try {
-    const fd = await request.formData();
-    const data = {};
-    for (const [k, v] of fd.entries()) {
-      data[k] = typeof v === "string" ? v : v?.name || "uploaded_file";
-    }
-    return { ok: true, data, type: "form" };
-  } catch (error) {
-    return {
-      ok: false,
-      error: "Unsupported body type",
-      details: String(error?.message || error),
-    };
-  }
-}
-
-/* ------------------------------------------
- * Ids
+ * Validation
  * ------------------------------------------ */
 
 function isUuidLike(v) {
@@ -522,86 +603,47 @@ function isUuidLike(v) {
   );
 }
 
-/* ------------------------------------------
- * Transcript: Stripe helpers
- * ------------------------------------------ */
+function isLikelyEmail(v) {
+  const s = String(v || "").trim().toLowerCase();
+  if (!s || s.length > 254) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+}
 
-async function stripeFetch(env, method, path, bodyObj = null, extraHeaders = {}) {
-  assertEnv(env, ["STRIPE_SECRET_KEY"]);
-  const res = await fetch(`https://api.stripe.com/v1${path}`, {
-    method,
-    headers: {
-      authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
-      "content-type": "application/x-www-form-urlencoded",
-      ...extraHeaders,
-    },
-    body: bodyObj ? new URLSearchParams(bodyObj).toString() : null,
-  });
+function isTokenIdFormat(v) {
+  const s = String(v || "").trim();
+  return /^[A-Za-z0-9_-]{8,128}$/.test(s);
+}
 
-  const text = await res.text();
-  let data;
+function isSafeReportUrl(v) {
+  const s = String(v || "").trim();
+  if (!s) return false;
+
+  let url;
   try {
-    data = JSON.parse(text);
+    url = new URL(s);
   } catch {
-    data = { raw: text };
+    return false;
   }
 
-  if (!res.ok) throw new Error(`Stripe error (${res.status}): ${data?.error?.message || text}`);
-  return data;
-}
+  if (url.origin !== "https://transcript.taxmonitor.pro") return false;
 
-function getTranscriptCreditMap(env) {
-  const raw = String(env.CREDIT_MAP_JSON || "").trim();
-  if (!raw) throw new Error("Missing CREDIT_MAP_JSON");
+  const allowedPaths = new Set([
+    "/assets/report",
+    "/assets/report.html",
+    "/assets/report-preview.html",
+    "/transcript/report",
+  ]);
 
-  const parsed = JSON.parse(raw);
-  if (!parsed || typeof parsed !== "object") {
-    throw new Error("Invalid CREDIT_MAP_JSON");
-  }
+  if (!allowedPaths.has(url.pathname)) return false;
 
-  return parsed;
-}
-
-function getCreditsForPriceId(env, priceId) {
-  const creditMap = getTranscriptCreditMap(env);
-  const credits = creditMap[String(priceId || "").trim()];
-  return typeof credits === "number" && Number.isFinite(credits) ? credits : null;
-}
-
-function buildPaymentMethodLabel(paymentMethod) {
-  const card = paymentMethod && paymentMethod.card ? paymentMethod.card : null;
-  if (!card) return "Not available";
-
-  const brandRaw = String(card.brand || "").trim();
-  const brand = brandRaw ? brandRaw.charAt(0).toUpperCase() + brandRaw.slice(1) : "Card";
-  const last4 = String(card.last4 || "").trim();
-
-  return last4 ? `${brand} • ${last4}` : brand;
-}
-
-async function verifyStripeSignature(env, sigHeader, rawBodyText) {
-  const parts = sigHeader.split(",").map((p) => p.trim());
-  const tPart = parts.find((p) => p.startsWith("t="));
-  const v1Part = parts.find((p) => p.startsWith("v1="));
-
-  if (!tPart || !v1Part) throw new Error("Invalid Stripe signature header");
-
-  const timestamp = tPart.slice(2);
-  const signature = v1Part.slice(3);
-
-  const signedPayload = `${timestamp}.${rawBodyText}`;
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(env.STRIPE_WEBHOOK_SECRET),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"]
+  const hasShortId = !!url.searchParams.get("r");
+  const hasHash = !!(url.hash && url.hash.slice(1).trim());
+  const hasPayloadQuery = !!(
+    (url.searchParams.get("data") || "").trim() ||
+    (url.searchParams.get("payload") || "").trim()
   );
-  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(signedPayload));
-  const expected = [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, "0")).join("");
 
-  if (!timingSafeEqualHex(expected, signature)) throw new Error("Stripe signature verification failed");
-  return JSON.parse(rawBodyText);
+  return hasShortId || hasHash || hasPayloadQuery;
 }
 
 function timingSafeEqualHex(a, b) {
@@ -612,117 +654,8 @@ function timingSafeEqualHex(a, b) {
 }
 
 /* ------------------------------------------
- * Transcript: Durable Object authoritative ledger
+ * Integrations
  * ------------------------------------------ */
-
-export class TokenLedger {
-  constructor(state, env) {
-    this.state = state;
-    this.env = env;
-  }
-
-  async fetch(request) {
-    const url = new URL(request.url);
-
-    if (request.method === "GET" && url.pathname === "/balance") {
-      const balance = (await this.state.storage.get("balance")) ?? 0;
-      return json({ balance }, 200);
-    }
-
-    if (request.method === "POST" && url.pathname === "/credit") {
-      const body = await request.json().catch(() => ({}));
-      const amount = Number(body?.amount ?? 0);
-      const requestId = typeof body?.requestId === "string" ? body.requestId.trim() : "";
-
-      if (!Number.isFinite(amount) || amount <= 0) return json({ error: "invalid_amount" }, 400);
-      if (!requestId) return json({ error: "missing_requestId" }, 400);
-
-      const idemKey = `credit:${requestId}`;
-      const already = await this.state.storage.get(idemKey);
-      if (already !== undefined) return json({ balance: already, idempotent: true }, 200);
-
-      const current = (await this.state.storage.get("balance")) ?? 0;
-      const next = Number(current) + amount;
-
-      await this.state.storage.put("balance", next);
-      await this.state.storage.put(idemKey, next);
-
-      return json({ balance: next }, 200);
-    }
-
-    if (request.method === "POST" && url.pathname === "/consume") {
-      const body = await request.json().catch(() => ({}));
-      const amount = Number(body?.amount ?? 1);
-      const requestId = typeof body?.requestId === "string" ? body.requestId.trim() : "";
-
-      if (!Number.isFinite(amount) || amount <= 0) return json({ error: "invalid_amount" }, 400);
-      if (!requestId) return json({ error: "missing_requestId" }, 400);
-
-      const idemKey = `consume:${requestId}`;
-      const already = await this.state.storage.get(idemKey);
-      if (already !== undefined) return json({ balance: already, idempotent: true }, 200);
-
-      const current = (await this.state.storage.get("balance")) ?? 0;
-      if (Number(current) < amount) return json({ balance: current, error: "insufficient_balance", needed: amount }, 402);
-
-      const next = Number(current) - amount;
-      await this.state.storage.put("balance", next);
-      await this.state.storage.put(idemKey, next);
-
-      return json({ balance: next }, 200);
-    }
-
-    return json({ error: "not_found" }, 404);
-  }
-}
-
-function getLedgerStub(env, tokenId) {
-  if (!env.TOKEN_LEDGER) throw new Error("Missing Durable Object binding: TOKEN_LEDGER");
-  const id = env.TOKEN_LEDGER.idFromName(tokenId);
-  return env.TOKEN_LEDGER.get(id);
-}
-
-const TRANSCRIPT_SESSION_COOKIE = "tm_transcript_session";
-
-/* ------------------------------------------
- * Transcript: ClickUp projection config
- * ------------------------------------------ */
-
-const CLICKUP_TRANSCRIPT = {
-  ACCOUNTS_LIST_ID: "901710909567",
-  SUPPORT_LIST_ID: "901710818377",
-  ACCOUNT_FIELDS: {
-    ACCOUNT_ID: "e5f176ba-82c8-47d8-b3b1-0716d075f43f",
-    PRIMARY_EMAIL: "a105f99e-b33d-4d12-bb24-f7c827ec761a",
-    SUPPORT_STATUS: "bbdf5418-8be0-452d-8bd0-b9f46643375e",
-    SUPPORT_TASK_LINK: "9e14a458-96fd-4109-a276-034d8270e15b",
-    TRANSCRIPT_CREDITS: "f938260c-600d-405a-bee7-a8db5d09bf6d",
-  },
-  SUPPORT_FIELDS: {
-    ACTION_REQUIRED: "aac0816d-0e05-4c57-8196-6098929f35ac",
-    EMAIL: "7f547901-690d-4f39-8851-d19e19f87bf8",
-    EVENT_ID: "8e8b453e-01f3-40fe-8156-2e9d9633ebd6",
-    LATEST_UPDATE: "03ebc8ba-714e-4f7c-9748-eb1b62e657f7",
-    PRIORITY: "b96403c7-028a-48eb-b6b1-349f295244b5",
-    RELATED_ORDER_ID: "423fda3b-f7c0-471e-aaa2-464d78db0a31",
-    SUPPORT_ID: "30fda9ea-12cd-4dc1-a89f-4633f4d06b27",
-    TYPE: "e09d9f53-4f03-49fe-8c5f-abe3b160b167",
-  },
-  WEBHOOK_ROUTE: "/v1/clickup/webhook",
-};
-
-function getClickUpApiToken(env) {
-  return String(env.CLICKUP_API_TOKEN || env.CLICKUP_TOKEN || "").trim();
-}
-
-function clickupHeaders(env) {
-  const token = getClickUpApiToken(env);
-  if (!token) throw new Error("Missing ClickUp API token");
-  return {
-    authorization: token,
-    "content-type": "application/json",
-  };
-}
 
 async function clickupFetchJson(env, path, init = {}) {
   const response = await fetch(`https://api.clickup.com/api/v2${path}`, {
@@ -753,86 +686,6 @@ async function clickupFetchJson(env, path, init = {}) {
   return data;
 }
 
-function getSupportStatusKey(supportId) {
-  return `support-status:${String(supportId || "").trim()}`;
-}
-
-function getSupportTaskKey(taskId) {
-  return `support-task:${String(taskId || "").trim()}`;
-}
-
-function getSupportEmailIndexKey(email, supportId) {
-  return `support-email-index:${normalizeEmail(email)}:${String(supportId || "").trim()}`;
-}
-
-function buildCanonicalSupportId() {
-  return `SUP-${randomShortId(9).replace(/[^A-Za-z0-9]/g, "").toUpperCase()}`;
-}
-
-function normalizeSupportId(value) {
-  return String(value || "").trim();
-}
-
-function normalizeSupportStatus(value) {
-  return String(value || "").trim() || "open / new";
-}
-
-function getTaskCustomField(task, fieldId) {
-  const fields = Array.isArray(task && task.custom_fields) ? task.custom_fields : [];
-  return fields.find((field) => String(field && field.id || "") === String(fieldId || "")) || null;
-}
-
-function getTaskCustomFieldValue(task, fieldId) {
-  const field = getTaskCustomField(task, fieldId);
-  if (!field) return "";
-
-  if (field.value === undefined || field.value === null) return "";
-
-  if (typeof field.value === "string") return field.value.trim();
-
-  if (typeof field.value === "number" || typeof field.value === "boolean") return String(field.value);
-
-  if (typeof field.value === "object") {
-    if (typeof field.value.name === "string") return field.value.name.trim();
-    if (typeof field.value.label === "string") return field.value.label.trim();
-    if (typeof field.value.text === "string") return field.value.text.trim();
-  }
-
-  return String(field.value || "").trim();
-}
-
-function buildSupportLatestUpdateFromTask(task, fallbackHistoryItem) {
-  const explicit = getTaskCustomFieldValue(task, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.LATEST_UPDATE);
-  if (explicit) return explicit;
-
-  const status = normalizeSupportStatus(task && task.status && task.status.status);
-  const at = task && task.date_updated ? new Date(Number(task.date_updated)).toISOString() : new Date().toISOString();
-  const by = fallbackHistoryItem && fallbackHistoryItem.user && fallbackHistoryItem.user.username ? String(fallbackHistoryItem.user.username).trim() : "Staff";
-
-  return `${status} • ${by} • ${at}`;
-}
-
-function mapSupportStatusToAccountStatus(status) {
-  const normalized = String(status || "").trim().toLowerCase();
-  if (normalized === "blocked") return "Blocked";
-  if (normalized === "client feedback") return "Waiting on Client";
-  if (normalized === "complete") return "Complete";
-  if (normalized === "closed") return "Closed";
-  if (normalized === "in progress") return "In Progress";
-  if (normalized === "in review") return "Needs Review";
-  if (normalized === "open / new") return "New / Open";
-  if (normalized === "resolved") return "Complete";
-  if (normalized === "waiting on client") return "Waiting on Client";
-  return "New / Open";
-}
-
-function getDropdownOptionIdByName(options, name) {
-  const target = String(name || "").trim().toLowerCase();
-  const list = Array.isArray(options) ? options : [];
-  const found = list.find((option) => String(option && option.name || "").trim().toLowerCase() === target);
-  return found && found.id ? String(found.id) : "";
-}
-
 async function setClickUpCustomField(env, taskId, fieldId, value) {
   await clickupFetchJson(env, `/task/${encodeURIComponent(taskId)}/field/${encodeURIComponent(fieldId)}`, {
     method: "POST",
@@ -857,183 +710,6 @@ async function linkClickUpTasks(env, taskId, linksTo) {
   } catch (_) {
     return null;
   }
-}
-
-function getPriorityOptionName(priority) {
-  const normalized = String(priority || "").trim().toLowerCase();
-  if (normalized === "critical") return "🟥 Critical — Today";
-  if (normalized === "high") return "🟧 High — 48 Hours";
-  if (normalized === "low") return "🟦 Low — As Scheduled";
-  return "🟨 Normal — 3–5 Days";
-}
-
-function getSupportTypeOptionName(payload) {
-  const issueType = String(payload && payload.issueType || "").trim().toLowerCase();
-  if (issueType === "token" || issueType === "credits" || issueType === "billing") {
-    return "Ticket - Transcript Token";
-  }
-  return "Ticket - Transcript Token";
-}
-
-function buildInitialSupportLatestUpdate(payload) {
-  const subject = String(payload && payload.subject || "").trim();
-  if (subject) return `Ticket submitted: ${subject}`;
-  return "Ticket submitted.";
-}
-
-function buildSupportTaskDescription(payload, supportId) {
-  const lines = [
-    `Support ID: ${supportId}`,
-    `Name: ${String(payload && payload.name || "").trim()}`,
-    `Email: ${normalizeEmail(payload && payload.email)}`,
-    `Category: ${String(payload && payload.category || "").trim()}`,
-    `Issue Type: ${String(payload && payload.issueType || "").trim()}`,
-    `Priority: ${String(payload && payload.priority || "").trim()}`,
-    `Urgency: ${String(payload && payload.urgency || "").trim()}`,
-    `Event ID: ${String(payload && payload.eventId || "").trim()}`,
-  ];
-
-  const tokenId = String(payload && payload.tokenId || "").trim();
-  const relatedOrderId = String(payload && payload.relatedOrderId || "").trim();
-  if (tokenId) lines.push(`Token ID: ${tokenId}`);
-  if (relatedOrderId) lines.push(`Related Order ID: ${relatedOrderId}`);
-
-  lines.push("");
-  lines.push(`Subject: ${String(payload && payload.subject || "").trim()}`);
-  lines.push("");
-  lines.push("Message:");
-  lines.push(String(payload && payload.message || "").trim());
-
-  return lines.join("\n");
-}
-
-async function createCanonicalSupportTicket(env, payload) {
-  const kv = getReportKv(env);
-  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
-
-  const email = normalizeEmail(payload && payload.email);
-  const eventId = String(payload && payload.eventId || "").trim();
-  const latestUpdate = buildInitialSupportLatestUpdate(payload);
-  const priorityName = getPriorityOptionName(payload && payload.priority);
-  const supportTypeName = getSupportTypeOptionName(payload);
-  const supportStatus = "open / new";
-  const createdAt = new Date().toISOString();
-
-  let supportId = "";
-  let existing = null;
-
-  for (let i = 0; i < 5; i++) {
-    supportId = buildCanonicalSupportId();
-    existing = await kv.get(getSupportStatusKey(supportId));
-    if (!existing) break;
-    supportId = "";
-  }
-
-  if (!supportId) {
-    throw new Error("unable_to_allocate_support_id");
-  }
-
-  const canonicalRecord = {
-    accountEmail: email,
-    createdAt,
-    eventId,
-    latestUpdate,
-    relatedOrderId: String(payload && payload.relatedOrderId || "").trim(),
-    source: "worker",
-    status: supportStatus,
-    subject: String(payload && payload.subject || "").trim(),
-    supportId,
-    taskId: "",
-    taskName: "",
-    type: supportTypeName,
-    updatedAt: createdAt,
-  };
-
-  await kv.put(getSupportStatusKey(supportId), JSON.stringify(canonicalRecord, null, 2));
-  await kv.put(getSupportEmailIndexKey(email, supportId), JSON.stringify({ createdAt, supportId }, null, 2));
-
-  const supportTask = await createClickUpTask(env, CLICKUP_TRANSCRIPT.SUPPORT_LIST_ID, {
-    description: buildSupportTaskDescription(payload, supportId),
-    name: `Support ${supportId} - ${String(payload && payload.subject || "Transcript Support").trim() || "Transcript Support"}`,
-    priority: null,
-    status: "open / new",
-  });
-
-  const taskId = String(supportTask && supportTask.id || "").trim();
-  if (!taskId) {
-    throw new Error("clickup_support_task_not_created");
-  }
-
-  const fullSupportTask = await getClickUpTask(env, taskId);
-  const actionRequiredField = getTaskCustomField(fullSupportTask, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.ACTION_REQUIRED);
-  const priorityField = getTaskCustomField(fullSupportTask, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.PRIORITY);
-  const typeField = getTaskCustomField(fullSupportTask, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.TYPE);
-
-  const actionRequiredOptionId = getDropdownOptionIdByName(
-    actionRequiredField && actionRequiredField.type_config && actionRequiredField.type_config.options,
-    "Acknowledge"
-  );
-  const priorityOptionId = getDropdownOptionIdByName(
-    priorityField && priorityField.type_config && priorityField.type_config.options,
-    priorityName
-  );
-  const typeOptionId = getDropdownOptionIdByName(
-    typeField && typeField.type_config && typeField.type_config.options,
-    supportTypeName
-  );
-
-  await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.SUPPORT_ID, supportId);
-  await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.EMAIL, email);
-  await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.EVENT_ID, eventId);
-  await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.LATEST_UPDATE, latestUpdate);
-
-  if (String(payload && payload.relatedOrderId || "").trim()) {
-    await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.RELATED_ORDER_ID, String(payload.relatedOrderId).trim());
-  }
-
-  if (actionRequiredOptionId) {
-    await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.ACTION_REQUIRED, actionRequiredOptionId);
-  }
-
-  if (priorityOptionId) {
-    await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.PRIORITY, priorityOptionId);
-  }
-
-  if (typeOptionId) {
-    await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.TYPE, typeOptionId);
-  }
-
-  const refreshedRecord = {
-    ...canonicalRecord,
-    taskId,
-    taskName: String(fullSupportTask && fullSupportTask.name || supportTask && supportTask.name || "").trim(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  await kv.put(getSupportStatusKey(supportId), JSON.stringify(refreshedRecord, null, 2));
-  await kv.put(getSupportTaskKey(taskId), JSON.stringify({ supportId }, null, 2));
-
-  try {
-    const accountTask = await findAccountTaskByEmail(env, email);
-    if (accountTask && accountTask.id) {
-      const accountSupportStatusField = getTaskCustomField(accountTask, CLICKUP_TRANSCRIPT.ACCOUNT_FIELDS.SUPPORT_STATUS);
-      const accountSupportStatusOptionId = getDropdownOptionIdByName(
-        accountSupportStatusField && accountSupportStatusField.type_config && accountSupportStatusField.type_config.options,
-        mapSupportStatusToAccountStatus(supportStatus)
-      );
-
-      if (accountSupportStatusOptionId) {
-        await setClickUpCustomField(env, accountTask.id, CLICKUP_TRANSCRIPT.ACCOUNT_FIELDS.SUPPORT_STATUS, accountSupportStatusOptionId);
-      }
-
-      await linkClickUpTasks(env, taskId, accountTask.id);
-      await linkClickUpTasks(env, accountTask.id, taskId);
-    }
-  } catch (_) {
-    // Projection only. Ticket creation should still succeed.
-  }
-
-  return refreshedRecord;
 }
 
 async function listClickUpTasksByList(env, listId, page = 0) {
@@ -1114,62 +790,6 @@ async function mirrorSupportStatusToAccount(env, supportTask, supportStatus) {
   }
 }
 
-async function upsertCanonicalSupportFromTask(env, task, historyItem = null) {
-  const kv = getReportKv(env);
-  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
-
-  const supportId = normalizeSupportId(getTaskCustomFieldValue(task, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.SUPPORT_ID));
-  if (!supportId) {
-    return { ok: false, reason: "missing_support_id" };
-  }
-
-  const status = normalizeSupportStatus(task && task.status && task.status.status);
-  const latestUpdate = buildSupportLatestUpdateFromTask(task, historyItem);
-  const updatedAt = task && task.date_updated ? new Date(Number(task.date_updated)).toISOString() : new Date().toISOString();
-  const supportEmail = normalizeEmail(getTaskCustomFieldValue(task, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.EMAIL));
-
-  const record = {
-    latestUpdate,
-    source: "clickup_webhook",
-    status,
-    supportEmail,
-    supportId,
-    taskId: String(task && task.id || "").trim(),
-    taskName: String(task && task.name || "").trim(),
-    updatedAt,
-  };
-
-  await kv.put(getSupportStatusKey(supportId), JSON.stringify(record, null, 2));
-  if (record.taskId) {
-    await kv.put(getSupportTaskKey(record.taskId), JSON.stringify({ supportId }, null, 2));
-  }
-
-  await mirrorSupportStatusToAccount(env, task, status);
-
-  return { ok: true, record };
-}
-
-async function getCanonicalSupportRecord(env, supportId) {
-  const kv = getReportKv(env);
-  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
-
-  const raw = await kv.get(getSupportStatusKey(supportId));
-  if (!raw) return null;
-
-  const parsed = tryParseJson(raw);
-  if (!parsed.ok || !parsed.value) return null;
-  return parsed.value;
-}
-
-async function syncSupportRecordFromClickUp(env, supportId) {
-  const task = await findSupportTaskBySupportId(env, supportId);
-  if (!task) return null;
-
-  const fullTask = await getClickUpTask(env, task.id);
-  const synced = await upsertCanonicalSupportFromTask(env, fullTask, null);
-  return synced.ok ? synced.record : null;
-}
-
 async function verifyClickUpWebhookSignature(env, request, rawBody) {
   const secret = String(env.CLICKUP_WEBHOOK_SECRET || "").trim();
   if (!secret) throw new Error("Missing CLICKUP_WEBHOOK_SECRET");
@@ -1191,82 +811,279 @@ async function verifyClickUpWebhookSignature(env, request, rawBody) {
   return timingSafeEqualHex(expected, incoming);
 }
 
-function buildAppDashboardUrl() {
-  return "https://transcript.taxmonitor.pro/app-dashboard.html";
-}
+async function stripeFetch(env, method, path, bodyObj = null, extraHeaders = {}) {
+  assertEnv(env, ["STRIPE_SECRET_KEY"]);
+  const res = await fetch(`https://api.stripe.com/v1${path}`, {
+    method,
+    headers: {
+      authorization: `Bearer ${env.STRIPE_SECRET_KEY}`,
+      "content-type": "application/x-www-form-urlencoded",
+      ...extraHeaders,
+    },
+    body: bodyObj ? new URLSearchParams(bodyObj).toString() : null,
+  });
 
-function buildMagicVerifyUrl(token) {
-  return `https://transcript.taxmonitor.pro/api/transcripts/magic-link/verify?token=${encodeURIComponent(token)}`;
-}
-
-function buildReportPageUrl(reportId) {
-  return `https://transcript.taxmonitor.pro/assets/report.html?reportId=${encodeURIComponent(reportId)}`;
-}
-
-function buildSessionCookie(sessionId, maxAgeSeconds = 60 * 60 * 24 * 30) {
-  return [
-    `${TRANSCRIPT_SESSION_COOKIE}=${encodeURIComponent(sessionId)}`,
-    "HttpOnly",
-    `Max-Age=${maxAgeSeconds}`,
-    "Path=/",
-    "SameSite=Lax",
-    "Secure",
-  ].join("; ");
-}
-
-function buildSessionCookieClear() {
-  return [
-    `${TRANSCRIPT_SESSION_COOKIE}=`,
-    "HttpOnly",
-    "Max-Age=0",
-    "Path=/",
-    "SameSite=Lax",
-    "Secure",
-  ].join("; ");
-}
-
-function getCookieValue(request, name) {
-  const raw = String(request.headers.get("cookie") || "");
-  if (!raw) return "";
-  const parts = raw.split(";").map((x) => x.trim());
-  for (const part of parts) {
-    const idx = part.indexOf("=");
-    if (idx === -1) continue;
-    const key = part.slice(0, idx).trim();
-    const value = part.slice(idx + 1).trim();
-    if (key === name) return decodeURIComponent(value);
+  const text = await res.text();
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    data = { raw: text };
   }
-  return "";
+
+  if (!res.ok) throw new Error(`Stripe error (${res.status}): ${data?.error?.message || text}`);
+  return data;
 }
 
-function getMagicLinkKey(token) {
-  return `magic-link:${String(token || "").trim()}`;
-}
+async function verifyStripeSignature(env, sigHeader, rawBodyText) {
+  const parts = sigHeader.split(",").map((p) => p.trim());
+  const tPart = parts.find((p) => p.startsWith("t="));
+  const v1Part = parts.find((p) => p.startsWith("v1="));
 
-function getSessionKey(sessionId) {
-  return `session:${String(sessionId || "").trim()}`;
-}
+  if (!tPart || !v1Part) throw new Error("Invalid Stripe signature header");
 
-function getUserAccountKey(email) {
-  return `user-account:${String(email || "").trim().toLowerCase()}`;
-}
+  const timestamp = tPart.slice(2);
+  const signature = v1Part.slice(3);
 
-function getReportIndexKey(email, createdAt, reportId) {
-  return `report-index:${String(email || "").trim().toLowerCase()}:${String(createdAt || "").trim()}:${String(reportId || "").trim()}`;
-}
+  const signedPayload = `${timestamp}.${rawBodyText}`;
+  const key = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(env.STRIPE_WEBHOOK_SECRET),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const mac = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(signedPayload));
+  const expected = [...new Uint8Array(mac)].map((b) => b.toString(16).padStart(2, "0")).join("");
 
-function getReportMetaKey(reportId) {
-  return `report-meta:${String(reportId || "").trim()}`;
-}
-
-function normalizeEmail(value) {
-  return String(value || "").trim().toLowerCase();
+  if (!timingSafeEqualHex(expected, signature)) throw new Error("Stripe signature verification failed");
+  return JSON.parse(rawBodyText);
 }
 
 async function sha256Hex(input) {
   const bytes = new TextEncoder().encode(String(input || ""));
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function googleServiceAccountAccessToken(env, subjectUser, scopes) {
+  const now = Math.floor(Date.now() / 1000);
+  const iat = now - 5;
+  const exp = now + 55 * 60;
+
+  const tokenUri = env.GOOGLE_TOKEN_URI;
+  const clientEmail = env.GOOGLE_CLIENT_EMAIL;
+  const privateKeyPem = env.GOOGLE_PRIVATE_KEY;
+
+  if (!tokenUri || !clientEmail || !privateKeyPem) {
+    throw new Error("Missing Google env vars: GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY, GOOGLE_TOKEN_URI.");
+  }
+  if (!subjectUser) {
+    throw new Error("Missing Workspace user env var: GOOGLE_WORKSPACE_USER_*.");
+  }
+
+  const header = { alg: "RS256", typ: "JWT" };
+  const claim = {
+    aud: tokenUri,
+    exp,
+    iat,
+    iss: clientEmail,
+    scope: (Array.isArray(scopes) ? scopes : [String(scopes)]).join(" "),
+    sub: subjectUser,
+  };
+
+  const enc = (obj) => b64UrlEncode(new TextEncoder().encode(JSON.stringify(obj)));
+  const signingInput = enc(header) + "." + enc(claim);
+
+  const key = await crypto.subtle.importKey(
+    "pkcs8",
+    pemToArrayBuffer(privateKeyPem),
+    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+
+  const sig = await crypto.subtle.sign(
+    { name: "RSASSA-PKCS1-v1_5" },
+    key,
+    new TextEncoder().encode(signingInput)
+  );
+
+  const jwt = signingInput + "." + b64UrlEncode(new Uint8Array(sig));
+
+  const body = new URLSearchParams();
+  body.set("assertion", jwt);
+  body.set("grant_type", "urn:ietf:params:oauth:grant-type:jwt-bearer");
+
+  const res = await fetch(tokenUri, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+  });
+
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error("Google token exchange failed (" + String(res.status) + "): " + (t || res.statusText));
+  }
+
+  const parsed = await res.json();
+  const accessToken = parsed && parsed.access_token ? String(parsed.access_token) : "";
+  if (!accessToken) throw new Error("Google token exchange returned no access_token.");
+  return accessToken;
+}
+
+async function gmailSendMessage(env, { from, to, subject, text }) {
+  const workspaceUser =
+    env.GOOGLE_WORKSPACE_USER_SUPPORT ||
+    env.GOOGLE_WORKSPACE_USER_NOREPLY ||
+    env.GOOGLE_WORKSPACE_USER_DEFAULT;
+
+  const token = await googleServiceAccountAccessToken(env, workspaceUser, [
+    "https://www.googleapis.com/auth/gmail.send",
+  ]);
+
+  const rfc = makeRfc2822({ from, to, subject, text });
+  const raw = b64UrlEncode(new TextEncoder().encode(rfc));
+
+  const res = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ raw }),
+  });
+
+  if (!res.ok) {
+    const t = await res.text().catch(() => "");
+    throw new Error("Gmail send failed (" + String(res.status) + "): " + (t || res.statusText));
+  }
+
+  return await res.json().catch(() => ({}));
+}
+
+/* ------------------------------------------
+ * Handlers
+ * ------------------------------------------ */
+
+export class TokenLedger {
+  constructor(state, env) {
+    this.state = state;
+    this.env = env;
+  }
+
+  async fetch(request) {
+    const url = new URL(request.url);
+
+    if (request.method === "GET" && url.pathname === "/balance") {
+      const balance = (await this.state.storage.get("balance")) ?? 0;
+      return json({ balance }, 200);
+    }
+
+    if (request.method === "POST" && url.pathname === "/credit") {
+      const body = await request.json().catch(() => ({}));
+      const amount = Number(body?.amount ?? 0);
+      const requestId = typeof body?.requestId === "string" ? body.requestId.trim() : "";
+
+      if (!Number.isFinite(amount) || amount <= 0) return json({ error: "invalid_amount" }, 400);
+      if (!requestId) return json({ error: "missing_requestId" }, 400);
+
+      const idemKey = `credit:${requestId}`;
+      const already = await this.state.storage.get(idemKey);
+      if (already !== undefined) return json({ balance: already, idempotent: true }, 200);
+
+      const current = (await this.state.storage.get("balance")) ?? 0;
+      const next = Number(current) + amount;
+
+      await this.state.storage.put("balance", next);
+      await this.state.storage.put(idemKey, next);
+
+      return json({ balance: next }, 200);
+    }
+
+    if (request.method === "POST" && url.pathname === "/consume") {
+      const body = await request.json().catch(() => ({}));
+      const amount = Number(body?.amount ?? 1);
+      const requestId = typeof body?.requestId === "string" ? body.requestId.trim() : "";
+
+      if (!Number.isFinite(amount) || amount <= 0) return json({ error: "invalid_amount" }, 400);
+      if (!requestId) return json({ error: "missing_requestId" }, 400);
+
+      const idemKey = `consume:${requestId}`;
+      const already = await this.state.storage.get(idemKey);
+      if (already !== undefined) return json({ balance: already, idempotent: true }, 200);
+
+      const current = (await this.state.storage.get("balance")) ?? 0;
+      if (Number(current) < amount) return json({ balance: current, error: "insufficient_balance", needed: amount }, 402);
+
+      const next = Number(current) - amount;
+      await this.state.storage.put("balance", next);
+      await this.state.storage.put(idemKey, next);
+
+      return json({ balance: next }, 200);
+    }
+
+    return json({ error: "not_found" }, 404);
+  }
+}
+
+async function getShortReportLink(env, reportId) {
+  const stored = await resolveShortReportPayload(env, reportId);
+  if (!stored || !stored.payload) return null;
+
+  return {
+    reportId: String(reportId || "").trim(),
+    reportUrl: `https://transcript.taxmonitor.pro/assets/report.html?reportId=${encodeURIComponent(String(reportId || "").trim())}`,
+  };
+}
+
+async function resolveShortReportPayload(env, reportId) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+
+  const raw = await kv.get(getShortReportKey(reportId));
+  if (!raw) return null;
+
+  const parsed = tryParseJson(raw);
+  if (!parsed.ok || !parsed.value || typeof parsed.value !== "object") return null;
+
+  return parsed.value;
+}
+
+async function storeShortReportPayload(env, payload, meta = {}) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+
+  const now = new Date().toISOString();
+
+  for (let i = 0; i < 5; i++) {
+    const reportId = randomShortId();
+    const key = getShortReportKey(reportId);
+
+    const existing = await kv.get(key);
+    if (existing) continue;
+
+    await kv.put(
+      key,
+      JSON.stringify(
+        {
+          createdAt: now,
+          payload: String(payload || ""),
+          payloadTransport: meta.payloadTransport || "hash",
+          sourcePath: meta.sourcePath || "/assets/report",
+        },
+        null,
+        2
+      )
+    );
+
+    return {
+      reportId,
+      shortUrl: buildShortReportUrl(reportId),
+    };
+  }
+
+  throw new Error("Failed to allocate a unique reportId");
 }
 
 async function getOrCreateUserAccount(env, email) {
@@ -1453,23 +1270,190 @@ async function listUserPurchaseRecords(env, tokenId) {
   return out;
 }
 
-/* ------------------------------------------
- * Transcript: Handlers
- *
- * Projection plan now confirmed from ClickUp:
- * - Accounts list: 901710909567
- * - Support list: 901710818377
- * - Use Account Transcript Credits field for transcript balances, not Account Gaming Credits.
- * - Mirror support status onto Account Support Status.
- * - Support list now has a dedicated Support ID field: 30fda9ea-12cd-4dc1-a89f-4633f4d06b27.
- * - Canonical supportId should live in Worker state and be projected into that field.
- * - Public support lookup should read canonical Worker state, with ClickUp status and latest update projected back into it.
- * ------------------------------------------
- */
+async function createCanonicalSupportTicket(env, payload) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
 
-/* ------------------------------------------
- * Transcript: Handlers
- * ------------------------------------------ */
+  const email = normalizeEmail(payload && payload.email);
+  const eventId = String(payload && payload.eventId || "").trim();
+  const latestUpdate = buildInitialSupportLatestUpdate(payload);
+  const priorityName = getPriorityOptionName(payload && payload.priority);
+  const supportTypeName = getSupportTypeOptionName(payload);
+  const supportStatus = "open / new";
+  const createdAt = new Date().toISOString();
+
+  let supportId = "";
+  let existing = null;
+
+  for (let i = 0; i < 5; i++) {
+    supportId = buildCanonicalSupportId();
+    existing = await kv.get(getSupportStatusKey(supportId));
+    if (!existing) break;
+    supportId = "";
+  }
+
+  if (!supportId) {
+    throw new Error("unable_to_allocate_support_id");
+  }
+
+  const canonicalRecord = {
+    accountEmail: email,
+    createdAt,
+    eventId,
+    latestUpdate,
+    relatedOrderId: String(payload && payload.relatedOrderId || "").trim(),
+    source: "worker",
+    status: supportStatus,
+    subject: String(payload && payload.subject || "").trim(),
+    supportId,
+    taskId: "",
+    taskName: "",
+    type: supportTypeName,
+    updatedAt: createdAt,
+  };
+
+  await kv.put(getSupportStatusKey(supportId), JSON.stringify(canonicalRecord, null, 2));
+  await kv.put(getSupportEmailIndexKey(email, supportId), JSON.stringify({ createdAt, supportId }, null, 2));
+
+  const supportTask = await createClickUpTask(env, CLICKUP_TRANSCRIPT.SUPPORT_LIST_ID, {
+    description: buildSupportTaskDescription(payload, supportId),
+    name: `Support ${supportId} - ${String(payload && payload.subject || "Transcript Support").trim() || "Transcript Support"}`,
+    priority: null,
+    status: "open / new",
+  });
+
+  const taskId = String(supportTask && supportTask.id || "").trim();
+  if (!taskId) {
+    throw new Error("clickup_support_task_not_created");
+  }
+
+  const fullSupportTask = await getClickUpTask(env, taskId);
+  const actionRequiredField = getTaskCustomField(fullSupportTask, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.ACTION_REQUIRED);
+  const priorityField = getTaskCustomField(fullSupportTask, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.PRIORITY);
+  const typeField = getTaskCustomField(fullSupportTask, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.TYPE);
+
+  const actionRequiredOptionId = getDropdownOptionIdByName(
+    actionRequiredField && actionRequiredField.type_config && actionRequiredField.type_config.options,
+    "Acknowledge"
+  );
+  const priorityOptionId = getDropdownOptionIdByName(
+    priorityField && priorityField.type_config && priorityField.type_config.options,
+    priorityName
+  );
+  const typeOptionId = getDropdownOptionIdByName(
+    typeField && typeField.type_config && typeField.type_config.options,
+    supportTypeName
+  );
+
+  await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.SUPPORT_ID, supportId);
+  await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.EMAIL, email);
+  await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.EVENT_ID, eventId);
+  await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.LATEST_UPDATE, latestUpdate);
+
+  if (String(payload && payload.relatedOrderId || "").trim()) {
+    await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.RELATED_ORDER_ID, String(payload.relatedOrderId).trim());
+  }
+
+  if (actionRequiredOptionId) {
+    await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.ACTION_REQUIRED, actionRequiredOptionId);
+  }
+
+  if (priorityOptionId) {
+    await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.PRIORITY, priorityOptionId);
+  }
+
+  if (typeOptionId) {
+    await setClickUpCustomField(env, taskId, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.TYPE, typeOptionId);
+  }
+
+  const refreshedRecord = {
+    ...canonicalRecord,
+    taskId,
+    taskName: String(fullSupportTask && fullSupportTask.name || supportTask && supportTask.name || "").trim(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  await kv.put(getSupportStatusKey(supportId), JSON.stringify(refreshedRecord, null, 2));
+  await kv.put(getSupportTaskKey(taskId), JSON.stringify({ supportId }, null, 2));
+
+  try {
+    const accountTask = await findAccountTaskByEmail(env, email);
+    if (accountTask && accountTask.id) {
+      const accountSupportStatusField = getTaskCustomField(accountTask, CLICKUP_TRANSCRIPT.ACCOUNT_FIELDS.SUPPORT_STATUS);
+      const accountSupportStatusOptionId = getDropdownOptionIdByName(
+        accountSupportStatusField && accountSupportStatusField.type_config && accountSupportStatusField.type_config.options,
+        mapSupportStatusToAccountStatus(supportStatus)
+      );
+
+      if (accountSupportStatusOptionId) {
+        await setClickUpCustomField(env, accountTask.id, CLICKUP_TRANSCRIPT.ACCOUNT_FIELDS.SUPPORT_STATUS, accountSupportStatusOptionId);
+      }
+
+      await linkClickUpTasks(env, taskId, accountTask.id);
+      await linkClickUpTasks(env, accountTask.id, taskId);
+    }
+  } catch (_) {
+    // Projection only. Ticket creation should still succeed.
+  }
+
+  return refreshedRecord;
+}
+
+async function upsertCanonicalSupportFromTask(env, task, historyItem = null) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+
+  const supportId = normalizeSupportId(getTaskCustomFieldValue(task, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.SUPPORT_ID));
+  if (!supportId) {
+    return { ok: false, reason: "missing_support_id" };
+  }
+
+  const status = normalizeSupportStatus(task && task.status && task.status.status);
+  const latestUpdate = buildSupportLatestUpdateFromTask(task, historyItem);
+  const updatedAt = task && task.date_updated ? new Date(Number(task.date_updated)).toISOString() : new Date().toISOString();
+  const supportEmail = normalizeEmail(getTaskCustomFieldValue(task, CLICKUP_TRANSCRIPT.SUPPORT_FIELDS.EMAIL));
+
+  const record = {
+    latestUpdate,
+    source: "clickup_webhook",
+    status,
+    supportEmail,
+    supportId,
+    taskId: String(task && task.id || "").trim(),
+    taskName: String(task && task.name || "").trim(),
+    updatedAt,
+  };
+
+  await kv.put(getSupportStatusKey(supportId), JSON.stringify(record, null, 2));
+  if (record.taskId) {
+    await kv.put(getSupportTaskKey(record.taskId), JSON.stringify({ supportId }, null, 2));
+  }
+
+  await mirrorSupportStatusToAccount(env, task, status);
+
+  return { ok: true, record };
+}
+
+async function getCanonicalSupportRecord(env, supportId) {
+  const kv = getReportKv(env);
+  if (!kv) throw new Error("Missing KV binding: KV_TRANSCRIPT");
+
+  const raw = await kv.get(getSupportStatusKey(supportId));
+  if (!raw) return null;
+
+  const parsed = tryParseJson(raw);
+  if (!parsed.ok || !parsed.value) return null;
+  return parsed.value;
+}
+
+async function syncSupportRecordFromClickUp(env, supportId) {
+  const task = await findSupportTaskBySupportId(env, supportId);
+  if (!task) return null;
+
+  const fullTask = await getClickUpTask(env, task.id);
+  const synced = await upsertCanonicalSupportFromTask(env, fullTask, null);
+  return synced.ok ? synced.record : null;
+}
 
 async function handleGetTranscriptPrices(request, env) {
   const required = ["CREDIT_MAP_JSON", "PRICE_10", "PRICE_100", "PRICE_25", "STRIPE_SECRET_KEY"];
@@ -1820,10 +1804,6 @@ async function handleTranscriptStripeWebhook(request, env, ctx) {
   return json({ received: true }, 200);
 }
 
-/* ------------------------------------------
- * FORMS: Transcript Report Email
- * ------------------------------------------ */
-
 async function handleShortReportLookup(request, env, url) {
   if (!requireMethod(request, ["GET"])) {
     return new Response("Method not allowed", { status: 405 });
@@ -2123,6 +2103,9 @@ async function handleGetTranscriptReportData(request, url, env) {
 }
 
 async function handleTranscriptMagicLinkRequest(request, env) {
+  // Contract sync note:
+  // This runtime route accepts email + redirect.
+  // Do not require eventId in the matching contract unless the sign-in page is changed too.
   const body = await request.json().catch(() => ({}));
   const email = normalizeEmail(body?.email);
   const redirectRaw = String(body?.redirect || "").trim();
@@ -2599,7 +2582,7 @@ async function handleAssetReportRedirect(request, url, env) {
  */
 
 /* ------------------------------------------
- * Worker Entry
+ * Router
  * ------------------------------------------ */
 
 export default {
@@ -2712,7 +2695,6 @@ export default {
         return jsonError(request, 500, "internal_error", String(err?.message || err));
       }
     }
-
 
     if (request.method === "GET" && isPath(url, "/api/health")) {
       return jsonResponse({ ok: true, service: "transcript-tax-monitor-pro-api" }, { status: 200 });
