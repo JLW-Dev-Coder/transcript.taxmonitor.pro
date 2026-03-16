@@ -39,53 +39,42 @@
 
   <style>
     :root {
-      --tm-bg: #0a0e1a;
-      --tm-bg-soft: #101729;
-      --tm-card: linear-gradient(135deg, rgba(16, 23, 41, 0.84) 0%, rgba(10, 14, 26, 0.94) 100%);
-      --tm-card-strong: linear-gradient(180deg, rgba(18, 24, 44, 0.96) 0%, rgba(8, 11, 21, 0.98) 100%);
-      --tm-line: rgba(0, 212, 170, 0.16);
-      --tm-line-strong: rgba(0, 212, 170, 0.28);
-      --tm-teal: #00d4aa;
-      --tm-purple: #8b5cf6;
-      --tm-magenta: #ec4899;
-      --tm-silver: #94a3b8;
+      --tm-bg: #0f172a;
+      --tm-bg-soft: #1e293b;
+      --tm-card: linear-gradient(180deg, rgba(15, 23, 42, 0.94) 0%, rgba(30, 41, 59, 0.96) 100%);
+      --tm-card-strong: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(17, 24, 39, 1) 100%);
+      --tm-line: rgba(255, 255, 255, 0.08);
+      --tm-line-strong: rgba(168, 85, 247, 0.22);
+      --tm-gold: #d4a017;
+      --tm-gold-soft: #f5d76e;
+      --tm-navy: #0f172a;
+      --tm-sage: #6b8e6f;
+      --tm-cream: #f8f4e9;
       --tm-text: #f8fafc;
       --tm-text-soft: #cbd5e1;
       --tm-text-muted: #94a3b8;
-      --tm-shadow: 0 24px 64px rgba(0, 0, 0, 0.34);
-      --tm-glow: 0 0 30px rgba(0, 212, 170, 0.18), 0 0 60px rgba(139, 92, 246, 0.08);
+      --tm-purple: #a855f7;
+      --tm-purple-soft: #c084fc;
+      --tm-shadow: 0 24px 64px rgba(2, 8, 23, 0.42);
+      --tm-glow: 0 18px 48px rgba(168, 85, 247, 0.14);
       --tm-radius: 18px;
     }
 
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
-
-    body {
+    html, body {
       margin: 0;
       color: var(--tm-text);
       font-family: 'Sora', 'DM Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
       background:
-        radial-gradient(circle at 16% 14%, rgba(0, 212, 170, 0.14), transparent 24%),
-        radial-gradient(circle at 82% 18%, rgba(139, 92, 246, 0.14), transparent 22%),
-        radial-gradient(circle at 52% 78%, rgba(236, 72, 153, 0.10), transparent 24%),
-        linear-gradient(180deg, #101729 0%, #0a0e1a 52%, #060913 100%);
+        radial-gradient(circle at 16% 18%, rgba(168, 85, 247, 0.14), transparent 24%),
+        radial-gradient(circle at 84% 12%, rgba(99, 102, 241, 0.12), transparent 22%),
+        linear-gradient(180deg, #020617 0%, #0f172a 46%, #1e293b 100%);
     }
 
     .app-shell {
       display: flex;
       min-height: 100vh;
       position: relative;
-    }
-
-    .app-shell::before {
-      background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 300'><g stroke='%2300d4aa' stroke-width='2' fill='none' opacity='0.15'><polygon points='600,40 500,90 700,90'/><rect x='520' y='90' width='20' height='120'/><rect x='560' y='90' width='20' height='120'/><rect x='600' y='90' width='20' height='120'/><rect x='640' y='90' width='20' height='120'/><rect x='680' y='90' width='20' height='120'/><line x1='480' y1='210' x2='720' y2='210'/></g></svg>");
-      background-size: 100% 100%;
-      content: '';
-      inset: 0;
-      opacity: 0.3;
-      pointer-events: none;
-      position: fixed;
-      z-index: 0;
     }
 
     .button-row {
@@ -120,7 +109,7 @@
     }
 
     .detail-value {
-      color: white;
+      color: var(--tm-text);
       font-size: 14px;
       font-weight: 700;
       word-break: break-word;
@@ -144,15 +133,15 @@
     }
 
     .pill-pending {
-      background: rgba(236, 72, 153, 0.12);
-      border: 1px solid rgba(236, 72, 153, 0.22);
-      color: #f9a8d4;
+      background: rgba(168, 85, 247, 0.14);
+      border: 1px solid rgba(168, 85, 247, 0.24);
+      color: #e9d5ff;
     }
 
     .pill-printed {
-      background: rgba(0, 212, 170, 0.12);
-      border: 1px solid rgba(0, 212, 170, 0.22);
-      color: #99f6e4;
+      background: rgba(107, 142, 111, 0.18);
+      border: 1px solid rgba(107, 142, 111, 0.26);
+      color: #dcfce7;
     }
 
     .section-header {
@@ -186,10 +175,10 @@
     }
 
     .report-label-input {
-      background: rgba(16, 23, 41, 0.7);
-      border: 1px solid rgba(0, 212, 170, 0.16);
+      background: rgba(15, 23, 42, 0.88);
+      border: 1px solid rgba(168, 85, 247, 0.18);
       border-radius: 10px;
-      color: white;
+      color: var(--tm-text);
       font-family: inherit;
       font-size: 12px;
       min-width: 160px;
@@ -199,8 +188,8 @@
 
     .report-label-input:focus,
     .parser-input:focus {
-      border-color: var(--tm-teal);
-      box-shadow: 0 0 0 4px rgba(0, 212, 170, 0.08), 0 0 20px rgba(0, 212, 170, 0.12);
+      border-color: var(--tm-purple);
+      box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.10), 0 0 22px rgba(168, 85, 247, 0.16);
     }
 
     .table-meta-row {
@@ -231,7 +220,7 @@
 
     tbody td {
       border-top: 1px solid rgba(148, 163, 184, 0.10);
-      color: #e2e8f0;
+      color: var(--tm-text-soft);
       font-size: 14px;
       padding: 12px;
       vertical-align: middle;
@@ -240,8 +229,8 @@
 
     .sidebar {
       backdrop-filter: blur(18px);
-      background: linear-gradient(180deg, rgba(16, 23, 41, 0.9) 0%, rgba(10, 14, 26, 0.96) 100%);
-      border-right: 1px solid var(--tm-line);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(30, 58, 95, 0.96) 100%);
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -264,8 +253,10 @@
 
     .topbar {
       backdrop-filter: blur(18px);
-      background: rgba(10, 14, 26, 0.72);
-      border-bottom: 1px solid var(--tm-line);
+      background:
+        radial-gradient(circle at top left, rgba(168, 85, 247, 0.10), transparent 34%),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(15, 23, 42, 0.84) 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       display: block;
       position: sticky;
       top: 0;
@@ -289,7 +280,7 @@
     }
 
     .topbar-title {
-      color: white;
+      color: var(--tm-text);
       font-size: 24px;
       font-weight: 700;
       letter-spacing: -0.02em;
@@ -332,25 +323,25 @@
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--tm-teal) 0%, #00a88a 100%);
-      box-shadow: 0 0 24px rgba(0, 212, 170, 0.24);
-      color: #081019;
+      background: linear-gradient(135deg, #9333ea 0%, #7c3aed 52%, #4f46e5 100%);
+      box-shadow: 0 14px 32px rgba(124, 58, 237, 0.26);
+      color: white;
     }
 
     .btn-primary:hover {
-      box-shadow: 0 0 30px rgba(0, 212, 170, 0.36);
+      box-shadow: 0 18px 40px rgba(124, 58, 237, 0.34);
     }
 
     .btn-secondary {
-      background: rgba(16, 23, 41, 0.62);
-      border-color: rgba(0, 212, 170, 0.24);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
-      color: #ccfbf1;
+      background: rgba(15, 23, 42, 0.78);
+      border-color: rgba(168, 85, 247, 0.16);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+      color: var(--tm-text);
     }
 
     .btn-secondary:hover {
-      background: rgba(0, 212, 170, 0.08);
-      border-color: rgba(0, 212, 170, 0.4);
+      background: rgba(30, 41, 59, 0.92);
+      border-color: rgba(168, 85, 247, 0.28);
     }
 
     .btn-danger {
@@ -368,8 +359,8 @@
 
     .workspace-tabs {
       backdrop-filter: blur(14px);
-      background: rgba(10, 14, 26, 0.72);
-      border-bottom: 1px solid var(--tm-line);
+      background: rgba(15, 23, 42, 0.72);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       gap: 0;
       padding: 0;
@@ -400,13 +391,13 @@
     }
 
     .workspace-tab:hover {
-      background: rgba(0, 212, 170, 0.05);
-      color: white;
+      background: rgba(168, 85, 247, 0.08);
+      color: var(--tm-text);
     }
 
     .workspace-tab.active {
-      border-bottom-color: var(--tm-teal);
-      color: var(--tm-teal);
+      border-bottom-color: var(--tm-purple);
+      color: white;
     }
 
     .workspace-tab svg {
@@ -434,10 +425,81 @@
       gap: 24px;
     }
 
+    .account-grid {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .account-grid .card:last-child {
+      grid-column: 1 / -1;
+    }
+
+    .account-icon {
+      align-items: center;
+      background: rgba(168, 85, 247, 0.14);
+      border: 1px solid rgba(168, 85, 247, 0.24);
+      border-radius: 16px;
+      color: var(--tm-purple-soft);
+      display: inline-flex;
+      height: 52px;
+      justify-content: center;
+      margin-bottom: 16px;
+      width: 52px;
+    }
+
+    .account-icon svg {
+      height: 24px;
+      width: 24px;
+    }
+
+    .account-membership-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .account-membership-item {
+      background: rgba(15, 23, 42, 0.56);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      display: grid;
+      gap: 8px;
+      padding: 16px;
+    }
+
+    .account-membership-top {
+      align-items: center;
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+    }
+
+    .account-membership-title {
+      color: var(--tm-text);
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .account-membership-meta {
+      color: var(--tm-text-muted);
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .account-action-copy {
+      color: var(--tm-text-soft);
+      font-size: 14px;
+      line-height: 1.7;
+      margin: 0 0 18px;
+    }
+
     .card {
       background: var(--tm-card);
       backdrop-filter: blur(18px);
-      border: 1px solid var(--tm-line);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: var(--tm-radius);
       box-shadow: var(--tm-shadow);
       overflow: hidden;
@@ -445,7 +507,7 @@
     }
 
     .card::before {
-      background: linear-gradient(135deg, rgba(0, 212, 170, 0.8), rgba(139, 92, 246, 0.78), rgba(236, 72, 153, 0.66));
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.82), rgba(99, 102, 241, 0.68), rgba(255, 255, 255, 0.12));
       border-radius: inherit;
       content: '';
       inset: 0;
@@ -453,7 +515,7 @@
       -webkit-mask-composite: xor;
       mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       mask-composite: exclude;
-      opacity: 0.55;
+      opacity: 0.32;
       padding: 1px;
       pointer-events: none;
       position: absolute;
@@ -466,7 +528,7 @@
     }
 
     .card-title {
-      color: white;
+      color: var(--tm-text);
       font-size: 18px;
       font-weight: 700;
       letter-spacing: -0.02em;
@@ -488,10 +550,10 @@
 
     .support-link {
       align-items: center;
-      background: rgba(16, 23, 41, 0.56);
-      border: 1px solid rgba(0, 212, 170, 0.14);
+      background: rgba(15, 23, 42, 0.74);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 14px;
-      color: #e2e8f0;
+      color: var(--tm-text-soft);
       display: flex;
       justify-content: space-between;
       padding: 14px 16px;
@@ -500,14 +562,14 @@
     }
 
     .support-link:hover {
-      background: rgba(0, 212, 170, 0.08);
-      border-color: rgba(0, 212, 170, 0.32);
-      color: white;
+      background: rgba(30, 41, 59, 0.92);
+      border-color: rgba(168, 85, 247, 0.24);
+      color: var(--tm-text);
       transform: translateY(-1px);
     }
 
     .support-link span:last-child {
-      color: #c4b5fd;
+      color: var(--tm-purple-soft);
       font-size: 16px;
       font-weight: 700;
       line-height: 1;
@@ -533,13 +595,12 @@
     }
 
     .parser-hero h2 {
-      color: white;
+      color: var(--tm-text);
       font-size: 32px;
       font-weight: 800;
       letter-spacing: -0.03em;
       line-height: 1.1;
       margin: 0 0 12px;
-      text-shadow: 0 0 20px rgba(0, 212, 170, 0.18);
     }
 
     .parser-hero p {
@@ -556,7 +617,7 @@
     }
 
     .parser-steps {
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
       display: flex;
       gap: 0;
       margin-bottom: 28px;
@@ -586,22 +647,22 @@
     }
 
     .parser-step:hover {
-      background: rgba(0, 212, 170, 0.05);
-      color: white;
+      background: rgba(168, 85, 247, 0.06);
+      color: var(--tm-text);
     }
 
     .parser-step.active {
-      border-bottom-color: var(--tm-teal);
-      color: white;
+      border-bottom-color: var(--tm-purple);
+      color: var(--tm-text);
     }
 
     .parser-step-badge,
     .section-badge {
       align-items: center;
-      background: rgba(0, 212, 170, 0.12);
-      border: 1px solid rgba(0, 212, 170, 0.22);
+      background: rgba(168, 85, 247, 0.14);
+      border: 1px solid rgba(168, 85, 247, 0.24);
       border-radius: 999px;
-      color: #ccfbf1;
+      color: #f3e8ff;
       display: inline-flex;
       flex-shrink: 0;
       font-size: 14px;
@@ -613,7 +674,7 @@
 
     .parser-step-title,
     .parser-section-title {
-      color: white;
+      color: var(--tm-text);
       font-size: 16px;
       font-weight: 700;
       margin: 0 0 4px;
@@ -628,7 +689,7 @@
     }
 
     .parser-section {
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       display: none;
       margin-bottom: 28px;
       padding: 0 0 28px;
@@ -653,10 +714,10 @@
 
     .parser-input {
       width: 100%;
-      background: rgba(16, 23, 41, 0.7);
-      border: 1px solid rgba(0, 212, 170, 0.16);
+      background: rgba(15, 23, 42, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.10);
       border-radius: 14px;
-      color: white;
+      color: var(--tm-text);
       font-family: inherit;
       font-size: 14px;
       line-height: 1.5;
@@ -666,7 +727,7 @@
     }
 
     .parser-input::placeholder {
-      color: rgba(255,255,255,0.34);
+      color: rgba(100, 116, 139, 0.72);
     }
 
     .parser-form-label {
@@ -694,8 +755,8 @@
 
     .logo-preview {
       align-items: center;
-      background: rgba(16, 23, 41, 0.58);
-      border: 1px solid rgba(0, 212, 170, 0.14);
+      background: rgba(15, 23, 42, 0.70);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
       display: flex;
       gap: 14px;
@@ -724,7 +785,7 @@
     }
 
     .logo-preview-title {
-      color: white;
+      color: var(--tm-text);
       font-size: 13px;
       font-weight: 700;
       margin: 0 0 4px;
@@ -749,28 +810,27 @@
     .parser-status-box,
     .parser-info-box,
     .parser-output-box {
-      background: rgba(16, 23, 41, 0.56);
-      border: 1px solid rgba(0, 212, 170, 0.12);
+      background: rgba(15, 23, 42, 0.74);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 18px;
       padding: 16px 18px;
     }
 
     .parser-info-box {
-      background: linear-gradient(135deg, rgba(16, 23, 41, 0.84) 0%, rgba(139, 92, 246, 0.12) 50%, rgba(236, 72, 153, 0.10) 100%);
-      border-color: rgba(139, 92, 246, 0.18);
+      background: linear-gradient(135deg, rgba(76, 29, 149, 0.22) 0%, rgba(15, 23, 42, 0.90) 52%, rgba(79, 70, 229, 0.16) 100%);
+      border-color: rgba(168, 85, 247, 0.20);
     }
 
     .parser-balance-value {
-      color: #99f6e4;
+      color: #f5d0fe;
       font-size: 18px;
       font-weight: 800;
       margin-left: 8px;
-      text-shadow: 0 0 18px rgba(0, 212, 170, 0.18);
     }
 
     .parser-upload-zone {
-      background: rgba(0, 212, 170, 0.05);
-      border: 2px dashed rgba(0, 212, 170, 0.3);
+      background: rgba(15, 23, 42, 0.60);
+      border: 2px dashed rgba(168, 85, 247, 0.34);
       border-radius: 22px;
       cursor: pointer;
       padding: 34px 24px;
@@ -780,22 +840,22 @@
 
     .parser-upload-zone:hover,
     .parser-upload-zone.is-dragover {
-      background: rgba(0, 212, 170, 0.08);
-      border-color: rgba(0, 212, 170, 0.52);
-      box-shadow: 0 0 24px rgba(0, 212, 170, 0.12);
+      background: rgba(88, 28, 135, 0.22);
+      border-color: rgba(168, 85, 247, 0.58);
+      box-shadow: 0 18px 34px rgba(168, 85, 247, 0.12);
     }
 
     .parser-upload-zone svg {
-      color: #99f6e4;
+      color: var(--tm-purple-soft);
       display: block;
       height: 56px;
       margin: 0 auto 14px;
-      opacity: 0.86;
+      opacity: 0.90;
       width: 56px;
     }
 
     .parser-upload-title {
-      color: white;
+      color: var(--tm-text);
       font-size: 15px;
       font-weight: 700;
       margin-bottom: 8px;
@@ -831,7 +891,7 @@
     }
 
     .parser-output-title {
-      color: white;
+      color: var(--tm-text);
       font-size: 13px;
       font-weight: 700;
     }
@@ -839,7 +899,7 @@
     .parser-copy-btn {
       background: transparent;
       border: 0;
-      color: #ccfbf1;
+      color: var(--tm-purple-soft);
       cursor: pointer;
       font-family: inherit;
       font-size: 12px;
@@ -848,7 +908,7 @@
     }
 
     .parser-output-pre {
-      color: #e2e8f0;
+      color: var(--tm-text-soft);
       font-size: 12px;
       line-height: 1.7;
       margin: 0;
@@ -861,7 +921,7 @@
 
     .footer-inner p,
     .footer-inner a {
-      color: var(--tm-text-muted);
+      color: #94a3b8;
       font-size: 14px;
       text-decoration: none;
     }
@@ -890,6 +950,14 @@
     }
 
     @media (max-width: 900px) {
+      .account-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .account-grid .card:last-child {
+        grid-column: auto;
+      }
+
       .table-controls {
         grid-template-columns: 1fr;
       }
@@ -976,8 +1044,8 @@
                 <div class="parser-card-body">
                   <div class="parser-hero">
                     <h2>Ready to use the Transcript Parser?</h2>
-                    <p>Upload a transcript PDF. Parsing runs locally in your browser so the file never leaves your device.</p>
-                    <p>Optional: add your firm logo so the preview report looks like your deliverable.</p>
+                    <p>Upload a transcript PDF. Parsing runs locally in your browser, and the PDF file itself is never uploaded.</p>
+                    <p></p>
                   </div>
 
                   <div class="parser-steps">
@@ -1402,11 +1470,17 @@
           </section>
 
           <section id="accountPage" class="page">
-            <div class="stack">
+            <div class="account-grid">
               <div class="card">
                 <div class="card-body">
+                  <div class="account-icon" aria-hidden="true">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 20a8 8 0 0 1 16 0" />
+                    </svg>
+                  </div>
                   <h2 class="card-title">Account summary</h2>
-                  <p class="card-desc">Core session-backed account state plus current membership hydration.</p>
+                  <p class="card-desc">Your signed-in account details, available credits, and current membership status.</p>
                   <div class="detail-list">
                     <div class="detail-row">
                       <div class="detail-label">Email</div>
@@ -1421,7 +1495,7 @@
                       <div class="detail-value">Magic link</div>
                     </div>
                     <div class="detail-row">
-                      <div class="detail-label">Token balance</div>
+                      <div class="detail-label">Available credits</div>
                       <div id="accountTokens" class="detail-value">—</div>
                     </div>
                     <div class="detail-row">
@@ -1438,35 +1512,32 @@
 
               <div class="card">
                 <div class="card-body">
-                  <h2 class="card-title">Memberships</h2>
-                  <p class="card-desc">Canonical memberships synced from the Worker using the authenticated account ID.</p>
-                  <div id="accountMembershipsEmpty" class="empty-state hidden">No memberships found for this account.</div>
-                  <div id="accountMembershipsTableWrap" class="table-wrap hidden">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Membership ID</th>
-                          <th>Plan</th>
-                          <th>Status</th>
-                          <th>Start</th>
-                          <th>End</th>
-                          <th>Source</th>
-                        </tr>
-                      </thead>
-                      <tbody id="accountMembershipsTbody">
-                        <tr>
-                          <td colspan="6">Loading memberships...</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                  <div class="account-icon" aria-hidden="true">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 7h14" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 12h14" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 17h9" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z" />
+                    </svg>
                   </div>
+                  <h2 class="card-title">Memberships</h2>
+                  <p class="card-desc">Plans connected to this account, including current status and billing period details.</p>
+                  <div id="accountMembershipsEmpty" class="empty-state hidden">No memberships found for this account.</div>
+                  <div id="accountMembershipsTableWrap" class="account-membership-list hidden"></div>
                 </div>
               </div>
 
               <div class="card">
                 <div class="card-body">
+                  <div class="account-icon" aria-hidden="true">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6v12" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 10H9.75a2.75 2.75 0 1 1 0-5.5H15" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 14h6.25a2.75 2.75 0 1 1 0 5.5H8" />
+                    </svg>
+                  </div>
                   <h2 class="card-title">Account actions</h2>
-                  <p class="card-desc">Buy more credits when needed or sign out of the current session.</p>
+                  <p class="account-action-copy">Buy more credits when you need them, or sign out of your current session.</p>
                   <div class="button-row">
                     <a href="/index.html#pricing" class="btn btn-primary">Buy Credits</a>
                     <button id="signOutBtnSecondary" type="button" class="btn btn-danger">Log Out</button>
@@ -2023,11 +2094,11 @@
       return firstDefined(item && item.billing_status, item && item.billingStatus, item && item.status, 'unknown');
     }
 
-    function renderMembershipRows(tbodyId, memberships) {
-      const tbody = document.getElementById(tbodyId);
-      if (!tbody) return;
+    function renderMembershipRows(containerId, memberships) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
 
-      tbody.innerHTML = memberships.map(function (item) {
+      container.innerHTML = memberships.map(function (item) {
         const membershipId = firstDefined(item && item.membership_id, item && item.membershipId, item && item.id, '—');
         const plan = getMembershipPlan(item);
         const status = getMembershipStatus(item);
@@ -2036,14 +2107,18 @@
         const source = firstDefined(item && item.source, item && item.created_from, '—');
 
         return '' +
-          '<tr>' +
-            '<td>' + escapeHtml(membershipId) + '</td>' +
-            '<td>' + escapeHtml(plan) + '</td>' +
-            '<td>' + getStatusBadge(status) + '</td>' +
-            '<td>' + escapeHtml(formatDate(start)) + '</td>' +
-            '<td>' + escapeHtml(formatDate(end)) + '</td>' +
-            '<td>' + escapeHtml(String(source)) + '</td>' +
-          '</tr>';
+          '<div class="account-membership-item">' +
+            '<div class="account-membership-top">' +
+              '<p class="account-membership-title">' + escapeHtml(plan) + '</p>' +
+              getStatusBadge(status) +
+            '</div>' +
+            '<div class="account-membership-meta">' +
+              '<div><strong>Membership ID:</strong> ' + escapeHtml(membershipId) + '</div>' +
+              '<div><strong>Starts:</strong> ' + escapeHtml(formatDate(start)) + '</div>' +
+              '<div><strong>Ends:</strong> ' + escapeHtml(formatDate(end)) + '</div>' +
+              '<div><strong>Source:</strong> ' + escapeHtml(String(source)) + '</div>' +
+            '</div>' +
+          '</div>';
       }).join('');
     }
 
