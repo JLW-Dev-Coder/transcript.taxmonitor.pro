@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Consent Flyer - Transcript.Tax Monitor Pro</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+
+    <!-- Tailwind (CDN). Yes, we are keeping it. -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['DM Sans', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial']
+            }
+          }
+        }
+      };
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles/site.css?v=1" />
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
+
+    <style>
+    :root {
+      --bg-dark: #1a1a1a;
+      --bg-card: #2d2d2d;
+      --accent-purple: #8b5cf6;
+      --accent-purple-dark: #7c3aed;
+      --text-light: #f5f5f5;
+      --text-muted: #b0b0b0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    main {
+      height: 100%;
+      overflow-y: auto;
+      width: 100%;
+    }
+
+    .app-wrapper {
+      width: 100%;
+      min-height: 100%;
+      background: linear-gradient(135deg, var(--bg-dark) 0%, #252525 100%);
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      padding: 80px 20px;
+      text-align: center;
+      border-bottom: 2px solid var(--accent-purple);
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, var(--text-light), var(--accent-purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero .subheadline {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .hero p {
+      font-size: 1rem;
+      color: var(--text-light);
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+
+    /* Content Container */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Card Styles */
+    .card {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 24px;
+      border-left: 5px solid var(--accent-purple);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: slideInUp 0.6s ease-out;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(139, 92, 246, 0.15);
+    }
+
+    .card h3 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--accent-purple);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card p, .card ul {
+      color: var(--text-light);
+      line-height: 1.8;
+      margin-bottom: 12px;
+    }
+
+    .card ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .card li {
+      padding-left: 28px;
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .card li:before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--accent-purple);
+      font-weight: bold;
+    }
+
+    /* Copy Button */
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent-purple);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background 0.3s ease, transform 0.2s ease;
+      margin-top: 12px;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent-purple-dark);
+      transform: scale(1.05);
+    }
+
+    .copy-btn:active {
+      transform: scale(0.98);
+    }
+
+    .copy-btn.copied {
+      background: #10b981;
+    }
+
+    /* Consent Block */
+    .consent-block {
+      background: rgba(139, 92, 246, 0.05);
+      border: 1px solid var(--accent-purple);
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      color: var(--text-light);
+    }
+
+    /* CTA Button */
+    .cta-btn {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-purple-dark));
+      color: white;
+      padding: 16px 40px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(139, 92, 246, 0.4);
+    }
+
+    .cta-section {
+      text-align: center;
+      padding: 40px 20px;
+      margin: 40px 0;
+      border-top: 2px solid var(--accent-purple);
+      border-bottom: 2px solid var(--accent-purple);
+    }
+
+    /* Reference Links */
+    .reference-link {
+      display: inline-block;
+      color: var(--accent-purple);
+      text-decoration: none;
+      margin: 8px 0;
+      transition: color 0.3s ease;
+      font-weight: 500;
+    }
+
+    .reference-link:hover {
+      color: #c4b5fd;
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    .footer {
+      background: rgba(0, 0, 0, 0.4);
+      padding: 32px 20px;
+      text-align: center;
+      border-top: 1px solid var(--accent-purple);
+      margin-top: 60px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer a {
+      color: var(--accent-purple);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer a:hover {
+      color: #c4b5fd;
+      text-decoration: underline;
+    }
+
+    /* Checklist */
+    .checklist-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .checklist-item:hover {
+      background: rgba(139, 92, 246, 0.08);
+    }
+
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--accent-purple);
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 2px;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .checklist-item.checked .checkbox {
+      background: var(--accent-purple);
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: white;
+        color: black;
+      }
+
+      .hero, .cta-section, .copy-btn, .reference-link {
+        display: none;
+      }
+
+      .card {
+        border-left: 3px solid #333;
+        page-break-inside: avoid;
+        background: white;
+        color: black;
+        box-shadow: none;
+      }
+
+      .card h3 {
+        color: #333;
+      }
+
+      .consent-block {
+        background: #f5f5f5;
+        border: 1px solid #ccc;
+        color: black;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+
+      .hero .subheadline {
+        font-size: 1rem;
+      }
+
+      .container {
+        padding: 20px 16px;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .cta-btn {
+        width: 100%;
+      }
+    }
+  </style>
+  </head>
+
+  <body class="h-full noise font-sans">
+    <div id="app-container" class="min-h-full overflow-auto">
+<!-- Lead Magnet Nav (matches product toolbar style) -->
+      <div class="sticky top-0 z-50 border-b border-slate-800/60 bg-slate-950/80 backdrop-blur">
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+          <a href="https://transcript.taxmonitor.pro/" class="flex items-center gap-3 text-white">
+            <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-purple-600 to-purple-500 text-slate-950 font-extrabold">TM</span>
+            <div class="leading-tight">
+              <div class="text-sm font-semibold">Transcript.Tax Monitor Pro</div>
+              <div class="text-[11px] text-white/60">Free IRS Transcript Code Guide</div>
+            </div>
+          </a>
+
+          <div class="flex items-center gap-2">
+            <a href="/" class="inline-flex items-center gap-2 rounded-xl border border-slate-800/60 bg-slate-950/60 px-3 py-2 text-sm font-semibold text-white/80 backdrop-blur hover:text-white transition">
+              <svg class="h-5 w-5" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+              Back
+            </a>
+</div>
+        </div>
+      </div>
+
+ </head>
+ <body>
+  <main>
+   <div class="app-wrapper"><!-- Hero Section -->
+    <section class="hero">
+     <h1 id="hero-title">How We Safeguard and Enhance Research with AI Tools</h1>
+     <p class="subheadline">Understand consent, modern AI tools, and compliance for tax professionals.</p>
+     <p id="hero-copy">Download a ready-to-use consent template and PDF guide to safely integrate AI into your tax workflow.</p>
+    </section><!-- Main Content -->
+    <div class="container"><!-- Introduction Card -->
+     <div class="card">
+      <h3><i data-lucide="info" style="width: 20px; height: 20px;"></i> Understanding IRS Form 7216 Consent</h3>
+      <p id="intro-text">If no exception applies, the tax return preparer needs the taxpayer's consent under Treas. Reg. §301.7216-3. For Form 1040 filers, the practitioner must follow Rev. Proc. 2013-14 to obtain valid consent; for all other taxpayers, the format may vary, provided the tax return preparer meets all requirements. In the context of AI tools, obtaining consent presents some specific challenges.</p>
+     </div><!-- Consent Section 1: USE -->
+     <div class="card">
+      <h3><i data-lucide="check-circle" style="width: 20px; height: 20px;"></i> Consent to USE AI Tools</h3>
+      <p>Taxpayers must affirmatively consent before their information is processed through AI systems:</p>
+      <div class="consent-block" id="consent-use">
+       I authorize [FIRM_NAME] to use artificial intelligence and machine learning tools to assist in the preparation and analysis of my tax return. I understand that my tax return information may be processed through AI systems to improve accuracy, efficiency, and research capabilities. This consent applies only to tools and vendors approved by the firm and does not authorize disclosure of my information to unauthorized third parties.
+      </div><button class="copy-btn" onclick="copyToClipboard('consent-use')"> <i data-lucide="copy" style="width: 16px; height: 16px;"></i> Copy Text </button>
+     </div><!-- Consent Section 2: DISCLOSE -->
+     <div class="card">
+      <h3><i data-lucide="shield-alert" style="width: 20px; height: 20px;"></i> Consent to DISCLOSE to AI Vendors</h3>
+      <p>When information is shared with third-party AI vendors, explicit consent is required:</p>
+      <div class="consent-block" id="consent-disclose">
+       I consent to [FIRM_NAME] disclosing my tax return information, including personally identifiable information (PII), to the following AI vendors for the limited purpose of assisting with tax return preparation and analysis: [INSERT VENDOR NAMES AND PURPOSES] I understand that these vendors are contractually obligated to: - Maintain the confidentiality and security of my information - Use my information only for the stated purpose - Comply with all applicable tax laws and regulations - Not retain my information beyond the stated engagement period I acknowledge that I am providing this consent voluntarily and that refusal to consent will not affect the quality of service I receive, except for services specifically requiring AI assistance.
+      </div><button class="copy-btn" onclick="copyToClipboard('consent-disclose')"> <i data-lucide="copy" style="width: 16px; height: 16px;"></i> Copy Text </button>
+     </div><!-- Compliance Points -->
+     <div class="card">
+      <h3><i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i> Key Compliance Points</h3>
+      <ul>
+       <li><strong>Affirmative Consent Required:</strong> Consent must be obtained BEFORE processing information through AI systems. Pre-checked boxes are not acceptable.</li>
+       <li><strong>Written Format:</strong> Consent must be in writing and signed by the taxpayer or authorized representative.</li>
+       <li><strong>Specific Purpose:</strong> Consent must clearly state which AI tools, vendors, and purposes are authorized.</li>
+       <li><strong>Consent Duration:</strong> Specify whether consent is valid for one tax year, multiple years, or until revoked.</li>
+       <li><strong>Revocation Rights:</strong> Taxpayers must be informed they can revoke consent at any time in writing.</li>
+       <li><strong>No Conditional Service:</strong> Consent cannot be a condition of service. Taxpayers must be able to receive service without AI use.</li>
+       <li><strong>SSN Protection:</strong> <span id="vendor-safeguard">Ensure AI vendors use encrypted, HIPAA-compliant infrastructure for data security.</span></li>
+       <li><strong>Foreign Vendor Safeguards:</strong> If data is transferred to foreign-based AI vendors, additional safeguards may be required. Consult recent IRS guidance and Rev. Proc. 2024-XX.</li>
+      </ul>
+     </div><!-- Statement on Improper Disclosure -->
+     <div class="card">
+      <h3><i data-lucide="lock" style="width: 20px; height: 20px;"></i> Statement on Improper Disclosure</h3>
+      <div class="consent-block" id="improper-disclosure">
+       Under Treasury Regulation §301.7216-1, it is unlawful for any tax return preparer to disclose any tax return information without the taxpayer's consent, except as permitted by law or regulation. Any unauthorized disclosure or use of tax return information is prohibited and may result in civil and criminal penalties. If you believe your tax return information has been disclosed or used without authorization, you have the right to file a complaint with the Treasury Inspector General for Tax Administration (TIGTA).
+      </div><button class="copy-btn" onclick="copyToClipboard('improper-disclosure')"> <i data-lucide="copy" style="width: 16px; height: 16px;"></i> Copy Text </button>
+     </div><!-- Signature Requirements -->
+     <div class="card">
+      <h3><i data-lucide="pen-tool" style="width: 20px; height: 20px;"></i> Signature Requirements</h3>
+      <p>The following signatures and acknowledgments must be obtained and retained:</p>
+      <div class="consent-block" id="signature-requirements">
+       TAXPAYER ACKNOWLEDGMENT AND SIGNATURE I have read and understand the above disclosures regarding the use of AI tools in the preparation of my tax return. I consent to the use of AI tools as described above. I understand that I may revoke this consent at any time by providing written notice to [FIRM_NAME]. I further understand that: - My consent is voluntary and not a condition of service - I may receive tax preparation services without AI assistance if I choose - [FIRM_NAME] is responsible for all work performed, whether AI-assisted or not - I have the right to request that specific information not be processed through AI systems Taxpayer Signature: _________________________ Date: _________ Taxpayer Name (print): _____________________ TAX RETURN PREPARER ACKNOWLEDGMENT I have obtained the taxpayer's informed written consent before using AI tools to process their tax return information. I have maintained a copy of this signed consent in my client file. I certify that I have complied with all applicable Treasury Regulations and IRS guidance regarding the disclosure and use of tax return information. Preparer Signature: _________________________ Date: _________ Preparer Name (print): _____________________ [FIRM_NAME]: _____________________________
+      </div><button class="copy-btn" onclick="copyToClipboard('signature-requirements')"> <i data-lucide="copy" style="width: 16px; height: 16px;"></i> Copy Text </button>
+     </div><!-- Risk Scenario Section Header -->
+     <div style="margin: 40px 0 20px 0; padding-bottom: 16px; border-bottom: 2px solid var(--accent-purple);">
+      <h2 style="font-size: 1.4rem; font-weight: 600; color: var(--text-light); margin-bottom: 8px;">What Other Tax Professionals Are Running Into with AI</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Real-world scenarios that can unintentionally trigger IRS §7216 disclosure issues. Examples for educational purposes only.</p>
+     </div><!-- Risk Scenario Cards -->
+     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px;"><!-- Card 1: Foreign Account -->
+      <div class="card" style="border-left: 5px solid #ef4444;">
+       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;"><i data-lucide="alert-triangle" style="width: 20px; height: 20px; color: #ef4444;"></i> <span style="font-size: 0.85rem; color: #ef4444; font-weight: 600;">COMPLIANCE RISK EXAMPLE</span>
+       </div>
+       <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; padding: 16px; margin-bottom: 16px; font-style: italic; line-height: 1.7; color: var(--text-light);">
+        "I started using AI to research a foreign account issue and didn't think twice about it. My first question was general, but then I added client specifics to get a better answer… name, income, account details, everything. It hit me later that I had basically disclosed the entire situation to a third party."
+       </div>
+       <p style="font-weight: 600; margin-bottom: 4px;">— Michael R.</p>
+       <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">Midland, TX</p>
+       <p style="font-size: 0.85rem; color: #ef4444; background: rgba(239, 68, 68, 0.08); padding: 8px 12px; border-radius: 4px; border-left: 3px solid #ef4444;"><strong>Risk:</strong> This scenario may constitute a disclosure under IRC §7216.</p>
+      </div><!-- Card 2: Meeting Notes -->
+      <div class="card" style="border-left: 5px solid #ef4444;">
+       <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;"><i data-lucide="alert-triangle" style="width: 20px; height: 20px; color: #ef4444;"></i> <span style="font-size: 0.85rem; color: #ef4444; font-weight: 600;">COMPLIANCE RISK EXAMPLE</span>
+       </div>
+       <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 8px; padding: 16px; margin-bottom: 16px; font-style: italic; line-height: 1.7; color: var(--text-light);">
+        "I copied my client meeting notes into an AI tool to summarize things faster. It included names, income estimates, rental properties, and their LLC. I thought I was just saving time, but I didn't realize I had shared identifiable tax return information."
+       </div>
+       <p style="font-weight: 600; margin-bottom: 4px;">— Danielle S.</p>
+       <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">Scottsdale, AZ</p>
+       <p style="font-size: 0.85rem; color: #ef4444; background: rgba(239, 68, 68, 0.08); padding: 8px 12px; border-radius: 4px; border-left: 3px solid #ef4444;"><strong>Risk:</strong> This scenario may constitute a disclosure under IRC §7216.</p>
+      </div>
+     </div><!-- AI Compliance Checklist -->
+     <div class="card">
+      <h3><i data-lucide="clipboard-check" style="width: 20px; height: 20px;"></i> AI Compliance Checklist</h3>
+      <div class="checklist-item" onclick="toggleCheckbox(this)">
+       <div class="checkbox">
+        ✓
+       </div>
+       <div>
+        <strong>Affirmative Consent Obtained:</strong> Written, signed consent received BEFORE AI processing
+       </div>
+      </div>
+      <div class="checklist-item" onclick="toggleCheckbox(this)">
+       <div class="checkbox">
+        ✓
+       </div>
+       <div>
+        <strong>SSN &amp; PII Protection:</strong> Confirmed AI vendor uses encryption and data minimization
+       </div>
+      </div>
+      <div class="checklist-item" onclick="toggleCheckbox(this)">
+       <div class="checkbox">
+        ✓
+       </div>
+       <div>
+        <strong>Consent Duration Set:</strong> <span id="consent-duration">Consent valid for one tax year or until revoked</span>
+       </div>
+      </div>
+      <div class="checklist-item" onclick="toggleCheckbox(this)">
+       <div class="checkbox">
+        ✓
+       </div>
+       <div>
+        <strong>Vendor Safeguards:</strong> AI vendor contract includes confidentiality, data retention, and compliance obligations
+       </div>
+      </div>
+      <div class="checklist-item" onclick="toggleCheckbox(this)">
+       <div class="checkbox">
+        ✓
+       </div>
+       <div>
+        <strong>No Pre-Checked Boxes:</strong> Consent is affirmative, not default or conditional
+       </div>
+      </div>
+      <div class="checklist-item" onclick="toggleCheckbox(this)">
+       <div class="checkbox">
+        ✓
+       </div>
+       <div>
+        <strong>Foreign Vendor Review:</strong> If applicable, reviewed latest IRS guidance for foreign-based AI services
+       </div>
+      </div>
+      <div class="checklist-item" onclick="toggleCheckbox(this)">
+       <div class="checkbox">
+        ✓
+       </div>
+       <div>
+        <strong>Client File Documentation:</strong> Signed consent forms retained in client files
+       </div>
+      </div>
+     </div><!-- References Section -->
+     <div class="card">
+      <h3><i data-lucide="external-link" style="width: 20px; height: 20px;"></i> Official References &amp; Resources</h3>
+      <p><strong>Click below to access authoritative IRS guidance:</strong></p>
+      <div><a href="https://www.tomtalkstaxes.com/p/ai-7216" target="_blank" rel="noopener noreferrer" class="reference-link"> → Tom Talks Taxes – AI &amp; 7216 Compliance </a>
+      </div>
+      <div><a href="https://www.irs.gov/pub/irs-drop/rp-13-14.pdf" target="_blank" rel="noopener noreferrer" class="reference-link"> → IRS Rev. Proc. 2013-14 (Consent Requirements) </a>
+      </div>
+      <div><a href="https://www.law.cornell.edu/cfr/text/26/301.7216-3" target="_blank" rel="noopener noreferrer" class="reference-link"> → 26 CFR 301.7216-3 (Disclosure Regulations) </a>
+      </div>
+     </div>
+     
+     <!-- CTA Section -->
+     <div class="cta-section">
+      <h2 style="font-size: 1.8rem; margin-bottom: 20px;">Ready to Implement AI Consent?</h2>
+      <p style="margin-bottom: 24px; font-size: 1.05rem;">Download the complete AI Consent Flyer + PDF guide for <span id="firm-name">your tax firm</span>. All templates are ready to customize and print.</p><a href="https://buy.stripe.com/placeholder" id="cta-button" class="cta-btn" target="_blank" rel="noopener noreferrer"> Purchase &amp; Download – $2.99 </a>
+     </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+     <p style="margin-bottom: 16px;"><strong>Compliance Notice:</strong></p>
+     <p>If you believe your tax return information has been disclosed or used improperly without authorization, contact the Treasury Inspector General for Tax Administration (TIGTA) at <strong>1-800-366-4484</strong> or email <a href="mailto:complaints@tigta.treas.gov">complaints@tigta.treas.gov</a>.</p>
+     <p style="margin-top: 24px; font-size: 0.85rem;">© <span id="footer-year"></span> <span id="footer-firm">Your Tax Firm</span>. All rights reserved. This resource is for informational purposes only and does not constitute legal advice.</p>
+    </footer>
+
+    <!-- Footer (standalone, no partial injection) -->
+      <footer class="px-6 py-3 mt-1 border-t border-slate-800/60 bg-slate-950/80 backdrop-blur">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <p class="text-slate-500 text-sm">© <span id="footer-year"></span> Transcript.Tax Monitor Pro. All rights reserved.</p>
+          <div class="flex items-center gap-6">
+            <a href="/legal/privacy.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Privacy Policy</a>
+            <a href="/legal/terms.html" class="text-slate-400 hover:text-purple-400 text-sm transition-colors">Terms of Service</a>
+          </div>
+        </div>
+      </footer>
+</div>
+
+    <script>
+      (function () {
+        // Prevent the page from loading "flat".
+        // Adds a tiny entrance animation matching the main site vibe.
+        requestAnimationFrame(() => document.documentElement.classList.add("tm-loaded"));
+
+        // Footer year
+        (function () {
+          const y = document.getElementById("footer-year");
+          if (y) y.textContent = String(new Date().getFullYear());
+        })();
+
+        const form = document.getElementById("lead-form");
+        const errorEl = document.getElementById("lead-error");
+
+        function showError(msg) {
+          if (!errorEl) return;
+          errorEl.textContent = String(msg || "Something went wrong.");
+          errorEl.classList.remove("hidden");
+        }
+
+        function clearError() {
+          if (!errorEl) return;
+          errorEl.textContent = "";
+          errorEl.classList.add("hidden");
+        }
+
+        form?.addEventListener("submit", (e) => {
+          e.preventDefault();
+          clearError();
+
+          const name = String(document.getElementById("lead-name")?.value || "").trim();
+          const email = String(document.getElementById("lead-email")?.value || "").trim();
+
+          if (!name) return showError("Please enter your full name.");
+          if (!email) return showError("Please enter your email address.");
+
+          // For now: simple redirect as requested.
+          // You can later replace this with a Worker POST, then redirect.
+          window.location.href = "/magnets/guide.html";
+        });
+      })();
+    </script>
+
+   </div>
+  </main>
+  <script>
+    // Element SDK Configuration
+    const defaultConfig = {
+      firm_name: 'Your Tax Firm',
+      firm_email: 'contact@yourfirm.com',
+      firm_phone: '(555) 123-4567',
+      consent_duration: 'This consent is valid for one tax year and will automatically expire on December 31st of the current year.',
+      vendor_safeguard: 'Ensure AI vendors use encrypted, HIPAA-compliant infrastructure for data security.',
+      stripe_link: 'https://buy.stripe.com/placeholder'
+    };
+
+    let config = { ...defaultConfig };
+
+    const elementSdkHandler = {
+      defaultConfig,
+      onConfigChange: async (updatedConfig) => {
+        config = updatedConfig;
+        
+        // Update all text elements with firm name
+        document.getElementById('firm-name').textContent = config.firm_name || defaultConfig.firm_name;
+        document.getElementById('footer-firm').textContent = config.firm_name || defaultConfig.firm_name;
+        
+        // Replace [FIRM_NAME] placeholders in consent blocks
+        const consentUse = document.getElementById('consent-use');
+        consentUse.textContent = consentUse.textContent.replace(/\[FIRM_NAME\]/g, config.firm_name || defaultConfig.firm_name);
+        
+        const consentDisclose = document.getElementById('consent-disclose');
+        consentDisclose.textContent = consentDisclose.textContent.replace(/\[FIRM_NAME\]/g, config.firm_name || defaultConfig.firm_name);
+        
+        const signatureReqs = document.getElementById('signature-requirements');
+        signatureReqs.textContent = signatureReqs.textContent.replace(/\[FIRM_NAME\]/g, config.firm_name || defaultConfig.firm_name);
+        
+        // Update consent duration
+        document.getElementById('consent-duration').textContent = config.consent_duration || defaultConfig.consent_duration;
+        
+        // Update vendor safeguard
+        document.getElementById('vendor-safeguard').textContent = config.vendor_safeguard || defaultConfig.vendor_safeguard;
+        
+        // Update Stripe link
+        document.getElementById('cta-button').href = config.stripe_link || defaultConfig.stripe_link;
+      },
+      mapToCapabilities: (config) => ({
+        recolorables: [],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ['firm_name', config.firm_name || defaultConfig.firm_name],
+        ['firm_email', config.firm_email || defaultConfig.firm_email],
+        ['firm_phone', config.firm_phone || defaultConfig.firm_phone],
+        ['consent_duration', config.consent_duration || defaultConfig.consent_duration],
+        ['vendor_safeguard', config.vendor_safeguard || defaultConfig.vendor_safeguard],
+        ['stripe_link', config.stripe_link || defaultConfig.stripe_link]
+      ])
+    };
+
+    // Initialize Element SDK
+    if (window.elementSdk) {
+      window.elementSdk.init(elementSdkHandler);
+    }
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Set footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+    // Copy to Clipboard Function
+    function copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      const text = element.textContent;
+      
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target.closest('.copy-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" style="width: 16px; height: 16px;"></i> Copied!';
+        btn.classList.add('copied');
+        lucide.createIcons();
+        
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+          btn.classList.remove('copied');
+          lucide.createIcons();
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+      });
+    }
+
+    // Toggle Checklist Items
+    function toggleCheckbox(element) {
+      element.classList.toggle('checked');
+    }
+
+    // Initialize config values
+    window.elementSdk?.onConfigChange?.(config);
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9dee95e6074f2abc',t:'MTc3Mzk0NTQxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
