@@ -98,10 +98,31 @@
                 <div class="text-xs font-semibold uppercase tracking-wide text-blue-300">Tools & Extras</div>
 
                 <div class="mt-2 space-y-1">
-                  <a href="/resources/transcript-codes" class="block rounded-lg px-3 py-2 text-sm text-blue-200 hover:bg-blue-950/20">Transcript Codes</a>
-                  <a href="/resources/transcript-orders" class="block rounded-lg px-3 py-2 text-sm text-blue-200 hover:bg-blue-950/20">Order Walkthrough</a>
-                  <a href="https://taxmonitor.pro" target="_blank" class="block rounded-lg px-3 py-2 text-sm text-blue-200 hover:bg-blue-950/20">Tax Monitor Pro</a>
-                  <a href="https://taxtools.taxmonitor.pro" target="_blank" class="block rounded-lg px-3 py-2 text-sm text-blue-200 hover:bg-blue-950/20">TaxTools Arcade</a>
+
+                  <a href="/magnets/section-7216-disclosure.html" class="block rounded-lg px-3 py-2 text-sm text-blue-200 hover:bg-blue-950/20">
+                    §7216 Disclosure Guide
+                  </a>
+
+                  <a href="/resources/irs-phone-numbers.html" class="block rounded-lg px-3 py-2 text-sm text-blue-200 hover:bg-blue-950/20">
+                    IRS Phone Numbers
+                  </a>
+
+                  <a href="/resources/transcript-codes" class="block rounded-lg px-3 py-2 text-sm text-blue-200 hover:bg-blue-950/20">
+                    Transcript Codes
+                  </a>
+
+                  <a href="/resources/transcript-orders" class="block rounded-lg px-3 py-2 text-sm text-blue-200 hover:bg-blue-950/20">
+                    Order Walkthrough
+                  </a>
+
+                  <a href="https://taxmonitor.pro" target="_blank" class="block rounded-lg px-3 py-2 text-sm text-blue-200 hover:bg-blue-950/20">
+                    Tax Monitor Pro
+                  </a>
+
+                  <a href="https://taxtools.taxmonitor.pro" target="_blank" class="block rounded-lg px-3 py-2 text-sm text-blue-200 hover:bg-blue-950/20">
+                    TaxTools Arcade
+                  </a>
+
                 </div>
 
                 <div class="mt-4 rounded-xl border border-blue-900/40 bg-blue-950/20 p-4">
@@ -133,7 +154,7 @@
       <!-- Account -->
       <div class="flex items-center gap-6">
 
-        <a id="login-link" href="/sign-in.html" class="text-sm text-blue-200 hover:text-white">
+        <a id="login-link" href="/sign-in.html" class="text-sm text-blue-200 hover:text-white transition">
           Sign In
         </a>
 
@@ -144,14 +165,105 @@
         </div>
 
         <div id="account-wrap" class="relative hidden">
-          <!-- unchanged account dropdown -->
+
+          <button id="account-toggle" type="button" class="flex items-center gap-2 text-sm text-blue-200 hover:text-white">
+            <span id="auth-email"></span>
+          </button>
+
+          <div id="account-menu" class="hidden absolute right-0 mt-3 w-56 rounded-xl border border-blue-900/40 bg-navy shadow-xl">
+            <div class="border-b border-blue-900/40 px-4 py-3 text-xs text-blue-300">
+              Signed in as<br>
+              <span id="auth-email-menu" class="font-semibold text-white"></span>
+            </div>
+
+            <a href="/app/dashboard.html" class="block px-4 py-3 text-sm text-blue-200 hover:bg-blue-950/20">
+              Dashboard
+            </a>
+
+            <a id="signout-link" href="#" class="block px-4 py-3 text-sm text-blue-200 hover:bg-blue-950/20">
+              Sign out
+            </a>
+          </div>
+
         </div>
 
       </div>
 
     </div>
 
+    <!-- Mobile Toggle -->
+    <button id="mobile-menu-btn"
+      class="md:hidden inline-flex items-center justify-center rounded-lg p-2 text-blue-200 hover:bg-blue-950/40 hover:text-white">
+      <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+
   </div>
 
-  <!-- Keep your existing JS exactly as-is -->
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden border-t border-blue-900/40 bg-navy md:hidden">
+    <div class="flex flex-col gap-4 px-6 py-6 text-sm">
+
+      <a href="/about.html" class="text-blue-200 hover:text-white">About</a>
+      <a href="/index.html#features" class="text-blue-200 hover:text-white">Features</a>
+      <a href="/index.html#how-it-works" class="text-blue-200 hover:text-white">How It Works</a>
+      <a href="/index.html#pricing" class="text-blue-200 hover:text-white">Pricing</a>
+      <a href="/contact.html" class="text-blue-200 hover:text-white">Contact</a>
+
+      <a href="/resources/index.html" class="text-blue-200 hover:text-white">Resources</a>
+
+      <a href="/sign-in.html" class="text-blue-200 hover:text-white">Sign In</a>
+
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+  (function () {
+
+    var mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    var mobileMenu = document.getElementById('mobile-menu');
+
+    var resourcesToggle = document.getElementById('resources-toggle');
+    var resourcesMenu = document.getElementById('resources-menu');
+
+    function setExpanded(btn, isOpen) {
+      if (!btn) return;
+      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+
+    function toggleMenu(btn, menu) {
+      if (!btn || !menu) return;
+      var willOpen = menu.classList.contains('hidden');
+      menu.classList.toggle('hidden', !willOpen);
+      menu.classList.toggle('invisible', !willOpen);
+      menu.classList.toggle('opacity-0', !willOpen);
+      setExpanded(btn, willOpen);
+    }
+
+    if (mobileMenuBtn) {
+      mobileMenuBtn.addEventListener('click', function () {
+        var willOpen = mobileMenu.classList.contains('hidden');
+        mobileMenu.classList.toggle('hidden', !willOpen);
+      });
+    }
+
+    if (resourcesToggle) {
+      resourcesToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleMenu(resourcesToggle, resourcesMenu);
+      });
+    }
+
+    document.addEventListener('click', function (e) {
+      if (!resourcesMenu.contains(e.target) && !resourcesToggle.contains(e.target)) {
+        resourcesMenu.classList.add('hidden','invisible','opacity-0');
+        setExpanded(resourcesToggle, false);
+      }
+    });
+
+  })();
+  </script>
+
 </header>
