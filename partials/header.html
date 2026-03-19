@@ -134,12 +134,12 @@
       <div class="h-6 w-px bg-slate-700"></div>
 
       <div class="flex items-center gap-3">
-        <a href="/app/login.html" class="text-sm font-medium text-slate-300 transition hover:text-white">Log In</a>
+        <a href="/login.html" class="text-sm font-medium text-slate-300 transition hover:text-white">Log In</a>
         <a
-          href="/app/intake.html"
+          href="/magnets/lead-magnet.html"
           class="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:from-amber-400 hover:to-amber-500"
         >
-          Start Intake →
+          Get the guide →
         </a>
       </div>
 
@@ -208,201 +208,139 @@
   </div>
 
   <script>
-  (function () {
-    var API = window.TRANSCRIPT_API_BASE || '';
+    (function () {
+      var head = document.head;
+      var mobileMenu = document.getElementById('mobile-menu');
+      var mobileResourcesMenu = document.getElementById('mobile-resources-menu');
+      var mobileResourcesToggle = document.getElementById('mobile-resources-toggle');
+      var resourcesDropdown = document.getElementById('resources-dropdown');
+      var resourcesMenu = document.getElementById('resources-menu');
+      var resourcesToggle = document.getElementById('resources-toggle');
+      var toggle = document.getElementById('menu-toggle');
 
-    var login = document.getElementById('login-link');
-    var loginMobile = document.getElementById('login-link-mobile');
+      function closeDesktopResources() {
+        if (!resourcesMenu || !resourcesToggle) return;
 
-    var token = document.getElementById('token-pill');
-    var tokenMobile = document.getElementById('token-pill-mobile');
+        resourcesMenu.classList.add('hidden', 'invisible', 'pointer-events-none', 'opacity-0');
+        resourcesToggle.setAttribute('aria-expanded', 'false');
 
-    var account = document.getElementById('account-wrap');
-    var accountMobile = document.getElementById('account-mobile');
-
-    var email = document.getElementById('auth-email');
-    var emailMenu = document.getElementById('auth-email-menu');
-    var emailMobile = document.getElementById('auth-email-mobile');
-
-    var balance = document.getElementById('token-balance');
-    var balanceMobile = document.getElementById('token-balance-mobile');
-
-    var accountToggle = document.getElementById('account-toggle');
-    var accountMenu = document.getElementById('account-menu');
-
-    var mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    var mobileMenu = document.getElementById('mobile-menu');
-
-    var resourcesToggle = document.getElementById('resources-toggle');
-    var resourcesMenu = document.getElementById('resources-menu');
-
-    var signout = document.getElementById('signout-link');
-    var signoutMobile = document.getElementById('signout-link-mobile');
-
-    function setExpanded(btn, isOpen) {
-      if (!btn) return;
-      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    }
-
-    function closeMenu(btn, menu) {
-      if (!menu) return;
-      menu.classList.add('hidden');
-      setExpanded(btn, false);
-    }
-
-    function toggleMenu(btn, menu, otherBtn, otherMenu) {
-      if (!btn || !menu) return;
-      var willOpen = menu.classList.contains('hidden');
-      if (otherMenu) closeMenu(otherBtn, otherMenu);
-      menu.classList.toggle('hidden', !willOpen);
-      setExpanded(btn, willOpen);
-    }
-
-    function buildUrl(path) {
-      if (/^https?:\/\//i.test(path)) return path;
-      return String(API || '').replace(/\/$/, '') + path;
-    }
-
-    function extractUser(data) {
-      if (!data || typeof data !== 'object') {
-        return { email: '', tokenId: '', balance: 0 };
+        var icon = resourcesToggle.querySelector('svg');
+        if (icon) icon.classList.remove('rotate-180');
       }
 
-      var source = data.user && typeof data.user === 'object' ? data.user : data;
-      var email = typeof source.email === 'string' ? source.email.trim() : '';
-      var tokenId = typeof source.tokenId === 'string' ? source.tokenId.trim() : '';
-      var balanceValue = typeof source.balance !== 'undefined' ? source.balance : data.balance;
-      var balance = Number.isFinite(Number(balanceValue)) ? Number(balanceValue) : 0;
+      function openDesktopResources() {
+        if (!resourcesMenu || !resourcesToggle) return;
 
-      return {
-        balance: balance,
-        email: email,
-        tokenId: tokenId
-      };
-    }
+        resourcesMenu.classList.remove('hidden');
+        requestAnimationFrame(function () {
+          resourcesMenu.classList.remove('invisible', 'pointer-events-none', 'opacity-0');
+        });
 
-    function hideCredits() {
-      if (token) token.classList.add('hidden');
-      if (tokenMobile) tokenMobile.classList.add('hidden');
-    }
+        resourcesToggle.setAttribute('aria-expanded', 'true');
 
-    function showCredits(value) {
-      var nextValue = Number.isFinite(Number(value)) ? String(value) : '0';
-      if (balance) balance.textContent = nextValue;
-      if (balanceMobile) balanceMobile.textContent = nextValue;
-      if (token) token.classList.remove('hidden');
-      if (tokenMobile) tokenMobile.classList.remove('hidden');
-    }
+        var icon = resourcesToggle.querySelector('svg');
+        if (icon) icon.classList.add('rotate-180');
+      }
 
-    function showLoggedOut() {
-      if (login) login.classList.remove('hidden');
-      if (loginMobile) loginMobile.classList.remove('hidden');
+      function toggleDesktopResources() {
+        if (!resourcesMenu || !resourcesToggle) return;
+        var isOpen = resourcesToggle.getAttribute('aria-expanded') === 'true';
 
-      if (account) account.classList.add('hidden');
-      if (accountMobile) accountMobile.classList.add('hidden');
+        if (isOpen) {
+          closeDesktopResources();
+        } else {
+          openDesktopResources();
+        }
+      }
 
-      hideCredits();
-    }
+      function closeMobileMenu() {
+        if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+          mobileMenu.classList.add('hidden');
+        }
+        if (toggle) {
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+        closeMobileResources();
+      }
 
-    function showLoggedIn(user) {
-      if (email) email.textContent = user.email;
-      if (emailMenu) emailMenu.textContent = user.email;
-      if (emailMobile) emailMobile.textContent = user.email;
+      function closeMobileResources() {
+        if (mobileResourcesMenu && !mobileResourcesMenu.classList.contains('hidden')) {
+          mobileResourcesMenu.classList.add('hidden');
+        }
+        if (mobileResourcesToggle) {
+          mobileResourcesToggle.setAttribute('aria-expanded', 'false');
+          var icon = mobileResourcesToggle.querySelector('svg');
+          if (icon) icon.classList.remove('rotate-180');
+        }
+      }
 
-      if (login) login.classList.add('hidden');
-      if (loginMobile) loginMobile.classList.add('hidden');
+      toggle && toggle.addEventListener('click', function () {
+        var isHidden = mobileMenu.classList.toggle('hidden');
+        toggle.setAttribute('aria-expanded', String(!isHidden));
 
-      if (account) account.classList.remove('hidden');
-      if (accountMobile) accountMobile.classList.remove('hidden');
+        if (isHidden) {
+          closeMobileResources();
+        }
+      });
 
-      showCredits(user.balance);
-    }
+      mobileResourcesToggle && mobileResourcesToggle.addEventListener('click', function () {
+        var isHidden = mobileResourcesMenu.classList.toggle('hidden');
+        mobileResourcesToggle.setAttribute('aria-expanded', String(!isHidden));
 
-    function wireSignout(link) {
-      if (!link) return;
-      link.addEventListener('click', function (e) {
+        var icon = mobileResourcesToggle.querySelector('svg');
+        if (icon) {
+          icon.classList.toggle('rotate-180', !isHidden);
+        }
+      });
+
+      resourcesToggle && resourcesToggle.addEventListener('click', function (e) {
         e.preventDefault();
-        fetch(buildUrl('/api/transcripts/sign-out'), {
-          credentials: 'include',
-          method: 'POST'
-        }).finally(function () {
-          window.location.href = '/index.html';
-        });
-      });
-    }
-
-    if (mobileMenuBtn && mobileMenu) {
-      mobileMenuBtn.addEventListener('click', function () {
-        var willOpen = mobileMenu.classList.contains('hidden');
-        mobileMenu.classList.toggle('hidden', !willOpen);
-        setExpanded(mobileMenuBtn, willOpen);
-      });
-    }
-
-    if (accountToggle && accountMenu) {
-      accountToggle.addEventListener('click', function (e) {
         e.stopPropagation();
-        toggleMenu(accountToggle, accountMenu, resourcesToggle, resourcesMenu);
+        toggleDesktopResources();
       });
-    }
 
-    if (resourcesToggle && resourcesMenu) {
-      resourcesToggle.addEventListener('click', function (e) {
-        e.stopPropagation();
-        toggleMenu(resourcesToggle, resourcesMenu, accountToggle, accountMenu);
-      });
-    }
-
-    document.addEventListener('click', function (e) {
-      if (accountMenu && accountToggle) {
-        var insideAccount = accountMenu.contains(e.target) || accountToggle.contains(e.target);
-        if (!insideAccount) closeMenu(accountToggle, accountMenu);
-      }
-
-      if (resourcesMenu && resourcesToggle) {
-        var insideResources = resourcesMenu.contains(e.target) || resourcesToggle.contains(e.target);
-        if (!insideResources) closeMenu(resourcesToggle, resourcesMenu);
-      }
-    });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape') return;
-      closeMenu(accountToggle, accountMenu);
-      closeMenu(resourcesToggle, resourcesMenu);
-      if (mobileMenu) mobileMenu.classList.add('hidden');
-      setExpanded(mobileMenuBtn, false);
-    });
-
-    wireSignout(signout);
-    wireSignout(signoutMobile);
-
-    async function hydrate() {
-      try {
-        var response = await fetch(buildUrl('/api/transcripts/me'), {
-          credentials: 'include'
-        });
-
-        if (!response.ok) {
-          showLoggedOut();
-          return;
+      document.addEventListener('click', function (e) {
+        if (resourcesDropdown && !resourcesDropdown.contains(e.target)) {
+          closeDesktopResources();
         }
 
-        var data = await response.json();
-        var user = extractUser(data);
+        if (mobileMenu && toggle && !mobileMenu.classList.contains('hidden')) {
+          var clickedInsideMobileMenu = mobileMenu.contains(e.target);
+          var clickedMobileToggle = toggle.contains(e.target);
 
-        if (!user.email || !user.tokenId) {
-          showLoggedOut();
-          return;
+          if (!clickedInsideMobileMenu && !clickedMobileToggle) {
+            closeMobileMenu();
+          }
         }
+      });
 
-        showLoggedIn(user);
-      } catch (err) {
-        showLoggedOut();
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        closeDesktopResources();
+        closeMobileMenu();
+      });
+
+      if (!head) return;
+
+      var icons = [
+        { rel: 'icon', href: '/assets/favicon.ico', type: 'image/x-icon' },
+        { rel: 'icon', href: '/assets/favicon.svg', type: 'image/svg+xml' }
+      ].sort(function (a, b) {
+        return String(a.href).localeCompare(String(b.href));
+      });
+
+      function hasIcon(href) {
+        return !!head.querySelector('link[rel~="icon"][href="' + href + '"]');
       }
-    }
 
-    showLoggedOut();
-    hydrate();
-  })();
-</script>
+      icons.forEach(function (i) {
+        if (hasIcon(i.href)) return;
+        var link = document.createElement('link');
+        link.rel = i.rel;
+        link.href = i.href;
+        link.type = i.type;
+        head.appendChild(link);
+      });
+    })();
+  </script>
 </header>
