@@ -90,116 +90,14 @@
     }
 
     .workspace-content { padding:28px; }
-    .account-grid {
-      align-items:start;
-      display:grid;
-      gap:24px;
-      grid-template-columns:repeat(2, minmax(0,1fr));
+
+    #accountPage {
+      width:100%;
     }
-    .account-grid-column { display:grid; gap:24px; }
-
-    .card {
-      background: var(--tm-card);
-      backdrop-filter: blur(18px);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: var(--tm-radius);
-      box-shadow: var(--tm-shadow);
-      overflow:hidden;
-      position:relative;
-    }
-
-    .card::before {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.76), rgba(67, 56, 202, 0.70), rgba(255, 255, 255, 0.10));
-      border-radius: inherit;
-      content: '';
-      inset: 0;
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      mask-composite: exclude;
-      opacity: 0.32;
-      padding: 1px;
-      pointer-events: none;
-      position: absolute;
-    }
-
-    .card-body { padding:24px; position:relative; z-index:1; }
-    .card-title { font-size:18px; font-weight:700; margin:0 0 8px; }
-    .card-desc, .account-action-copy { color: var(--tm-text-muted); font-size:14px; line-height:1.7; margin:0 0 18px; }
-    .detail-list { display:grid; gap:0; }
-    .detail-row { border-bottom:1px solid rgba(148,163,184,0.10); display:grid; gap:6px; padding:12px 0; }
-    .detail-row:last-child { border-bottom:0; }
-    .detail-label { color: var(--tm-text-muted); font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; }
-    .detail-value { color: var(--tm-text); font-size:14px; font-weight:700; word-break:break-word; }
-
-    .account-icon {
-      align-items:center;
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.18) 0%, rgba(99, 102, 241, 0.14) 100%);
-      border:1px solid rgba(139, 92, 246, 0.24);
-      border-radius:16px;
-      color:var(--tm-purple-soft);
-      display:inline-flex;
-      height:52px;
-      justify-content:center;
-      margin-bottom:16px;
-      width:52px;
-    }
-
-    .account-icon svg { height:24px; width:24px; }
-    .account-membership-list { display:grid; gap:14px; margin-top:18px; }
-    .account-membership-item {
-      background: rgba(15, 23, 42, 0.56);
-      border:1px solid rgba(255,255,255,0.08);
-      border-radius:16px;
-      display:grid;
-      gap:8px;
-      padding:16px;
-    }
-
-    .account-membership-top { align-items:center; display:flex; gap:12px; justify-content:space-between; }
-    .account-membership-title { font-size:15px; font-weight:700; margin:0; }
-    .account-membership-meta { color:var(--tm-text-muted); display:grid; gap:6px; font-size:13px; }
-    .button-row { display:flex; flex-wrap:wrap; gap:12px; }
-    .btn {
-      align-items:center;
-      border:1px solid transparent;
-      border-radius:12px;
-      cursor:pointer;
-      display:inline-flex;
-      font-family:inherit;
-      font-size:13px;
-      font-weight:700;
-      gap:8px;
-      justify-content:center;
-      min-height:42px;
-      padding:0 16px;
-      text-decoration:none;
-      transition:all 180ms ease;
-      white-space:nowrap;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 46%, #4338ca 100%);
-      box-shadow: 0 16px 34px rgba(76, 29, 149, 0.34);
-      color: white;
-    }
-
-    .btn-danger {
-      background: rgba(127, 29, 29, 0.22);
-      border-color: rgba(248, 113, 113, 0.22);
-      color: #fecaca;
-    }
-
-    .empty-state { color: var(--tm-text-muted); font-size:14px; padding:12px 0 0; }
-    .hidden { display:none !important; }
 
     @media (max-width: 980px) {
       .app-shell { flex-direction:column; }
       .sidebar { height:auto; position:relative; width:100%; }
-    }
-
-    @media (max-width: 900px) {
-      .account-grid { grid-template-columns:1fr; }
     }
 
     @media (max-width: 720px) {
@@ -219,81 +117,99 @@
       </header>
 
       <main class="workspace-content">
-        <section id="accountPage">
-          <div class="account-grid">
-            <div class="account-grid-column">
-              <div class="card">
-                <div class="card-body">
-                  <div class="account-icon" aria-hidden="true">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 20a8 8 0 0 1 16 0" />
-                    </svg>
-                  </div>
-                  <h2 class="card-title">Account summary</h2>
-                  <p class="card-desc">Your signed-in account details, available credits, and current membership status.</p>
-                  <div class="detail-list">
-                    <div class="detail-row">
-                      <div class="detail-label">Email</div>
-                      <div id="accountEmail" class="detail-value">Loading...</div>
-                    </div>
-                    <div class="detail-row">
-                      <div class="detail-label">Account ID</div>
-                      <div id="accountId" class="detail-value">—</div>
-                    </div>
-                    <div class="detail-row">
-                      <div class="detail-label">Sign-in method</div>
-                      <div class="detail-value">Magic link</div>
-                    </div>
-                    <div class="detail-row">
-                      <div class="detail-label">Available credits</div>
-                      <div id="accountTokens" class="detail-value">—</div>
-                    </div>
-                    <div class="detail-row">
-                      <div class="detail-label">Current membership</div>
-                      <div id="accountMembershipStatus" class="detail-value">Loading...</div>
-                    </div>
-                    <div class="detail-row">
-                      <div class="detail-label">Current plan</div>
-                      <div id="accountMembershipPlan" class="detail-value">—</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <section id="accountPage" class="w-full">
+          <div class="grid grid-cols-1 gap-6 items-start">
+            <div class="grid gap-6 w-full">
+              <div class="relative overflow-hidden rounded-[18px] border border-white/10 bg-[linear-gradient(180deg,rgba(9,14,32,0.96)_0%,rgba(17,24,39,0.98)_52%,rgba(30,41,59,0.98)_100%)] shadow-[0_28px_72px_rgba(2,8,23,0.52)] backdrop-blur-[18px]">
+                <div class="pointer-events-none absolute inset-0 rounded-[18px] p-px opacity-30 [background:linear-gradient(135deg,rgba(139,92,246,0.76),rgba(67,56,202,0.70),rgba(255,255,255,0.10))] [mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [mask-composite:exclude] [-webkit-mask-composite:xor]"></div>
+                <div class="relative z-[1] p-6">
+                  <h2 class="mt-6 mb-2 text-[1.75rem] font-bold text-slate-50 text-center">Token packs</h2>
+                  <p class="mb-6 text-sm leading-7 text-slate-400 text-center">Purchase transcript credits below. Credits are applied instantly and can be used anytime you generate a transcript report.</p>
 
-            <div class="account-grid-column">
-              <div class="card">
-                <div class="card-body">
-                  <div class="account-icon" aria-hidden="true">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 7h14" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 12h14" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 17h9" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5Z" />
-                    </svg>
-                  </div>
-                  <h2 class="card-title">Memberships</h2>
-                  <p class="card-desc">Plans connected to this account, including current status and billing period details.</p>
-                  <div id="accountMembershipsEmpty" class="empty-state hidden">No memberships found for this account.</div>
-                  <div id="accountMembershipsTableWrap" class="account-membership-list hidden"></div>
-                </div>
-              </div>
+                  <div id="accountNotice" class="hidden pt-3 text-sm text-slate-400"></div>
 
-              <div class="card">
-                <div class="card-body">
-                  <div class="account-icon" aria-hidden="true">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 6v12" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 10H9.75a2.75 2.75 0 1 1 0-5.5H15" />
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 14h6.25a2.75 2.75 0 1 1 0 5.5H8" />
-                    </svg>
+                  <div id="tokenCardsWrap" class="mt-[18px] grid w-full grid-cols-3 gap-6 max-[900px]:grid-cols-1" aria-live="polite">
+                    <article class="relative flex min-h-full flex-col overflow-hidden rounded-3xl transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_28px_60px_rgba(15,23,42,0.45)] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.14),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.96)_0%,rgba(15,23,42,0.90)_100%)] p-8 text-slate-50 shadow-[0_22px_48px_rgba(15,23,42,0.28)]">
+                      <div class="pointer-events-none absolute inset-0 rounded-3xl p-px opacity-[0.26] [background:linear-gradient(135deg,rgba(139,92,246,0.72),rgba(67,56,202,0.62),rgba(255,255,255,0.08))] [mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [mask-composite:exclude] [-webkit-mask-composite:xor]"></div>
+                      <div class="relative z-[1] mb-5 flex items-center justify-between gap-3">
+                        <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-slate-200">Credits pack</div>
+                        <div class="text-xs leading-[1.4] text-slate-400">Transcript.Tax Monitor Pro</div>
+                      </div>
+                      <div class="relative z-[1] mb-5">
+                        <strong class="block text-[40px] font-extrabold leading-none tracking-[-0.03em] text-slate-50">10</strong>
+                        <span class="mt-1.5 block text-sm text-slate-300">credits</span>
+                      </div>
+                      <div class="relative z-[1] mb-6">
+                        <strong class="block text-[28px] font-extrabold leading-tight text-slate-50">$19</strong>
+                        <span class="mt-1.5 block text-xs text-slate-400">one-time purchase</span>
+                      </div>
+                      <ul class="relative z-[1] mb-7 grid gap-2.5 text-sm text-slate-200">
+                        <li class="flex items-start gap-2.5"><span class="font-extrabold text-violet-500">✓</span><span>Client-ready report preview</span></li>
+                        <li class="flex items-start gap-2.5"><span class="font-extrabold text-violet-500">✓</span><span>Credits applied instantly</span></li>
+                        <li class="flex items-start gap-2.5"><span class="font-extrabold text-violet-500">✓</span><span>Local PDF parsing (no uploads)</span></li>
+                      </ul>
+                      <div class="relative z-[1] mt-auto flex justify-center">
+                        <a class="btn-secondary" href="https://billing.taxmonitor.pro/b/4gM8wOaAe1oKcUEdTkaR203" target="_blank" rel="noopener">Pay with Stripe</a>
+                      </div>
+                    </article>
+
+                    <article class="relative flex min-h-full flex-col overflow-hidden rounded-3xl transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_28px_60px_rgba(15,23,42,0.45)] border-2 border-violet-500/30 bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.14),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.96)_0%,rgba(15,23,42,0.90)_100%)] p-8 text-slate-50 shadow-[0_22px_48px_rgba(15,23,42,0.28)]">
+                      <div class="pointer-events-none absolute inset-0 rounded-3xl p-px opacity-[0.26] [background:linear-gradient(135deg,rgba(139,92,246,0.72),rgba(67,56,202,0.62),rgba(255,255,255,0.08))] [mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [mask-composite:exclude] [-webkit-mask-composite:xor]"></div>
+                      <div class="relative z-[1] mb-5 flex items-center justify-between gap-3">
+                        <div class="inline-flex items-center gap-2 rounded-full border border-purple-600/30 bg-purple-500/15 px-3 py-1 text-xs font-bold text-purple-200">Most popular</div>
+                        <div class="text-xs leading-[1.4] text-slate-400">Transcript.Tax Monitor Pro</div>
+                      </div>
+                      <div class="relative z-[1] mb-5">
+                        <strong class="block text-[40px] font-extrabold leading-none tracking-[-0.03em] text-slate-50">25</strong>
+                        <span class="mt-1.5 block text-sm text-slate-300">credits</span>
+                      </div>
+                      <div class="relative z-[1] mb-6">
+                        <strong class="block text-[28px] font-extrabold leading-tight text-slate-50">$29</strong>
+                        <span class="mt-1.5 block text-xs text-slate-400">one-time purchase</span>
+                      </div>
+                      <ul class="relative z-[1] mb-7 grid gap-2.5 text-sm text-slate-200">
+                        <li class="flex items-start gap-2.5"><span class="font-extrabold text-violet-500">✓</span><span>Client-ready report preview</span></li>
+                        <li class="flex items-start gap-2.5"><span class="font-extrabold text-violet-500">✓</span><span>Credits applied instantly</span></li>
+                        <li class="flex items-start gap-2.5"><span class="font-extrabold text-violet-500">✓</span><span>Local PDF parsing (no uploads)</span></li>
+                      </ul>
+                      <div class="relative z-[1] mt-auto flex justify-center">
+                        <a class="btn-primary" href="https://billing.taxmonitor.pro/b/cNi14m5fU3wS1bW9D4aR204" target="_blank" rel="noopener">Pay with Stripe</a>
+                      </div>
+                    </article>
+
+                    <article class="relative flex min-h-full flex-col overflow-hidden rounded-3xl transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_28px_60px_rgba(15,23,42,0.45)] border border-white/10 bg-[radial-gradient(circle_at_top_left,rgba(168,85,247,0.14),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.96)_0%,rgba(15,23,42,0.90)_100%)] p-8 text-slate-50 shadow-[0_22px_48px_rgba(15,23,42,0.28)]">
+                      <div class="pointer-events-none absolute inset-0 rounded-3xl p-px opacity-[0.26] [background:linear-gradient(135deg,rgba(139,92,246,0.72),rgba(67,56,202,0.62),rgba(255,255,255,0.08))] [mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [-webkit-mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)] [mask-composite:exclude] [-webkit-mask-composite:xor]"></div>
+                      <div class="relative z-[1] mb-5 flex items-center justify-between gap-3">
+                        <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-bold text-slate-200">Credits pack</div>
+                        <div class="text-xs leading-[1.4] text-slate-400">Transcript.Tax Monitor Pro</div>
+                      </div>
+                      <div class="relative z-[1] mb-5">
+                        <strong class="block text-[40px] font-extrabold leading-none tracking-[-0.03em] text-slate-50">100</strong>
+                        <span class="mt-1.5 block text-sm text-slate-300">credits</span>
+                      </div>
+                      <div class="relative z-[1] mb-6">
+                        <strong class="block text-[28px] font-extrabold leading-tight text-slate-50">$129</strong>
+                        <span class="mt-1.5 block text-xs text-slate-400">one-time purchase</span>
+                      </div>
+                      <ul class="relative z-[1] mb-7 grid gap-2.5 text-sm text-slate-200">
+                        <li class="flex items-start gap-2.5"><span class="font-extrabold text-violet-500">✓</span><span>Client-ready report preview</span></li>
+                        <li class="flex items-start gap-2.5"><span class="font-extrabold text-violet-500">✓</span><span>Credits applied instantly</span></li>
+                        <li class="flex items-start gap-2.5"><span class="font-extrabold text-violet-500">✓</span><span>Local PDF parsing (no uploads)</span></li>
+                      </ul>
+                      <div class="relative z-[1] mt-auto flex justify-center">
+                        <a class="btn-secondary" href="https://billing.taxmonitor.pro/b/dRm8wO7o27N83k47uWaR205" target="_blank" rel="noopener">Pay with Stripe</a>
+                      </div>
+                    </article>
                   </div>
-                  <h2 class="card-title">Account actions</h2>
-                  <p class="account-action-copy">Buy more credits when you need them, or sign out of your current session.</p>
-                  <div class="button-row">
-                    <a href="/index.html#pricing" class="btn btn-primary">Buy Credits</a>
-                    <button id="signOutBtnSecondary" type="button" class="btn btn-danger">Log Out</button>
+
+                  <div class="mt-5 grid gap-0">
+                    <div class="grid gap-1.5 border-b border-slate-400/10 py-3 last:border-b-0">
+                      <div class="text-xs font-bold uppercase tracking-[0.08em] text-slate-400">Account actions</div>
+                      <div class="text-sm font-bold text-slate-50">Credits are one-time purchases. Use them when needed. No subscriptions.</div>
+                    </div>
+                    <div class="mt-4 flex flex-wrap gap-3">
+                      <button id="signOutBtnSecondary" type="button" class="btn btn-danger">Log Out</button>
+                    </div>
                   </div>
                 </div>
               </div>

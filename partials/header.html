@@ -25,136 +25,121 @@
         <a href="/index.html#pricing" class="text-sm text-blue-300 hover:text-white transition">Pricing</a>
         <a href="/contact.html" class="text-sm text-blue-300 hover:text-white transition">Contact</a>
 
-        <!-- Resources -->
-        <div class="relative">
+        <!-- Resources Mega Menu -->
+        <div id="resources-dropdown" class="relative">
           <button
             id="resources-toggle"
             type="button"
+<<<<<<< HEAD
             class="inline-flex items-center gap-2 text-sm text-blue-300 hover:text-white transition"
+=======
+            class="inline-flex items-center gap-2 text-sm text-slate-300 transition hover:text-white"
+>>>>>>> 5e50424297591a1c033ad0251b0881c9cc61ffbb
             aria-expanded="false"
             aria-controls="resources-menu"
           >
             Resources
-            <svg class="h-4 w-4 opacity-80" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+            <svg class="h-4 w-4 opacity-80 transition-transform duration-150" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </button>
 
           <div
             id="resources-menu"
-            class="hidden absolute left-1/2 mt-3 w-[min(520px,calc(100vw-3rem))] -translate-x-1/2 rounded-2xl border border-blue-900/40 bg-navy shadow-2xl"
+            class="invisible pointer-events-none absolute left-1/2 mt-3 hidden w-[min(920px,calc(100vw-3rem))] -translate-x-1/2 rounded-2xl border border-slate-800/70 bg-slate-950 opacity-0 shadow-2xl transition duration-150"
           >
-            <div class="grid gap-4 p-4">
-              <div class="rounded-xl border border-blue-900/40 bg-blue-950/10 p-4">
+            <div class="grid gap-4 p-4 lg:grid-cols-3">
 
-                <div class="text-xs font-semibold uppercase tracking-wide text-blue-300">
-                  Resources
-                </div>
-
+              <!-- Discover -->
+              <div class="rounded-xl border border-slate-800/60 bg-slate-950/40 p-4">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Discover</div>
                 <div class="mt-2 space-y-1">
-
-                  <a href="/resources/index.html" class="group flex items-start justify-between gap-3 rounded-lg px-3 py-2 hover:bg-blue-950/20 transition">
+                  <a href="/about.html" class="group flex items-start justify-between gap-3 rounded-lg px-3 py-2 transition hover:bg-slate-900">
                     <div>
-                      <div class="text-sm font-semibold text-white">Resources Hub</div>
-                      <div class="text-xs text-blue-300">Guides, workflows, comparisons</div>
+                      <div class="text-sm font-semibold text-slate-100 group-hover:text-white">About</div>
+                      <div class="text-xs text-slate-400">Why Transcript Tax Monitor Pro exists</div>
                     </div>
-                    <span class="text-blue-300/70 group-hover:text-white transition">→</span>
+                    <span class="text-slate-500 transition group-hover:text-amber-300">→</span>
                   </a>
-
-                  <a href="/contact.html" class="group flex items-start justify-between gap-3 rounded-lg px-3 py-2 hover:bg-blue-950/20 transition">
+                  <a href="/contact.html" class="group flex items-start justify-between gap-3 rounded-lg px-3 py-2 transition hover:bg-slate-900">
                     <div>
-                      <div class="text-sm font-semibold text-white">Support</div>
-                      <div class="text-xs text-blue-300">Contact the team</div>
+                      <div class="text-sm font-semibold text-slate-100 group-hover:text-white">Contact</div>
+                      <div class="text-xs text-slate-400">Talk to our team or get help</div>
                     </div>
-                    <span class="text-blue-300/70 group-hover:text-white transition">→</span>
+                    <span class="text-slate-500 transition group-hover:text-amber-300">→</span>
                   </a>
-
-                  <a href="https://taxmonitor.pro" class="group flex items-start justify-between gap-3 rounded-lg px-3 py-2 hover:bg-blue-950/20 transition">
+                  <a href="/magnets/section-7216-dislcosure.html" class="group flex items-start justify-between gap-3 rounded-lg px-3 py-2 transition hover:bg-slate-900">
                     <div>
-                      <div class="text-sm font-semibold text-white">Tax Monitor Pro</div>
-                      <div class="text-xs text-blue-300">IRS monitoring</div>
+                      <div class="text-sm font-semibold text-slate-100 group-hover:text-white">AI + Tax Pro Consent</div>
+                      <div class="text-xs text-slate-400">AI language for practice and compliance</div>
                     </div>
-                    <span class="text-blue-300/70 group-hover:text-white transition">→</span>
+                    <span class="text-slate-500 transition group-hover:text-amber-300">→</span>
                   </a>
-
-                  <a href="https://taxtools.taxmonitor.pro" class="group flex items-start justify-between gap-3 rounded-lg px-3 py-2 hover:bg-blue-950/20 transition">
+                  <a href="/resources/index.html" class="group flex items-start justify-between gap-3 rounded-lg px-3 py-2 transition hover:bg-slate-900">
                     <div>
-                      <div class="text-sm font-semibold text-white">TaxTools Arcade</div>
-                      <div class="text-xs text-blue-300">Simple and addicting tax games</div>
+                      <div class="text-sm font-semibold text-slate-100 group-hover:text-white">Resources Hub</div>
+                      <div class="text-xs text-slate-400">Guides, workflows, comparisons</div>
                     </div>
-                    <span class="text-blue-300/70 group-hover:text-white transition">→</span>
+                    <span class="text-slate-500 transition group-hover:text-amber-300">→</span>
                   </a>
-
                 </div>
               </div>
+
+              <!-- Learn -->
+              <div class="rounded-xl border border-slate-800/60 bg-slate-950/40 p-4">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Learn</div>
+                <div class="mt-2 space-y-1">
+                  <a href="/index.html#features" class="block rounded-lg px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900">Features</a>
+                  <a href="/index.html#how-it-works" class="block rounded-lg px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900">How It Works</a>
+                  <a href="/pricing.html" class="block rounded-lg px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900">Pricing</a>
+                  <a href="/resources/how-to-read-irs-transcripts" target="_blank" rel="noopener" class="block rounded-lg px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900">How to Read IRS Transcripts</a>
+                  <a href="/resources/transcript-types" target="_blank" rel="noopener" class="block rounded-lg px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900">Transcript Types</a>
+                </div>
+              </div>
+
+              <!-- Tools + Extras -->
+              <div class="rounded-xl border border-slate-800/60 bg-slate-950/40 p-4">
+                <div class="text-xs font-semibold uppercase tracking-wide text-slate-400">Tools & extras</div>
+                <div class="mt-2 space-y-1">
+                  <a href="/resources/irs-phone-numbers.html" class="block rounded-lg px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900">IRS Phone Numbers</a>
+                  <a href="/resources/transcript-codes" class="block rounded-lg px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900">Transcript Codes Database</a>
+                  <a href="/resources/transcript-orders" class="block rounded-lg px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900">Order Walkthrough</a>
+                  <a href="https://taxtools.taxmonitor.pro" target="_blank" rel="noopener" class="block rounded-lg px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900">TaxTools Arcade</a>
+                </div>
+                <div class="mt-4 rounded-xl border border-slate-800/60 bg-slate-950/60 p-4">
+                  <div class="text-xs text-slate-400">Get the guide with actionable client insights</div>
+                  <div class="mt-3 flex flex-col gap-2">
+                    <a
+                      href="/magnets/lead-magnet.html"
+                      class="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2 text-sm font-semibold text-white hover:from-purple-400 hover:to-purple-500 transition"
+                    >
+                      Get the guide →
+                    </a>
+                    <a
+                      href="/sign-in.html"
+                      class="inline-flex items-center justify-center rounded-lg border border-slate-800/70 bg-slate-950/40 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-900"
+                    >
+                      Log In
+                    </a>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
-
       </nav>
 
-      <!-- Divider -->
-      <div class="h-6 w-px bg-white/20"></div>
+      <div class="h-6 w-px bg-slate-700"></div>
 
-      <!-- Account area -->
-      <div class="flex items-center gap-6">
-
-        <!-- Login (shown logged out) -->
-        <a id="login-link"
-           href="/sign-in.html"
-           class="text-sm text-blue-200 hover:text-white transition">
-          Sign In
+      <div class="flex items-center gap-3">
+        <a href="/sign-in.html" class="text-sm font-medium text-slate-300 transition hover:text-white">Log In</a>
+        <a
+          href="/magnets/lead-magnet.html"
+          class="inline-flex items-center justify-center rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 px-4 py-2 text-sm font-semibold text-white hover:from-purple-400 hover:to-purple-500 transition"
+        >
+          Get the guide →
         </a>
-
-        <!-- Credits -->
-        <div id="token-pill"
-          class="hidden items-center gap-2 rounded-xl border border-blue-900/40 bg-blue-950/10 px-3 py-2 text-xs text-blue-100">
-          <span class="text-blue-300">Credits:</span>
-          <span id="token-balance" class="font-semibold text-white">0</span>
-        </div>
-
-        <!-- Account dropdown -->
-        <div id="account-wrap" class="relative hidden">
-
-          <button
-            id="account-toggle"
-            type="button"
-            aria-expanded="false"
-            aria-controls="account-menu"
-            class="flex items-center gap-2 text-sm text-blue-200 hover:text-white transition"
-          >
-            <span id="auth-email"></span>
-
-            <svg class="h-4 w-4 opacity-70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-
-          <div
-            id="account-menu"
-            class="hidden absolute right-0 mt-3 w-56 rounded-xl border border-blue-900/40 bg-navy shadow-xl"
-          >
-
-            <div class="border-b border-blue-900/40 px-4 py-3 text-xs text-blue-300">
-              Signed in as<br>
-              <span id="auth-email-menu" class="font-semibold text-white"></span>
-            </div>
-
-            <a href="/app/dashboard.html"
-               class="block px-4 py-3 text-sm text-blue-200 hover:bg-blue-950/20">
-               Dashboard
-            </a>
-
-            <a id="signout-link"
-               href="#"
-               class="block px-4 py-3 text-sm text-blue-200 hover:bg-blue-950/20">
-               Sign out
-            </a>
-
-          </div>
-
-        </div>
-
       </div>
 
     </div>
@@ -186,8 +171,8 @@
       <div class="border-t border-blue-900/40 pt-4">
 
         <a id="login-link-mobile"
-           href="/sign-in.html"
-           class="text-blue-200 hover:text-white transition">
+          href="/sign-in.html"
+          class="text-blue-200 hover:text-white transition">
           Sign In
         </a>
 
@@ -198,20 +183,20 @@
         </div>
 
         <div id="account-mobile"
-             class="hidden mt-4 text-sm text-blue-200">
+          class="hidden mt-4 text-sm text-blue-200">
 
           <div class="text-xs text-blue-300">Signed in as</div>
           <div id="auth-email-mobile" class="font-semibold text-white"></div>
 
           <a href="/app/dashboard.html"
-             class="mt-2 block text-blue-300 underline hover:text-white">
-             Dashboard
+            class="mt-2 block text-blue-300 underline hover:text-white">
+            Dashboard
           </a>
 
           <a id="signout-link-mobile"
-             href="#"
-             class="mt-2 block text-blue-300 underline hover:text-white">
-             Sign out
+            href="#"
+            class="mt-2 block text-blue-300 underline hover:text-white">
+            Sign out
           </a>
 
         </div>
@@ -222,201 +207,100 @@
   </div>
 
   <script>
-  (function () {
-    var API = window.TRANSCRIPT_API_BASE || '';
+    (function () {
+      var head = document.head;
+      var mobileMenu = document.getElementById('mobile-menu');
+      var resourcesDropdown = document.getElementById('resources-dropdown');
+      var resourcesMenu = document.getElementById('resources-menu');
+      var resourcesToggle = document.getElementById('resources-toggle');
+      var mobileMenuBtn = document.getElementById('mobile-menu-btn');
 
-    var login = document.getElementById('login-link');
-    var loginMobile = document.getElementById('login-link-mobile');
-
-    var token = document.getElementById('token-pill');
-    var tokenMobile = document.getElementById('token-pill-mobile');
-
-    var account = document.getElementById('account-wrap');
-    var accountMobile = document.getElementById('account-mobile');
-
-    var email = document.getElementById('auth-email');
-    var emailMenu = document.getElementById('auth-email-menu');
-    var emailMobile = document.getElementById('auth-email-mobile');
-
-    var balance = document.getElementById('token-balance');
-    var balanceMobile = document.getElementById('token-balance-mobile');
-
-    var accountToggle = document.getElementById('account-toggle');
-    var accountMenu = document.getElementById('account-menu');
-
-    var mobileMenuBtn = document.getElementById('mobile-menu-btn');
-    var mobileMenu = document.getElementById('mobile-menu');
-
-    var resourcesToggle = document.getElementById('resources-toggle');
-    var resourcesMenu = document.getElementById('resources-menu');
-
-    var signout = document.getElementById('signout-link');
-    var signoutMobile = document.getElementById('signout-link-mobile');
-
-    function setExpanded(btn, isOpen) {
-      if (!btn) return;
-      btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    }
-
-    function closeMenu(btn, menu) {
-      if (!menu) return;
-      menu.classList.add('hidden');
-      setExpanded(btn, false);
-    }
-
-    function toggleMenu(btn, menu, otherBtn, otherMenu) {
-      if (!btn || !menu) return;
-      var willOpen = menu.classList.contains('hidden');
-      if (otherMenu) closeMenu(otherBtn, otherMenu);
-      menu.classList.toggle('hidden', !willOpen);
-      setExpanded(btn, willOpen);
-    }
-
-    function buildUrl(path) {
-      if (/^https?:\/\//i.test(path)) return path;
-      return String(API || '').replace(/\/$/, '') + path;
-    }
-
-    function extractUser(data) {
-      if (!data || typeof data !== 'object') {
-        return { email: '', tokenId: '', balance: 0 };
+      function closeDesktopResources() {
+        if (!resourcesMenu || !resourcesToggle) return;
+        resourcesMenu.classList.add('hidden', 'invisible', 'pointer-events-none', 'opacity-0');
+        resourcesToggle.setAttribute('aria-expanded', 'false');
+        var icon = resourcesToggle.querySelector('svg');
+        if (icon) icon.classList.remove('rotate-180');
       }
 
-      var source = data.user && typeof data.user === 'object' ? data.user : data;
-      var email = typeof source.email === 'string' ? source.email.trim() : '';
-      var tokenId = typeof source.tokenId === 'string' ? source.tokenId.trim() : '';
-      var balanceValue = typeof source.balance !== 'undefined' ? source.balance : data.balance;
-      var balance = Number.isFinite(Number(balanceValue)) ? Number(balanceValue) : 0;
+      function openDesktopResources() {
+        if (!resourcesMenu || !resourcesToggle) return;
+        resourcesMenu.classList.remove('hidden');
+        requestAnimationFrame(function () {
+          resourcesMenu.classList.remove('invisible', 'pointer-events-none', 'opacity-0');
+        });
+        resourcesToggle.setAttribute('aria-expanded', 'true');
+        var icon = resourcesToggle.querySelector('svg');
+        if (icon) icon.classList.add('rotate-180');
+      }
 
-      return {
-        balance: balance,
-        email: email,
-        tokenId: tokenId
-      };
-    }
+      function toggleDesktopResources() {
+        if (!resourcesMenu || !resourcesToggle) return;
+        var isOpen = resourcesToggle.getAttribute('aria-expanded') === 'true';
+        if (isOpen) {
+          closeDesktopResources();
+        } else {
+          openDesktopResources();
+        }
+      }
 
-    function hideCredits() {
-      if (token) token.classList.add('hidden');
-      if (tokenMobile) tokenMobile.classList.add('hidden');
-    }
+      function closeMobileMenu() {
+        if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+          mobileMenu.classList.add('hidden');
+        }
+        if (mobileMenuBtn) {
+          mobileMenuBtn.setAttribute('aria-expanded', 'false');
+        }
+      }
 
-    function showCredits(value) {
-      var nextValue = Number.isFinite(Number(value)) ? String(value) : '0';
-      if (balance) balance.textContent = nextValue;
-      if (balanceMobile) balanceMobile.textContent = nextValue;
-      if (token) token.classList.remove('hidden');
-      if (tokenMobile) tokenMobile.classList.remove('hidden');
-    }
+      mobileMenuBtn && mobileMenuBtn.addEventListener('click', function () {
+        var isHidden = mobileMenu.classList.toggle('hidden');
+        mobileMenuBtn.setAttribute('aria-expanded', String(!isHidden));
+      });
 
-    function showLoggedOut() {
-      if (login) login.classList.remove('hidden');
-      if (loginMobile) loginMobile.classList.remove('hidden');
-
-      if (account) account.classList.add('hidden');
-      if (accountMobile) accountMobile.classList.add('hidden');
-
-      hideCredits();
-    }
-
-    function showLoggedIn(user) {
-      if (email) email.textContent = user.email;
-      if (emailMenu) emailMenu.textContent = user.email;
-      if (emailMobile) emailMobile.textContent = user.email;
-
-      if (login) login.classList.add('hidden');
-      if (loginMobile) loginMobile.classList.add('hidden');
-
-      if (account) account.classList.remove('hidden');
-      if (accountMobile) accountMobile.classList.remove('hidden');
-
-      showCredits(user.balance);
-    }
-
-    function wireSignout(link) {
-      if (!link) return;
-      link.addEventListener('click', function (e) {
+      resourcesToggle && resourcesToggle.addEventListener('click', function (e) {
         e.preventDefault();
-        fetch(buildUrl('/api/transcripts/sign-out'), {
-          credentials: 'include',
-          method: 'POST'
-        }).finally(function () {
-          window.location.href = '/index.html';
-        });
-      });
-    }
-
-    if (mobileMenuBtn && mobileMenu) {
-      mobileMenuBtn.addEventListener('click', function () {
-        var willOpen = mobileMenu.classList.contains('hidden');
-        mobileMenu.classList.toggle('hidden', !willOpen);
-        setExpanded(mobileMenuBtn, willOpen);
-      });
-    }
-
-    if (accountToggle && accountMenu) {
-      accountToggle.addEventListener('click', function (e) {
         e.stopPropagation();
-        toggleMenu(accountToggle, accountMenu, resourcesToggle, resourcesMenu);
+        toggleDesktopResources();
       });
-    }
 
-    if (resourcesToggle && resourcesMenu) {
-      resourcesToggle.addEventListener('click', function (e) {
-        e.stopPropagation();
-        toggleMenu(resourcesToggle, resourcesMenu, accountToggle, accountMenu);
+      document.addEventListener('click', function (e) {
+        if (resourcesDropdown && !resourcesDropdown.contains(e.target)) {
+          closeDesktopResources();
+        }
+        if (mobileMenu && mobileMenuBtn && !mobileMenu.classList.contains('hidden')) {
+          var clickedInsideMobileMenu = mobileMenu.contains(e.target);
+          var clickedMobileToggle = mobileMenuBtn.contains(e.target);
+          if (!clickedInsideMobileMenu && !clickedMobileToggle) {
+            closeMobileMenu();
+          }
+        }
       });
-    }
 
-    document.addEventListener('click', function (e) {
-      if (accountMenu && accountToggle) {
-        var insideAccount = accountMenu.contains(e.target) || accountToggle.contains(e.target);
-        if (!insideAccount) closeMenu(accountToggle, accountMenu);
+      document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape') return;
+        closeDesktopResources();
+        closeMobileMenu();
+      });
+
+      if (!head) return;
+      var icons = [
+        { rel: 'icon', href: '/assets/favicon.ico', type: 'image/x-icon' },
+        { rel: 'icon', href: '/assets/favicon.svg', type: 'image/svg+xml' }
+      ].sort(function (a, b) {
+        return String(a.href).localeCompare(String(b.href));
+      });
+      function hasIcon(href) {
+        return !!head.querySelector('link[rel~="icon"][href="' + href + '"]');
       }
-
-      if (resourcesMenu && resourcesToggle) {
-        var insideResources = resourcesMenu.contains(e.target) || resourcesToggle.contains(e.target);
-        if (!insideResources) closeMenu(resourcesToggle, resourcesMenu);
-      }
-    });
-
-    document.addEventListener('keydown', function (e) {
-      if (e.key !== 'Escape') return;
-      closeMenu(accountToggle, accountMenu);
-      closeMenu(resourcesToggle, resourcesMenu);
-      if (mobileMenu) mobileMenu.classList.add('hidden');
-      setExpanded(mobileMenuBtn, false);
-    });
-
-    wireSignout(signout);
-    wireSignout(signoutMobile);
-
-    async function hydrate() {
-      try {
-        var response = await fetch(buildUrl('/api/transcripts/me'), {
-          credentials: 'include'
-        });
-
-        if (!response.ok) {
-          showLoggedOut();
-          return;
-        }
-
-        var data = await response.json();
-        var user = extractUser(data);
-
-        if (!user.email || !user.tokenId) {
-          showLoggedOut();
-          return;
-        }
-
-        showLoggedIn(user);
-      } catch (err) {
-        showLoggedOut();
-      }
-    }
-
-    showLoggedOut();
-    hydrate();
-  })();
-</script>
+      icons.forEach(function (i) {
+        if (hasIcon(i.href)) return;
+        var link = document.createElement('link');
+        link.rel = i.rel;
+        link.href = i.href;
+        link.type = i.type;
+        head.appendChild(link);
+      });
+    })();
+  </script>
 </header>
