@@ -12,6 +12,8 @@ export default function Header() {
           <Link href="/resources/how-to-read-irs-transcripts">Guides</Link>
           <Link href="/pricing">Pricing</Link>
           <Link href="/demo">Book Demo</Link>
+          <Link href="/about">About</Link>
+          <Link href="/contact">Contact</Link>
           <Link href="/login" className={styles.loginBtn}>Log In</Link>
         </nav>
       </div>
