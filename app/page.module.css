@@ -84,6 +84,7 @@
 .section {
   padding: 4rem 1.5rem;
   text-align: center;
+  background: var(--bg);
 }
 
 .sectionAlt {
@@ -97,6 +98,7 @@
 /* ─── HERO ───────────────────────────────────────────────── */
 .hero {
   padding: 5rem 1.5rem 4rem;
+  background: var(--bg);
 }
 
 .heroInner {
@@ -392,6 +394,7 @@
 .pricingSection {
   padding: 4rem 1.5rem;
   text-align: center;
+  background: var(--bg);
 }
 
 .pricingGrid {
