@@ -6,7 +6,7 @@
   "productionUrl": "https://transcript.taxmonitor.pro",
   "hosting": "cloudflare-workers",
   "adapter": "@opennextjs/cloudflare",
-  "nextVersion": "14.2.35",
+  "nextVersion": "15.2.4",
   "vercelProject": "https://transcript-tax-monitor-pro.vercel.app",
   "templates": ["irs-code", "explainer", "comparison", "how-to", "sales"],
   "contentDir": "content/resources",

@@ -1,6 +1,7 @@
 dist/
 node_modules/
 .next/
+.open-next/
 out/
 .vercel/
 
