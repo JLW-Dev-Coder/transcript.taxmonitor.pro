@@ -52,10 +52,11 @@ function formatIso(ts: string): string {
 }
 
 function newEventId(): string {
-  if (typeof window !== 'undefined' && window.crypto?.randomUUID) {
+  try {
     return crypto.randomUUID()
+  } catch {
+    return 'evt_' + Date.now() + '_' + Math.random().toString(16).slice(2)
   }
-  return 'evt_' + Date.now() + '_' + Math.random().toString(16).slice(2)
 }
 
 function getParam(name: string): string {
