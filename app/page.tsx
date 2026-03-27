@@ -32,7 +32,7 @@ const PAIN_CARDS = [
   },
   {
     title: 'Intimidating transcripts',
-    body: 'Even when nothing is wrong. A clean summary would eliminate client anxiety before it starts — but that takes time you don't have.',
+    body: "Even when nothing is wrong. A clean summary would eliminate client anxiety before it starts — but that takes time you don't have.",
   },
 ]
 
