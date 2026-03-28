@@ -67,6 +67,16 @@ const nextConfig = {
         destination: '/magnets/guide',
         permanent: true,
       },
+      {
+        source: '/app/dashboard.html',
+        destination: '/app/dashboard',
+        permanent: true,
+      },
+      {
+        source: '/app-dashboard.html',
+        destination: '/app/dashboard',
+        permanent: true,
+      },
     ]
   },
 }
